@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DEVOLUCIÓN DE TRÁMITES</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    }
+
+    body {
+      background: #eef2f7;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #0d6efd;
+      margin-bottom: 20px;
+      font-size: 28px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, .1);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 140px 1fr 140px 180px 1fr;
+      gap: 15px;
+      align-items: end;
+    }
+
+    .gridDetalle {
+      display: grid;
+      grid-template-columns: 1fr 2fr 120px;
+      gap: 15px;
+      align-items: end;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #444;
+      font-size: 14px;
+    }
+
+    input, select {
+      width: 100%;
+      height: 42px;
+      border: 1px solid #CCC;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 14px;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #0d6efd;
+      box-shadow: 0 0 4px rgba(13, 110, 253, .3);
+    }
+
+    /* Estilos base para todos los botones */
+    button, .btn {
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #fff;
+      height: 42px;
+      padding: 0 18px;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background-color .2s, transform .1s, opacity .2s;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      background-color: #a5a5a5 !important;
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Botón Nuevo en color NARANJA */
+    .btnNuevo { 
+      background-color: #ff9800; 
+      border: 1px solid #ff9800;
+      color: #ffffff;
+    }
+    .btnNuevo:hover:not(:disabled) { 
+      background-color: #f57c00; 
+      border-color: #f57c00;
+    }
+
+    .btnAgregar { background: #0d6efd; width: 100%; }
+    .btnAgregar:hover:not(:disabled) { background: #0b5ed7; }
+
+    .btnGuardar { background: #198754; }
+    .btnGuardar:hover:not(:disabled) { background: #157347; }
+
+    .btnPDF { background: #dc3545; }
+    .btnPDF:hover:not(:disabled) { background: #bb2d3b; }
+
+    .btnEliminar {
+      background: #dc3545;
+      height: 34px;
+      padding: 0 12px;
+      font-size: 12px;
+    }
+    .btnEliminar:hover:not(:disabled) { background: #bb2d3b; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th {
+      background: #0d6efd;
+      color: #fff;
+      padding: 12px;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    td {
+      border: 1px solid #DDD;
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    tbody tr:nth-child(even) { background: #f8f9fa; }
+
+    .footer {
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .loader {
+      display: none;
+      text-align: center;
+      padding: 12px;
+      color: #0d6efd;
+      font-weight: bold;
+    }
+
+    @media (max-width: 1000px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+      .gridDetalle { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 650px) {
+      .grid { grid-template-columns: 1fr; }
+      .footer { flex-direction: column; }
+      .footer button { width: 100%; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+
+  <h1>DEVOLUCIÓN DE TRÁMITES</h1>
+
+  <!-- CABECERA DE FORMULARIO -->
+  <div class="card">
+    <div class="grid">
+      <div>
+        <label for="fecha">Fecha</label>
+        <input type="date" id="fecha">
+      </div>
+
+      <div>
+        <label for="funcionario">Funcionario</label>
+        <select id="funcionario">
+          <option value="">Cargando...</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="placa">Placa</label>
+        <input id="placa" maxlength="10" placeholder="ABC123" autocomplete="off">
+      </div>
+
+      <div>
+        <label for="cedula">CC Ciudadano</label>
+        <input id="cedula" maxlength="15" placeholder="Solo números">
+      </div>
+
+      <div>
+        <label for="nombre">Nombre Ciudadano</label>
+        <input id="nombre" placeholder="Nombre completo">
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN DE MOTIVOS Y DETALLES -->
+  <div class="card">
+    <h2 style="margin-bottom:15px; color:#0d6efd; font-size: 18px;">
+      Motivos de Devolución
+    </h2>
+
+    <div class="gridDetalle">
+      <div>
+        <label for="motivo">Motivo devolución</label>
+        <select id="motivo">
+          <option value="">Cargando...</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="observacion">Observación</label>
+        <input id="observacion" maxlength="250" placeholder="Añada un comentario o detalle...">
+      </div>
+
+      <div>
+        <button class="btnAgregar" onclick="agregarDetalle()">Agregar</button>
+      </div>
+    </div>
+
+    <table id="tablaDetalle">
+      <thead>
+        <tr>
+          <th width="35%">Motivo</th>
+          <th>Observación</th>
+          <th width="100" style="text-align: center;">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Filas dinámicas -->
+      </tbody>
+    </table>
+
+    <div class="loader" id="loader">
+      Procesando solicitud, por favor espere...
+    </div>
+
+    <!-- BOTONES DE ACCIÓN -->
+    <div class="footer">
+      <button id="btnNuevo" class="btnNuevo" onclick="nuevoRegistro()">
+        ➕ Nuevo
+      </button>
+
+      <button id="btnExportarPDF" class="btnPDF" onclick="exportarPDF()" disabled>
+        📄 Exportar a PDF
+      </button>
+
+      <button id="btnGuardar" class="btnGuardar" onclick="guardar()">
+        💾 Guardar Devolución
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let detalle = [];
+    let ultimoIdGuardado = null;
+
+    window.onload = function () {
+      document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
+
+      document.getElementById("placa").addEventListener("input", function () {
+        this.value = this.value.toUpperCase();
+      });
+
+      document.getElementById("nombre").addEventListener("input", function () {
+        this.value = this.value.toUpperCase();
+      });
+
+      document.getElementById("cedula").addEventListener("input", function () {
+        this.value = this.value.replace(/\D/g, "");
+      });
+
+      cargarFuncionarios();
+      cargarMotivos();
+      renderizarTabla();
+    };
+
+    function mostrarMensaje(icono, titulo, mensaje) {
+      Swal.fire({
+        icon: icono,
+        title: titulo,
+        text: mensaje,
+        confirmButtonText: "Aceptar",
+        confirmButtonColor: "#0d6efd",
+        allowOutsideClick: false
+      });
+    }
+
+    function cargarFuncionarios() {
+      google.script.run
+        .withSuccessHandler(data => {
+          const combo = document.getElementById("funcionario");
+          combo.innerHTML = '<option value="">Seleccione...</option>';
+          data.forEach(f => combo.innerHTML += `<option value="${f}">${f}</option>`);
+        })
+        .withFailureHandler(err => mostrarMensaje("error", "Error", "Error al cargar funcionarios: " + err.message))
+        .listarFuncionarios();
+    }
+
+    function cargarMotivos() {
+      google.script.run
+        .withSuccessHandler(data => {
+          const combo = document.getElementById("motivo");
+          combo.innerHTML = '<option value="">Seleccione un motivo...</option>';
+          data.forEach(m => combo.innerHTML += `<option value="${m}">${m}</option>`);
+        })
+        .withFailureHandler(err => mostrarMensaje("error", "Error", "Error al cargar motivos: " + err.message))
+        .obtenerMotivos();
+    }
+
+    function agregarDetalle() {
+      const comboMotivo = document.getElementById("motivo");
+      const inputObs = document.getElementById("observacion");
+      const motivo = comboMotivo.value;
+      const observacion = inputObs.value.trim();
+
+      if (!motivo) {
+        mostrarMensaje("warning", "Atención", "Seleccione un motivo de devolución.");
+        comboMotivo.focus();
+        return;
+      }
+
+      detalle.push({ motivo, observacion });
+      comboMotivo.value = "";
+      inputObs.value = "";
+      renderizarTabla();
+    }
+
+    function eliminarFila(index) {
+      detalle.splice(index, 1);
+      renderizarTabla();
+    }
+
+    function renderizarTabla() {
+      const tbody = document.querySelector("#tablaDetalle tbody");
+      tbody.innerHTML = "";
+
+      if (detalle.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#888;">No hay motivos agregados.</td></tr>`;
+        return;
+      }
+
+      detalle.forEach((item, index) => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${item.motivo}</td>
+            <td>${item.observacion || '-'}</td>
+            <td style="text-align:center;">
+              <button class="btnEliminar" onclick="eliminarFila(${index})">Eliminar</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function guardar() {
+      if (detalle.length === 0) {
+        mostrarMensaje("warning", "Atención", "Debe agregar al menos un motivo antes de guardar.");
+        return;
+      }
+
+      const datos = {
+        fecha: document.getElementById("fecha").value,
+        funcionario: document.getElementById("funcionario").value,
+        placa: document.getElementById("placa").value,
+        cedula: document.getElementById("cedula").value,
+        nombre: document.getElementById("nombre").value,
+        detalle: detalle
+      };
+
+      const btnGuardar = document.getElementById("btnGuardar");
+      const btnExportarPDF = document.getElementById("btnExportarPDF");
+      const loader = document.getElementById("loader");
+
+      btnGuardar.disabled = true;
+      loader.style.display = "block";
+
+      google.script.run
+        .withSuccessHandler(res => {
+          btnGuardar.disabled = false;
+          loader.style.display = "none";
+
+          if (res.ok) {
+            mostrarMensaje("success", "¡Éxito!", res.mensaje);
+            ultimoIdGuardado = res.id;
+            btnExportarPDF.disabled = false;
+          } else {
+            mostrarMensaje("error", "Error", "Error: " + res.mensaje);
+          }
+        })
+        .withFailureHandler(err => {
+          btnGuardar.disabled = false;
+          loader.style.display = "none";
+          mostrarMensaje("error", "Error Crítico", "Error de servidor: " + err.message);
+        })
+        .guardarDevolucion(datos);
+    }
+
+    function exportarPDF() {
+      if (!ultimoIdGuardado) {
+        mostrarMensaje("info", "Información", "Primero debe guardar el registro para poder exportarlo a PDF.");
+        return;
+      }
+
+      const btnExportarPDF = document.getElementById("btnExportarPDF");
+      const loader = document.getElementById("loader");
+
+      btnExportarPDF.disabled = true;
+      loader.innerText = "Generando archivo PDF, por favor espere...";
+      loader.style.display = "block";
+
+      google.script.run
+        .withSuccessHandler(res => {
+          btnExportarPDF.disabled = false;
+          loader.style.display = "none";
+          loader.innerText = "Procesando solicitud, por favor espere...";
+
+          if (res.ok) {
+            const link = document.createElement("a");
+            link.href = "data:application/pdf;base64," + res.base64;
+            link.download = res.nombreArchivo;
+            link.click();
+            mostrarMensaje("success", "Descarga completada", "El archivo PDF ha sido generado correctamente.");
+          } else {
+            mostrarMensaje("error", "Error PDF", "Error al generar PDF: " + res.mensaje);
+          }
+        })
+        .withFailureHandler(err => {
+          btnExportarPDF.disabled = false;
+          loader.style.display = "none";
+          mostrarMensaje("error", "Error Servidor", "Error al procesar PDF: " + err.message);
+        })
+        .generarPDFDevolucion(ultimoIdGuardado);
+    }
+
+    function nuevoRegistro() {
+      const tieneDatos = detalle.length > 0 || 
+                         document.getElementById("placa").value || 
+                         document.getElementById("cedula").value || 
+                         document.getElementById("nombre").value;
+
+      if (tieneDatos) {
+        Swal.fire({
+          title: '¿Crear nuevo registro?',
+          text: "Los datos ingresados en este formulario se limpiarán.",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#0d6efd',
+          cancelButtonColor: '#dc3545',
+          confirmButtonText: 'Sí, limpiar',
+          cancelButtonText: 'Cancelar'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            limpiarFormulario();
+          }
+        });
+      } else {
+        limpiarFormulario();
+      }
+    }
+
+    function limpiarFormulario() {
+      document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
+      document.getElementById("funcionario").value = "";
+      document.getElementById("placa").value = "";
+      document.getElementById("cedula").value = "";
+      document.getElementById("nombre").value = "";
+      document.getElementById("motivo").value = "";
+      document.getElementById("observacion").value = "";
+      
+      detalle = [];
+      ultimoIdGuardado = null;
+
+      document.getElementById("btnExportarPDF").disabled = true;
+      document.getElementById("btnGuardar").disabled = false;
+
+      renderizarTabla();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+
+</html>
