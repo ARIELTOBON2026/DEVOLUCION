@@ -2,7 +2,6 @@
 <html lang="es">
 
 <head>
-  <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DEVOLUCIÓN DE TRÁMITES</title>
@@ -274,6 +273,11 @@
   </div>
 
   <script>
+    // ============================================================
+    // REEMPLAZA ESTA URL CON TU URL DE IMPLEMENTACIÓN DE GOOGLE APPS SCRIPT
+    // ============================================================
+    const URL_API = "https://script.google.com/macros/s/AKfycbxjZB2BFBsMjUrpVcxQNozjd2cOoOoYLm_FWYyWDrMk2MnTLXvf32bK9aQfZAJbiHOqiw/exec";
+
     let detalle = [];
     let ultimoIdGuardado = null;
 
@@ -309,25 +313,33 @@
     }
 
     function cargarFuncionarios() {
-      google.script.run
-        .withSuccessHandler(data => {
-          const combo = document.getElementById("funcionario");
-          combo.innerHTML = '<option value="">Seleccione...</option>';
-          data.forEach(f => combo.innerHTML += `<option value="${f}">${f}</option>`);
+      fetch(`${URL_API}?accion=listarFuncionarios`)
+        .then(response => response.json())
+        .then(res => {
+          if (res.ok) {
+            const combo = document.getElementById("funcionario");
+            combo.innerHTML = '<option value="">Seleccione...</option>';
+            res.datos.forEach(f => combo.innerHTML += `<option value="${f}">${f}</option>`);
+          } else {
+            mostrarMensaje("error", "Error", "Error al cargar funcionarios: " + res.mensaje);
+          }
         })
-        .withFailureHandler(err => mostrarMensaje("error", "Error", "Error al cargar funcionarios: " + err.message))
-        .listarFuncionarios();
+        .catch(err => mostrarMensaje("error", "Error", "Error al conectar con la API: " + err.message));
     }
 
     function cargarMotivos() {
-      google.script.run
-        .withSuccessHandler(data => {
-          const combo = document.getElementById("motivo");
-          combo.innerHTML = '<option value="">Seleccione un motivo...</option>';
-          data.forEach(m => combo.innerHTML += `<option value="${m}">${m}</option>`);
+      fetch(`${URL_API}?accion=obtenerMotivos`)
+        .then(response => response.json())
+        .then(res => {
+          if (res.ok) {
+            const combo = document.getElementById("motivo");
+            combo.innerHTML = '<option value="">Seleccione un motivo...</option>';
+            res.datos.forEach(m => combo.innerHTML += `<option value="${m}">${m}</option>`);
+          } else {
+            mostrarMensaje("error", "Error", "Error al cargar motivos: " + res.mensaje);
+          }
         })
-        .withFailureHandler(err => mostrarMensaje("error", "Error", "Error al cargar motivos: " + err.message))
-        .obtenerMotivos();
+        .catch(err => mostrarMensaje("error", "Error", "Error al conectar con la API: " + err.message));
     }
 
     function agregarDetalle() {
@@ -397,25 +409,31 @@
       btnGuardar.disabled = true;
       loader.style.display = "block";
 
-      google.script.run
-        .withSuccessHandler(res => {
-          btnGuardar.disabled = false;
-          loader.style.display = "none";
+      fetch(URL_API, {
+        method: "POST",
+        body: JSON.stringify({
+          accion: "guardarDevolucion",
+          payload: datos
+        })
+      })
+      .then(response => response.json())
+      .then(res => {
+        btnGuardar.disabled = false;
+        loader.style.display = "none";
 
-          if (res.ok) {
-            mostrarMensaje("success", "¡Éxito!", res.mensaje);
-            ultimoIdGuardado = res.id;
-            btnExportarPDF.disabled = false;
-          } else {
-            mostrarMensaje("error", "Error", "Error: " + res.mensaje);
-          }
-        })
-        .withFailureHandler(err => {
-          btnGuardar.disabled = false;
-          loader.style.display = "none";
-          mostrarMensaje("error", "Error Crítico", "Error de servidor: " + err.message);
-        })
-        .guardarDevolucion(datos);
+        if (res.ok) {
+          mostrarMensaje("success", "¡Éxito!", res.mensaje);
+          ultimoIdGuardado = res.id;
+          btnExportarPDF.disabled = false;
+        } else {
+          mostrarMensaje("error", "Error", "Error: " + res.mensaje);
+        }
+      })
+      .catch(err => {
+        btnGuardar.disabled = false;
+        loader.style.display = "none";
+        mostrarMensaje("error", "Error Crítico", "Error de servidor: " + err.message);
+      });
     }
 
     function exportarPDF() {
@@ -431,28 +449,34 @@
       loader.innerText = "Generando archivo PDF, por favor espere...";
       loader.style.display = "block";
 
-      google.script.run
-        .withSuccessHandler(res => {
-          btnExportarPDF.disabled = false;
-          loader.style.display = "none";
-          loader.innerText = "Procesando solicitud, por favor espere...";
+      fetch(URL_API, {
+        method: "POST",
+        body: JSON.stringify({
+          accion: "generarPDF",
+          payload: { id: ultimoIdGuardado }
+        })
+      })
+      .then(response => response.json())
+      .then(res => {
+        btnExportarPDF.disabled = false;
+        loader.style.display = "none";
+        loader.innerText = "Procesando solicitud, por favor espere...";
 
-          if (res.ok) {
-            const link = document.createElement("a");
-            link.href = "data:application/pdf;base64," + res.base64;
-            link.download = res.nombreArchivo;
-            link.click();
-            mostrarMensaje("success", "Descarga completada", "El archivo PDF ha sido generado correctamente.");
-          } else {
-            mostrarMensaje("error", "Error PDF", "Error al generar PDF: " + res.mensaje);
-          }
-        })
-        .withFailureHandler(err => {
-          btnExportarPDF.disabled = false;
-          loader.style.display = "none";
-          mostrarMensaje("error", "Error Servidor", "Error al procesar PDF: " + err.message);
-        })
-        .generarPDFDevolucion(ultimoIdGuardado);
+        if (res.ok) {
+          const link = document.createElement("a");
+          link.href = "data:application/pdf;base64," + res.base64;
+          link.download = res.nombreArchivo;
+          link.click();
+          mostrarMensaje("success", "Descarga completada", "El archivo PDF ha sido generado correctamente.");
+        } else {
+          mostrarMensaje("error", "Error PDF", "Error al generar PDF: " + res.mensaje);
+        }
+      })
+      .catch(err => {
+        btnExportarPDF.disabled = false;
+        loader.style.display = "none";
+        mostrarMensaje("error", "Error Servidor", "Error al procesar PDF: " + err.message);
+      });
     }
 
     function nuevoRegistro() {
