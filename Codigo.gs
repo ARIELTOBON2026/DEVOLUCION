@@ -1,16 +1,15 @@
 /************************************************
- * SISTEMA DE DEVOLUCIÓN DE TRÁMITES (API GITHUB PAGES)
- * Codigo.gs - Optimizado & Corregido
+ * SISTEMA DE DEVOLUCIÓN DE TRÁMITES (VERSIÓN API PARA GITHUB PAGES)
+ * Codigo.gs
  ************************************************/
 
 const HOJA_DEVOLUCIONES = "DEVOLUCIONES";
 const HOJA_DETALLE = "DEVOLUCIONES_DETALLES";
 const HOJA_FUNCIONARIOS = "FUNCIONARIOS";
 const HOJA_MOTIVOS = "MOTIVOS";
-const encabezado = imagenBase64("1wPY_QJ4G_W7rz5bdkz7ObGc0L0cN9_ML");
-const pie = imagenBase64("1m-KztMZ-KSlX-tu4BS61qrRQ-9TX8YpR");
+
 /************************************************
- * MANEJADOR DE PETICIONES GET
+ * MANEJADOR DE PETICIONES GET (Para consultar datos)
  ************************************************/
 function doGet(e) {
   try {
@@ -45,11 +44,10 @@ function doGet(e) {
 }
 
 /************************************************
- * MANEJADOR DE PETICIONES POST
+ * MANEJADOR DE PETICIONES POST (Para enviar/guardar datos)
  ************************************************/
 function doPost(e) {
   try {
-    // Maneja payload formateado desde fetch cliente (JSON string)
     const contenido = JSON.parse(e.postData.contents);
     const accion = contenido.accion;
     const payload = contenido.payload;
@@ -81,7 +79,7 @@ function doPost(e) {
 }
 
 /************************************************
- * FUNCIONES AUXILIARES Y DE RED
+ * FUNCIÓN AUXILIAR PARA DEVOLVER EN FORMATO JSON
  ************************************************/
 function responderJSON(objeto) {
   return ContentService
@@ -89,49 +87,76 @@ function responderJSON(objeto) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+/************************************************
+ * OBTENER HOJA
+ ************************************************/
 function obtenerHoja(nombre) {
-  const hoja = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(nombre);
-  if (!hoja) throw new Error("No existe la hoja: " + nombre);
+  const hoja = SpreadsheetApp
+    .getActiveSpreadsheet()
+    .getSheetByName(nombre);
+
+  if (!hoja) {
+    throw new Error("No existe la hoja: " + nombre);
+  }
+
   return hoja;
 }
 
+/************************************************
+ * OBTENER SIGUIENTE ID
+ ************************************************/
 function siguienteID(hoja) {
   const ultimaFila = hoja.getLastRow();
-  if (ultimaFila <= 1) return 1;
+
+  if (ultimaFila <= 1) {
+    return 1;
+  }
 
   const ids = hoja
     .getRange(2, 1, ultimaFila - 1, 1)
     .getValues()
     .flat()
     .map(Number)
-    .filter(id => !isNaN(id) && id > 0);
+    .filter(id => !isNaN(id));
 
   return ids.length ? Math.max(...ids) + 1 : 1;
 }
 
+/************************************************
+ * FECHA ACTUAL
+ ************************************************/
 function fechaActual() {
-  return Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd");
+  return Utilities.formatDate(
+    new Date(),
+    Session.getScriptTimeZone(),
+    "yyyy-MM-dd"
+  );
 }
 
 /************************************************
- * LISTAR DATOS
+ * LISTAR FUNCIONARIOS
  ************************************************/
 function listarFuncionarios() {
   const hoja = obtenerHoja(HOJA_FUNCIONARIOS);
   const ultimaFila = hoja.getLastRow();
+
   if (ultimaFila < 2) return [];
 
   return hoja
     .getRange(2, 1, ultimaFila - 1, 1)
     .getDisplayValues()
     .flat()
-    .filter(nombre => nombre.trim() !== "");
+    .filter(nombre => nombre !== "");
 }
 
+/************************************************
+ * LISTAR MOTIVOS DE DEVOLUCIÓN
+ ************************************************/
 function obtenerMotivos() {
   const hoja = obtenerHoja(HOJA_MOTIVOS);
   const ultimaFila = hoja.getLastRow();
-  if (ultimaFila < 2) return [];
+
+  if (ultimaFila <= 1) return [];
 
   return hoja
     .getRange(2, 1, ultimaFila - 1, 1)
@@ -141,7 +166,7 @@ function obtenerMotivos() {
 }
 
 /************************************************
- * VALIDACIONES
+ * VALIDAR DATOS DE CABECERA
  ************************************************/
 function validarCabecera(datos) {
   if (!datos) throw new Error("No se recibieron datos.");
@@ -162,15 +187,9 @@ function validarCabecera(datos) {
 }
 
 /************************************************
- * GUARDAR DEVOLUCIÓN (CON LOCK DE SEGURIDAD)
+ * GUARDAR DEVOLUCIÓN
  ************************************************/
 function guardarDevolucion(datos) {
-  const lock = LockService.getScriptLock();
-  // Esperar hasta 10 segundos para bloquear proceso concurrente
-  if (!lock.tryLock(10000)) {
-    return { ok: false, mensaje: "El sistema está ocupado. Intenta de nuevo en unos segundos." };
-  }
-
   try {
     datos = validarCabecera(datos);
 
@@ -189,17 +208,26 @@ function guardarDevolucion(datos) {
       datos.nombre
     ]);
 
-    // Guardar Detalle
+    // Preparar y Guardar Detalle
     let idDetalle = siguienteID(hojaDetalle);
-    const registrosDetalle = datos.detalle.map(item => [
-      idDetalle++,
-      idDevolucion,
-      item.motivo,
-      item.observacion || ""
-    ]);
+    const registrosDetalle = [];
+
+    datos.detalle.forEach(function(item) {
+      registrosDetalle.push([
+        idDetalle++,
+        idDevolucion,
+        item.motivo,
+        item.observacion
+      ]);
+    });
 
     hojaDetalle
-      .getRange(hojaDetalle.getLastRow() + 1, 1, registrosDetalle.length, registrosDetalle[0].length)
+      .getRange(
+        hojaDetalle.getLastRow() + 1,
+        1,
+        registrosDetalle.length,
+        registrosDetalle[0].length
+      )
       .setValues(registrosDetalle);
 
     return {
@@ -209,14 +237,15 @@ function guardarDevolucion(datos) {
     };
 
   } catch (error) {
-    return { ok: false, mensaje: error.message };
-  } finally {
-    lock.releaseLock();
+    return {
+      ok: false,
+      mensaje: error.message
+    };
   }
 }
 
 /************************************************
- * CONSULTAS Y BÚSQUEDAS
+ * BUSCAR DEVOLUCIÓN POR ID
  ************************************************/
 function buscarDevolucion(id) {
   const hojaCabecera = obtenerHoja(HOJA_DEVOLUCIONES);
@@ -230,10 +259,7 @@ function buscarDevolucion(id) {
   for (let i = 1; i < cabecera.length; i++) {
     if (Number(cabecera[i][0]) === Number(id)) {
       respuesta.id = cabecera[i][0];
-      // Si la fecha viene como Date Object de Apps Script, la formateamos como string YYYY-MM-DD
-      respuesta.fecha = cabecera[i][1] instanceof Date 
-        ? Utilities.formatDate(cabecera[i][1], Session.getScriptTimeZone(), "yyyy-MM-dd") 
-        : cabecera[i][1];
+      respuesta.fecha = cabecera[i][1];
       respuesta.funcionario = cabecera[i][2];
       respuesta.placa = cabecera[i][3];
       respuesta.cedula = cabecera[i][4];
@@ -241,8 +267,6 @@ function buscarDevolucion(id) {
       break;
     }
   }
-
-  if (!respuesta.id) return null;
 
   for (let i = 1; i < detalle.length; i++) {
     if (Number(detalle[i][1]) === Number(id)) {
@@ -261,74 +285,71 @@ function consultarDevolucion(id) {
   return buscarDevolucion(id);
 }
 
+/************************************************
+ * LISTAR DEVOLUCIONES
+ ************************************************/
+function listarDevoluciones() {
+  const hoja = obtenerHoja(HOJA_DEVOLUCIONES);
+
+  if (hoja.getLastRow() <= 1) return [];
+
+  return hoja
+    .getRange(2, 1, hoja.getLastRow() - 1, 6)
+    .getValues();
+}
+
+/************************************************
+ * BUSCAR POR PLACA
+ ************************************************/
 function buscarPlaca(placa) {
   placa = String(placa).trim().toUpperCase();
   const hoja = obtenerHoja(HOJA_DEVOLUCIONES);
   const datos = hoja.getDataRange().getValues();
-  const resultados = [];
 
   for (let i = 1; i < datos.length; i++) {
     if (String(datos[i][3]).trim().toUpperCase() === placa) {
-      resultados.push({
+      return {
         id: datos[i][0],
-        fecha: datos[i][1] instanceof Date 
-          ? Utilities.formatDate(datos[i][1], Session.getScriptTimeZone(), "yyyy-MM-dd") 
-          : datos[i][1],
+        fecha: datos[i][1],
         funcionario: datos[i][2],
         placa: datos[i][3],
         cedula: datos[i][4],
         nombre: datos[i][5]
-      });
+      };
     }
   }
-  return resultados; // Retorna array de coincidencias
+  return null;
 }
 
 /************************************************
- * ELIMINAR DEVOLUCIÓN (OPTIMIZADO EN MEMORIA)
+ * ELIMINAR DEVOLUCIÓN
  ************************************************/
 function eliminarDevolucion(id) {
-  const lock = LockService.getScriptLock();
-  if (!lock.tryLock(10000)) return { ok: false, mensaje: "Sistema ocupado." };
+  const hojaCabecera = obtenerHoja(HOJA_DEVOLUCIONES);
+  const hojaDetalle = obtenerHoja(HOJA_DETALLE);
 
-  try {
-    const hojaCabecera = obtenerHoja(HOJA_DEVOLUCIONES);
-    const hojaDetalle = obtenerHoja(HOJA_DETALLE);
-
-    // Filtrar Cabecera
-    const datosCabecera = hojaCabecera.getDataRange().getValues();
-    const nuevaCabecera = datosCabecera.filter((fila, index) => index === 0 || Number(fila[0]) !== Number(id));
-
-    // Filtrar Detalle
-    const datosDetalle = hojaDetalle.getDataRange().getValues();
-    const nuevoDetalle = datosDetalle.filter((fila, index) => index === 0 || Number(fila[1]) !== Number(id));
-
-    // Reescribir hojas
-    hojaCabecera.clearContents();
-    if (nuevaCabecera.length > 0) {
-      hojaCabecera.getRange(1, 1, nuevaCabecera.length, nuevaCabecera[0].length).setValues(nuevaCabecera);
+  const cabecera = hojaCabecera.getDataRange().getValues();
+  for (let i = cabecera.length - 1; i >= 1; i--) {
+    if (Number(cabecera[i][0]) === Number(id)) {
+      hojaCabecera.deleteRow(i + 1);
+      break;
     }
-
-    hojaDetalle.clearContents();
-    if (nuevoDetalle.length > 0) {
-      hojaDetalle.getRange(1, 1, nuevoDetalle.length, nuevoDetalle[0].length).setValues(nuevoDetalle);
-    }
-
-    return { ok: true, mensaje: "Registro eliminado correctamente." };
-  } catch(error) {
-    return { ok: false, mensaje: error.message };
-  } finally {
-    lock.releaseLock();
   }
+
+  const detalle = hojaDetalle.getDataRange().getValues();
+  for (let i = detalle.length - 1; i >= 1; i--) {
+    if (Number(detalle[i][1]) === Number(id)) {
+      hojaDetalle.deleteRow(i + 1);
+    }
+  }
+
+  return { ok: true, mensaje: "Registro eliminado correctamente." };
 }
 
 /************************************************
  * ACTUALIZAR DEVOLUCIÓN
  ************************************************/
 function actualizarDevolucion(datos) {
-  const lock = LockService.getScriptLock();
-  if (!lock.tryLock(10000)) return { ok: false, mensaje: "Sistema ocupado." };
-
   try {
     datos = validarCabecera(datos);
     if (!datos.id) throw new Error("No se recibió el ID de la devolución.");
@@ -348,7 +369,6 @@ function actualizarDevolucion(datos) {
 
     if (filaCabecera === -1) throw new Error("No existe la devolución.");
 
-    // Actualizar fila en Cabecera
     hojaCabecera.getRange(filaCabecera, 1, 1, 6).setValues([[
       datos.id,
       datos.fecha,
@@ -358,29 +378,37 @@ function actualizarDevolucion(datos) {
       datos.nombre
     ]]);
 
-    // Limpiar detalle viejo y reescribir en memoria
-    const datosDetalle = hojaDetalle.getDataRange().getValues();
-    const detalleLimpio = datosDetalle.filter((fila, idx) => idx === 0 || Number(fila[1]) !== Number(datos.id));
+    // Eliminar detalle anterior
+    const detalle = hojaDetalle.getDataRange().getValues();
+    for (let i = detalle.length - 1; i >= 1; i--) {
+      if (Number(detalle[i][1]) === Number(datos.id)) {
+        hojaDetalle.deleteRow(i + 1);
+      }
+    }
 
+    // Insertar nuevo detalle
     let idDetalle = siguienteID(hojaDetalle);
-    datos.detalle.forEach(item => {
-      detalleLimpio.push([
+    const registros = [];
+
+    datos.detalle.forEach(function(item) {
+      registros.push([
         idDetalle++,
         datos.id,
         item.motivo,
-        item.observacion || ""
+        item.observacion
       ]);
     });
 
-    hojaDetalle.clearContents();
-    hojaDetalle.getRange(1, 1, detalleLimpio.length, detalleLimpio[0].length).setValues(detalleLimpio);
+    if (registros.length > 0) {
+      hojaDetalle
+        .getRange(hojaDetalle.getLastRow() + 1, 1, registros.length, registros[0].length)
+        .setValues(registros);
+    }
 
     return { ok: true, mensaje: "Devolución actualizada correctamente." };
 
   } catch (error) {
     return { ok: false, mensaje: error.message };
-  } finally {
-    lock.releaseLock();
   }
 }
 
@@ -407,206 +435,116 @@ function dashboard() {
 }
 
 /************************************************
- * GENERACIÓN DE PDF DEVOLUCIÓN (CORREGIDO Y GARANTIZADO)
+ * GENERAR PDF DE UNA DEVOLUCIÓN POR ID
  ************************************************/
 function generarPDFDevolucion(idDevolucion) {
   try {
     const datos = buscarDevolucion(idDevolucion);
 
-    if (!datos) {
-      throw new Error("No se encontró la devolución.");
+    if (!datos || !datos.id) {
+      throw new Error("No se encontró la devolución con ID: " + idDevolucion);
     }
 
-    const ID_ENCABEZADO = "1wPY_QJ4G_W7rz5bdkz7ObGc0L0cN9_ML";
-    const ID_PIE = "1m-KztMZ-KSlX-tu4BS61qrRQ-9TX8YpR";
+    const fecha = Utilities.formatDate(
+      new Date(datos.fecha),
+      Session.getScriptTimeZone(),
+      "dd/MM/yyyy"
+    );
 
-    // Función auxiliar para obtener la imagen directamente como Data URI desde DriveApp
-    function obtenerImagenDataURI(idDrive) {
-      try {
-        const archivo = DriveApp.getFileById(idDrive);
-        const blob = archivo.getBlob();
-        const tipoMime = blob.getContentType();
-        const bytesBase64 = Utilities.base64Encode(blob.getBytes());
-        return "data:" + tipoMime + ";base64," + bytesBase64;
-      } catch (e) {
-        Logger.log("Error leyendo la imagen ID (" + idDrive + "): " + e.message);
-        return "";
-      }
-    }
-
-    const encabezadoBase64 = obtenerImagenDataURI(ID_ENCABEZADO);
-    const pieBase64 = obtenerImagenDataURI(ID_PIE);
-
-    // Formatear Fecha
-    let fecha = datos.fecha;
-    if (fecha instanceof Date) {
-      fecha = Utilities.formatDate(fecha, Session.getScriptTimeZone(), "dd/MM/yyyy");
-    } else if (typeof fecha === "string" && fecha.includes("-")) {
-      fecha = fecha.split("-").reverse().join("/");
-    }
-
-    // Filas de los detalles
-    let filas = "";
-    if (datos.detalle && datos.detalle.length > 0) {
-      datos.detalle.forEach(function(f) {
-        filas += `
-        <tr>
-            <td>${f.motivo}</td>
-            <td>${f.observacion || ""}</td>
-        </tr>`;
-      });
-    }
-
-    // HTML del documento con imágenes incrustadas nativamente
-    const html = `
+    let html = `
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <style>
-  @page {
-    size: letter;
-    margin: 10mm;
-  }
-<img src="${encabezado}" style="width:100%;display:block; margin-bottom:15px;">
-  body {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 10pt;
-    color: #222222;
-    margin: 0;
-    padding: 0;
-  }
-  table {
-    border-collapse: collapse;
-    width: 100%;
-  }
-  .img-banner {
-    width: 100%;
-    max-width: 700px;
-    height: auto;
-    display: block;
-    margin: 0 auto;
-  }
-  .info td {
-    border: 1px solid #bdbdbd;
-    padding: 6px 8px;
-  }
-  .detalle th {
-    background-color: #0c4da2;
-    color: #ffffff;
-    border: 1px solid #0c4da2;
-    padding: 6px 8px;
-    text-align: left;
-  }
-  .detalle td {
-    border: 1px solid #999999;
-    padding: 6px 8px;
-  }
-  .titulo {
-    text-align: center;
-    font-size: 15pt;
-    font-weight: bold;
-    margin-top: 15px;
-    margin-bottom: 3px;
-    color: #111111;
-  }
-  .subtitulo {
-    text-align: center;
-    font-size: 11pt;
-    margin-bottom: 15px;
-    color: #555555;
-  }
-  .label {
-    background-color: #f2f2f2;
-    font-weight: bold;
-    width: 20%;
-  }
-  .linea {
-    width: 220px;
-    border-top: 1px solid #000000;
-    margin: 0 auto 5px auto;
-  }
-  .tabla-firmas {
-    margin-top: 40px;
-    margin-bottom: 20px;
-  }
+  body { font-family: Arial, sans-serif; font-size: 12px; color: #333; padding: 20px; }
+  .header { background: #0d6efd; color: white; padding: 15px; border-radius: 6px; }
+  .title { font-size: 20px; font-weight: bold; }
+  .table-info { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  .table-info td { border: 1px solid #CCC; padding: 8px; }
+  .label { background: #F5F5F5; font-weight: bold; width: 25%; }
+  .table-detalle { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
+  .table-detalle th { background: #0d6efd; color: white; border: 1px solid #CCC; padding: 8px; text-align: left; }
+  .table-detalle td { border: 1px solid #CCC; padding: 8px; vertical-align: top; word-wrap: break-word; }
+  .firmas { margin-top: 70px; width: 100%; text-align: center; }
+  .linea { width: 220px; border-top: 1px solid #000; margin: 0 auto 6px auto; }
 </style>
 </head>
 <body>
-<img src="${pie}" style="width:100%;display:block;">
-  <!-- ENCABEZADO -->
-  ${encabezadoBase64 ? `<div style="text-align: center; margin-bottom: 10px;"><img src="${encabezadoBase64}" class="img-banner" /></div>` : ''}
+<div class="header">
+  <div class="title">SECRETARIA DE MOVILIDAD</div>
+  <div class="title">MUNICIPIO DE LA CEJA - ANTIOQUIA</div>
+  <div class="title">COMPROBANTE DE DEVOLUCIÓN DE TRÁMITE #${datos.id}</div>
+</div>
 
-  <div class="titulo">COMPROBANTE DE DEVOLUCIÓN DE TRÁMITE</div>
-  <div class="subtitulo">Radicado No. ${datos.id}</div>
+<table class="table-info">
+  <tr>
+    <td class="label">Fecha</td>
+    <td>${fecha}</td>
+    <td class="label">Placa</td>
+    <td><strong>${datos.placa}</strong></td>
+  </tr>
+  <tr>
+    <td class="label">Cédula</td>
+    <td colspan="3">${datos.cedula}</td>
+  </tr>
+  <tr>
+    <td class="label">Ciudadano</td>
+    <td colspan="3">${datos.nombre}</td>
+  </tr>
+</table>
 
-  <!-- INFORMACIÓN GENERAL -->
-  <table class="info">
+<h3 style="color:#0d6efd; margin-top:25px;">Motivos de Devolución</h3>
+
+<table class="table-detalle">
+  <colgroup>
+    <col style="width:60%">
+    <col style="width:40%">
+  </colgroup>
+  <thead>
     <tr>
-      <td class="label">Fecha</td>
-      <td>${fecha}</td>
-      <td class="label">Placa</td>
-      <td><b>${datos.placa}</b></td>
+      <th>Motivo</th>
+      <th>Observación</th>
     </tr>
+  </thead>
+  <tbody>`;
+
+    datos.detalle.forEach(function(item) {
+      html += `
     <tr>
-      <td class="label">Funcionario</td>
-      <td>${datos.funcionario}</td>
-      <td class="label">Cédula</td>
-      <td>${datos.cedula}</td>
-    </tr>
-    <tr>
-      <td class="label">Ciudadano</td>
-      <td colspan="3">${datos.nombre}</td>
-    </tr>
-  </table>
+      <td><strong>${item.motivo}</strong></td>
+      <td>${item.observacion || ""}</td>
+    </tr>`;
+    });
 
-  <br>
+    html += `
+  </tbody>
+</table>
 
-  <!-- MOTIVOS Y DETALLES -->
-  <table class="detalle">
-    <thead>
-      <tr>
-        <th width="40%">Motivo</th>
-        <th>Observación</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${filas}
-    </tbody>
-  </table>
-
-  <!-- FIRMAS -->
-  <table class="tabla-firmas">
-    <tr>
-      <td align="center" style="vertical-align: top;">
-        <div class="linea"></div>
-        <b>${datos.funcionario}</b><br>
-        Funcionario Responsable
-      </td>
-      <td align="center" style="vertical-align: top;">
-        <div class="linea"></div>
-        <b>${datos.nombre}</b><br>
-        Ciudadano / Recibido
-      </td>
-    </tr>
-  </table>
-
-  <!-- PIE DE PÁGINA -->
-  ${pieBase64 ? `<div style="text-align: center; margin-top: 10px;"><img src="${pieBase64}" class="img-banner" /></div>` : ''}
-
+<table class="firmas">
+  <tr>
+    <td width="50%">
+      <div class="linea"></div>
+      <b>${datos.funcionario}</b><br>Funcionario Responsable
+    </td>
+    <td width="50%">
+      <div class="linea"></div>
+      <b>${datos.nombre}</b><br>Ciudadano / Recibido
+    </td>
+  </tr>
+</table>
 </body>
-</html>
-`;
+</html>`;
 
-    const pdf = HtmlService
+    const blob = HtmlService
       .createHtmlOutput(html)
       .getAs(MimeType.PDF)
-      .setName("Devolucion_" + datos.placa + "_" + datos.id + ".pdf");
+      .setName("Devolucion_" + datos.placa + "_ID_" + datos.id + ".pdf");
 
     return {
       ok: true,
-      nombreArchivo: pdf.getName(),
-      base64: Utilities.base64Encode(pdf.getBytes())
+      base64: Utilities.base64Encode(blob.getBytes()),
+      nombreArchivo: blob.getName()
     };
 
   } catch (error) {
@@ -615,14 +553,4 @@ function generarPDFDevolucion(idDevolucion) {
       mensaje: error.message
     };
   }
-}
-
-function imagenBase64(id) {
-  const archivo = DriveApp.getFileById(id);
-  const blob = archivo.getBlob();
-
-  return "data:" +
-         blob.getContentType() +
-         ";base64," +
-         Utilities.base64Encode(blob.getBytes());
 }
