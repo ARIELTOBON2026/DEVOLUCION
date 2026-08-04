@@ -436,222 +436,58 @@ function dashboard() {
     fecha: fechaActual()
   };
 }
-/************************************************
- * GENERAR PDF DE UNA DEVOLUCIÓN POR ID
- ************************************************/
-function generarPDFDevolucion(idDevolucion) {
-  try {
-    const datos = buscarDevolucion(idDevolucion);
+function generarPDFDevolucion(id) {
 
-    if (!datos || !datos.id) {
-      throw new Error("No se encontró la devolución con ID: " + idDevolucion);
-    }
+  const doc = DocumentApp.create("DEVOLUCION_" + id);
+  const body = doc.getBody();
 
-    const fecha = Utilities.formatDate(
-      new Date(datos.fecha),
-      Session.getScriptTimeZone(),
-      "dd/MM/yyyy"
-    );
+  // Encabezado
+  const imgEncabezado = UrlFetchApp.fetch(encabezadoURL).getBlob();
+  body.appendImage(imgEncabezado);
 
-    // Intentamos descargar y convertir las imágenes a Base64
-    const encabezadoURL = "https://arieltobon2026.github.io/DEVOLUCION/img/Encabezado.png";
-    const piePaginaURL = "https://arieltobon2026.github.io/DEVOLUCION/img/PiePagina.png";
+  body.appendParagraph("DEVOLUCIÓN DE TRÁMITES")
+      .setHeading(DocumentApp.ParagraphHeading.HEADING1);
 
-    const imgEncabezadoSrc = obtenerImagenBase64(encabezadoURL);
-    const imgPieSrc = obtenerImagenBase64(piePaginaURL);
+  body.appendParagraph("");
 
-    let html = `
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<style>
-  @page {
-    margin: 10mm 10mm 10mm 10mm;
-  }
-  body { 
-    font-family: Arial, sans-serif; 
-    font-size: 11px; 
-    color: #333; 
-    margin: 0;
-    padding: 0;
-  }
-  .img-header { 
-    width: 100%; 
-    max-height: 120px; 
-    object-fit: contain;
-    display: block; 
-    margin-bottom: 10px; 
-  }
-  .img-footer { 
-    width: 100%; 
-    max-height: 100px; 
-    object-fit: contain;
-    display: block; 
-    margin-top: 25px; 
-  }
-  .header { 
-    background: #0d6efd; 
-    color: white; 
-    padding: 10px; 
-    border-radius: 5px; 
-    text-align: center;
-    margin-bottom: 15px;
-  }
-  .title { 
-    font-size: 15px; 
-    font-weight: bold; 
-    line-height: 1.2;
-  }
-  .table-info { 
-    width: 100%; 
-    border-collapse: collapse; 
-    margin-top: 10px; 
-  }
-  .table-info td { 
-    border: 1px solid #CCC; 
-    padding: 6px; 
-  }
-  .label { 
-    background: #F5F5F5; 
-    font-weight: bold; 
-    width: 20%; 
-  }
-  .table-detalle { 
-    width: 100%; 
-    border-collapse: collapse; 
-    margin-top: 15px; 
-    table-layout: fixed; 
-  }
-  .table-detalle th { 
-    background: #0d6efd; 
-    color: white; 
-    border: 1px solid #0d6efd; 
-    padding: 6px; 
-    text-align: left; 
-  }
-  .table-detalle td { 
-    border: 1px solid #CCC; 
-    padding: 6px; 
-    vertical-align: top; 
-    word-wrap: break-word; 
-  }
-  .firmas { 
-    margin-top: 45px; 
-    width: 100%; 
-    text-align: center; 
-  }
-  .linea { 
-    width: 200px; 
-    border-top: 1px solid #000; 
-    margin: 0 auto 5px auto; 
-  }
-</style>
-</head>
-<body>
+  body.appendParagraph("Fecha: " + datos.fecha);
+  body.appendParagraph("Funcionario: " + datos.funcionario);
+  body.appendParagraph("Ciudadano: " + datos.ciudadano);
 
-${imgEncabezadoSrc ? `<img src="${imgEncabezadoSrc}" class="img-header" alt="Encabezado" />` : ''}
+  // Tabla
+  const tabla = body.appendTable();
 
-<div class="header">
-  <div class="title">SECRETARÍA DE MOVILIDAD</div>
-  <div class="title">MUNICIPIO DE LA CEJA - ANTIOQUIA</div>
-  <div class="title">COMPROBANTE DE DEVOLUCIÓN DE TRÁMITE #${datos.id}</div>
-</div>
+  tabla.appendTableRow()
+       .appendTableCell("Placa")
+       .getParentTableRow()
+       .appendTableCell("Motivo")
+       .getParentTableRow()
+       .appendTableCell("Observación");
 
-<table class="table-info">
-  <tr>
-    <td class="label">Fecha</td>
-    <td>${fecha}</td>
-    <td class="label">Placa</td>
-    <td><strong>${datos.placa}</strong></td>
-  </tr>
-  <tr>
-    <td class="label">Cédula</td>
-    <td colspan="3">${datos.cedula}</td>
-  </tr>
-  <tr>
-    <td class="label">Ciudadano</td>
-    <td colspan="3">${datos.nombre}</td>
-  </tr>
-</table>
+  detalle.forEach(function(f){
 
-<h3 style="color:#0d6efd; margin-top:20px; font-size:13px;">Motivos de Devolución</h3>
+      const fila = tabla.appendTableRow();
 
-<table class="table-detalle">
-  <colgroup>
-    <col style="width:50%">
-    <col style="width:50%">
-  </colgroup>
-  <thead>
-    <tr>
-      <th>Motivo</th>
-      <th>Observación</th>
-    </tr>
-  </thead>
-  <tbody>`;
+      fila.appendTableCell(f.placa);
+      fila.appendTableCell(f.motivo);
+      fila.appendTableCell(f.observacion);
 
-    datos.detalle.forEach(function(item) {
-      html += `
-    <tr>
-      <td><strong>${item.motivo}</strong></td>
-      <td>${item.observacion || ""}</td>
-    </tr>`;
-    });
+  });
 
-    html += `
-  </tbody>
-</table>
+  body.appendParagraph("");
 
-<table class="firmas">
-  <tr>
-    <td width="50%">
-      <div class="linea"></div>
-      <b>${datos.funcionario}</b><br>Funcionario Responsable
-    </td>
-    <td width="50%">
-      <div class="linea"></div>
-      <b>${datos.nombre}</b><br>Ciudadano / Recibido
-    </td>
-  </tr>
-</table>
+  // Pie
+  const imgPie = UrlFetchApp.fetch(pieURL).getBlob();
+  body.appendImage(imgPie);
 
-${imgPieSrc ? `<img src="${imgPieSrc}" class="img-footer" alt="Pie de Página" />` : ''}
+  doc.saveAndClose();
 
-</body>
-</html>`;
+  const pdf = DriveApp
+      .getFileById(doc.getId())
+      .getBlob()
+      .setName("DEVOLUCION_" + id + ".pdf");
 
-    const blob = HtmlService
-      .createHtmlOutput(html)
-      .getAs(MimeType.PDF)
-      .setName("Devolucion_" + datos.placa + "_ID_" + datos.id + ".pdf");
+  DriveApp.getFileById(doc.getId()).setTrashed(true);
 
-    return {
-      ok: true,
-      base64: Utilities.base64Encode(blob.getBytes()),
-      nombreArchivo: blob.getName()
-    };
-
-  } catch (error) {
-    return {
-      ok: false,
-      mensaje: error.message
-    };
-  }
+  return pdf;
 }
-
-/**
- * Convierte URL remota a Base64 con manejo de errores para Google Apps Script
- */
-function obtenerImagenBase64(url) {
-  try {
-    const response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
-    if (response.getResponseCode() === 200) {
-      const blob = response.getBlob();
-      return "data:" + blob.getContentType() + ";base64," + Utilities.base64Encode(blob.getBytes());
-    }
-  } catch (e) {
-    Logger.log("No se pudo obtener la imagen: " + e.toString());
-  }
-  return null;
-}
-
