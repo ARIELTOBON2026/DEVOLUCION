@@ -406,7 +406,7 @@ function dashboard() {
 }
 
 /************************************************
- * GENERACIÓN DE PDF DEVOLUCIÓN (OPTIMIZADO)
+ * GENERACIÓN DE PDF DEVOLUCIÓN (CORREGIDO Y GARANTIZADO)
  ************************************************/
 function generarPDFDevolucion(idDevolucion) {
   try {
@@ -419,9 +419,22 @@ function generarPDFDevolucion(idDevolucion) {
     const ID_ENCABEZADO = "1wPY_QJ4G_W7rz5bdkz7ObGc0L0cN9_ML";
     const ID_PIE = "1m-KztMZ-KSlX-tu4BS61qrRQ-9TX8YpR";
 
-    // URLs directas de transmisión pública de Google Drive (evita errores de Base64 en PDF)
-    const urlEncabezado = "https://lh3.googleusercontent.com/d/" + ID_ENCABEZADO;
-    const urlPie = "https://lh3.googleusercontent.com/d/" + ID_PIE;
+    // Función auxiliar para obtener la imagen directamente como Data URI desde DriveApp
+    function obtenerImagenDataURI(idDrive) {
+      try {
+        const archivo = DriveApp.getFileById(idDrive);
+        const blob = archivo.getBlob();
+        const tipoMime = blob.getContentType();
+        const bytesBase64 = Utilities.base64Encode(blob.getBytes());
+        return "data:" + tipoMime + ";base64," + bytesBase64;
+      } catch (e) {
+        Logger.log("Error leyendo la imagen ID (" + idDrive + "): " + e.message);
+        return "";
+      }
+    }
+
+    const encabezadoBase64 = obtenerImagenDataURI(ID_ENCABEZADO);
+    const pieBase64 = obtenerImagenDataURI(ID_PIE);
 
     // Formatear Fecha
     let fecha = datos.fecha;
@@ -443,7 +456,7 @@ function generarPDFDevolucion(idDevolucion) {
       });
     }
 
-    // Plantilla HTML para la conversión a PDF
+    // HTML del documento con imágenes incrustadas nativamente
     const html = `
 <!DOCTYPE html>
 <html>
@@ -452,7 +465,7 @@ function generarPDFDevolucion(idDevolucion) {
 <style>
   @page {
     size: letter;
-    margin: 12mm;
+    margin: 10mm;
   }
   body {
     font-family: Arial, Helvetica, sans-serif;
@@ -467,9 +480,10 @@ function generarPDFDevolucion(idDevolucion) {
   }
   .img-banner {
     width: 100%;
-    max-width: 100%;
+    max-width: 700px;
     height: auto;
     display: block;
+    margin: 0 auto;
   }
   .info td {
     border: 1px solid #bdbdbd;
@@ -511,7 +525,7 @@ function generarPDFDevolucion(idDevolucion) {
     margin: 0 auto 5px auto;
   }
   .tabla-firmas {
-    margin-top: 50px;
+    margin-top: 40px;
     margin-bottom: 20px;
   }
 </style>
@@ -519,13 +533,7 @@ function generarPDFDevolucion(idDevolucion) {
 <body>
 
   <!-- ENCABEZADO -->
-  <table width="100%" style="margin-bottom: 10px;">
-    <tr>
-      <td align="center">
-        <img src="${urlEncabezado}" class="img-banner" />
-      </td>
-    </tr>
-  </table>
+  ${encabezadoBase64 ? `<div style="text-align: center; margin-bottom: 10px;"><img src="${encabezadoBase64}" class="img-banner" /></div>` : ''}
 
   <div class="titulo">COMPROBANTE DE DEVOLUCIÓN DE TRÁMITE</div>
   <div class="subtitulo">Radicado No. ${datos.id}</div>
@@ -582,13 +590,7 @@ function generarPDFDevolucion(idDevolucion) {
   </table>
 
   <!-- PIE DE PÁGINA -->
-  <table width="100%">
-    <tr>
-      <td align="center">
-        <img src="${urlPie}" class="img-banner" />
-      </td>
-    </tr>
-  </table>
+  ${pieBase64 ? `<div style="text-align: center; margin-top: 10px;"><img src="${pieBase64}" class="img-banner" /></div>` : ''}
 
 </body>
 </html>
