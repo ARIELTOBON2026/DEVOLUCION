@@ -417,8 +417,23 @@ function dashboard() {
 }
 
 /************************************************
- * GENERAR PDF DEVOLUCIÓN (COMPLETAMENTE CORREGIDO)
+ * GENERAR PDF DEVOLUCIÓN (CON IMÁGENES CORREGIDAS)
  ************************************************/
+function obtenerBlobDesdeURL(url) {
+  try {
+    const respuesta = UrlFetchApp.fetch(url, {
+      muteHttpExceptions: true,
+      headers: { "User-Agent": "Mozilla/5.0" }
+    });
+    if (respuesta.getResponseCode() === 200) {
+      return respuesta.getBlob();
+    }
+  } catch (e) {
+    Logger.log("Error descargando imagen desde: " + url + " - " + e.message);
+  }
+  return null;
+}
+
 function generarPDFDevolucion(id) {
   try {
     const datos = buscarDevolucion(id);
@@ -427,12 +442,12 @@ function generarPDFDevolucion(id) {
     const doc = DocumentApp.create("DEVOLUCION_" + id);
     const body = doc.getBody();
 
-    // Imagen Encabezado
-    try {
-      const imgEncabezado = UrlFetchApp.fetch(encabezadoURL).getBlob();
-      body.appendImage(imgEncabezado);
-    } catch (e) {
-      // Continuar si la imagen no carga
+    // 1. Imagen Encabezado
+    const imgEncabezado = obtenerBlobDesdeURL(encabezadoURL);
+    if (imgEncabezado) {
+      const imgObj = body.appendImage(imgEncabezado);
+      // Opcional: Ajustar ancho/alto si la imagen sale muy grande
+      // imgObj.setWidth(500).setHeight(100); 
     }
 
     body.appendParagraph("DEVOLUCIÓN DE TRÁMITES")
@@ -446,7 +461,7 @@ function generarPDFDevolucion(id) {
     body.appendParagraph("Ciudadano: " + datos.nombre);
     body.appendParagraph("");
 
-    // Tabla de Detalle
+    // 2. Tabla de Detalle
     const tabla = body.appendTable();
     const headerRow = tabla.appendTableRow();
     headerRow.appendTableCell("Motivo");
@@ -460,21 +475,20 @@ function generarPDFDevolucion(id) {
 
     body.appendParagraph("");
 
-    // Imagen Pie
-    try {
-      const imgPie = UrlFetchApp.fetch(pieURL).getBlob();
-      body.appendImage(imgPie);
-    } catch (e) {
-      // Continuar si la imagen no carga
+    // 3. Imagen Pie
+    const imgPie = obtenerBlobDesdeURL(pieURL);
+    if (imgPie) {
+      const imgObjPie = body.appendImage(imgPie);
+      // imgObjPie.setWidth(500).setHeight(80);
     }
 
     doc.saveAndClose();
 
-    // Obtener PDF en Base64 para enviar a GitHub Pages
+    // Exportar PDF
     const pdfBlob = DriveApp.getFileById(doc.getId()).getBlob();
     const pdfBase64 = Utilities.base64Encode(pdfBlob.getBytes());
 
-    // Eliminar archivo temporal de Google Docs
+    // Enviar a la papelera el archivo borrador de Docs
     DriveApp.getFileById(doc.getId()).setTrashed(true);
 
     return {
@@ -486,10 +500,4 @@ function generarPDFDevolucion(id) {
   } catch (error) {
     return { ok: false, mensaje: "Error al generar PDF: " + error.message };
   }
-}
-function descargarPDF(base64Data, nombreArchivo) {
-  const link = document.createElement("a");
-  link.href = "data:application/pdf;base64," + base64Data;
-  link.download = nombreArchivo;
-  link.click();
 }
