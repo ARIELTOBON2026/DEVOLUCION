@@ -2,8 +2,6 @@
  * SISTEMA DE DEVOLUCIÓN DE TRÁMITES (VERSIÓN API PARA GITHUB PAGES)
  * Codigo.gs
  ************************************************/
-const encabezadoURL = "https://raw.githubusercontent.com/arieltobon2026/DEVOLUCION/main/img/Encabezado.png";
-const pieURL = "https://raw.githubusercontent.com/arieltobon2026/DEVOLUCION/main/img/PiePagina.png";
 
 const HOJA_DEVOLUCIONES = "DEVOLUCIONES";
 const HOJA_DETALLE = "DEVOLUCIONES_DETALLES";
@@ -11,11 +9,11 @@ const HOJA_FUNCIONARIOS = "FUNCIONARIOS";
 const HOJA_MOTIVOS = "MOTIVOS";
 
 /************************************************
- * MANEJADOR DE PETICIONES GET
+ * MANEJADOR DE PETICIONES GET (Para consultar datos)
  ************************************************/
 function doGet(e) {
   try {
-    const accion = e ? e.parameter.accion : null;
+    const accion = e.parameter.accion;
     let respuesta = {};
 
     switch (accion) {
@@ -46,14 +44,10 @@ function doGet(e) {
 }
 
 /************************************************
- * MANEJADOR DE PETICIONES POST
+ * MANEJADOR DE PETICIONES POST (Para enviar/guardar datos)
  ************************************************/
 function doPost(e) {
   try {
-    if (!e || !e.postData || !e.postData.contents) {
-      throw new Error("No se recibieron datos POST.");
-    }
-
     const contenido = JSON.parse(e.postData.contents);
     const accion = contenido.accion;
     const payload = contenido.payload;
@@ -85,14 +79,6 @@ function doPost(e) {
 }
 
 /************************************************
- * MANEJADOR PREFLIGHT (CORS)
- ************************************************/
-function doOptions(e) {
-  return ContentService.createTextOutput("")
-    .setMimeType(ContentService.MimeType.TEXT);
-}
-
-/************************************************
  * FUNCIÓN AUXILIAR PARA DEVOLVER EN FORMATO JSON
  ************************************************/
 function responderJSON(objeto) {
@@ -105,24 +91,33 @@ function responderJSON(objeto) {
  * OBTENER HOJA
  ************************************************/
 function obtenerHoja(nombre) {
-  const hoja = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(nombre);
-  if (!hoja) throw new Error("No existe la hoja: " + nombre);
+  const hoja = SpreadsheetApp
+    .getActiveSpreadsheet()
+    .getSheetByName(nombre);
+
+  if (!hoja) {
+    throw new Error("No existe la hoja: " + nombre);
+  }
+
   return hoja;
 }
 
 /************************************************
- * OBTENER SIGUIENTE ID (CORREGIDO)
+ * OBTENER SIGUIENTE ID
  ************************************************/
 function siguienteID(hoja) {
   const ultimaFila = hoja.getLastRow();
-  if (ultimaFila <= 1) return 1;
+
+  if (ultimaFila <= 1) {
+    return 1;
+  }
 
   const ids = hoja
     .getRange(2, 1, ultimaFila - 1, 1)
     .getValues()
     .flat()
     .map(Number)
-    .filter(id => !isNaN(id) && id > 0);
+    .filter(id => !isNaN(id));
 
   return ids.length ? Math.max(...ids) + 1 : 1;
 }
@@ -131,7 +126,11 @@ function siguienteID(hoja) {
  * FECHA ACTUAL
  ************************************************/
 function fechaActual() {
-  return Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd");
+  return Utilities.formatDate(
+    new Date(),
+    Session.getScriptTimeZone(),
+    "yyyy-MM-dd"
+  );
 }
 
 /************************************************
@@ -140,13 +139,14 @@ function fechaActual() {
 function listarFuncionarios() {
   const hoja = obtenerHoja(HOJA_FUNCIONARIOS);
   const ultimaFila = hoja.getLastRow();
+
   if (ultimaFila < 2) return [];
 
   return hoja
     .getRange(2, 1, ultimaFila - 1, 1)
     .getDisplayValues()
     .flat()
-    .filter(nombre => nombre.trim() !== "");
+    .filter(nombre => nombre !== "");
 }
 
 /************************************************
@@ -155,7 +155,8 @@ function listarFuncionarios() {
 function obtenerMotivos() {
   const hoja = obtenerHoja(HOJA_MOTIVOS);
   const ultimaFila = hoja.getLastRow();
-  if (ultimaFila < 2) return [];
+
+  if (ultimaFila <= 1) return [];
 
   return hoja
     .getRange(2, 1, ultimaFila - 1, 1)
@@ -174,7 +175,7 @@ function validarCabecera(datos) {
   if (!datos.placa) throw new Error("Debe ingresar la placa.");
   if (!datos.cedula) throw new Error("Debe ingresar la cédula.");
   if (!datos.nombre) throw new Error("Debe ingresar el nombre del ciudadano.");
-  if (!datos.detalle || !Array.isArray(datos.detalle) || datos.detalle.length === 0) {
+  if (!datos.detalle || datos.detalle.length === 0) {
     throw new Error("Debe agregar al menos un motivo de devolución.");
   }
 
@@ -216,7 +217,7 @@ function guardarDevolucion(datos) {
         idDetalle++,
         idDevolucion,
         item.motivo,
-        item.observacion || ""
+        item.observacion
       ]);
     });
 
@@ -236,7 +237,10 @@ function guardarDevolucion(datos) {
     };
 
   } catch (error) {
-    return { ok: false, mensaje: error.message };
+    return {
+      ok: false,
+      mensaje: error.message
+    };
   }
 }
 
@@ -250,24 +254,19 @@ function buscarDevolucion(id) {
   const cabecera = hojaCabecera.getDataRange().getValues();
   const detalle = hojaDetalle.getDataRange().getValues();
 
-  let respuesta = null;
+  const respuesta = { detalle: [] };
 
   for (let i = 1; i < cabecera.length; i++) {
     if (Number(cabecera[i][0]) === Number(id)) {
-      respuesta = {
-        id: cabecera[i][0],
-        fecha: cabecera[i][1] instanceof Date ? Utilities.formatDate(cabecera[i][1], Session.getScriptTimeZone(), "yyyy-MM-dd") : cabecera[i][1],
-        funcionario: cabecera[i][2],
-        placa: cabecera[i][3],
-        cedula: cabecera[i][4],
-        nombre: cabecera[i][5],
-        detalle: []
-      };
+      respuesta.id = cabecera[i][0];
+      respuesta.fecha = cabecera[i][1];
+      respuesta.funcionario = cabecera[i][2];
+      respuesta.placa = cabecera[i][3];
+      respuesta.cedula = cabecera[i][4];
+      respuesta.nombre = cabecera[i][5];
       break;
     }
   }
-
-  if (!respuesta) return null;
 
   for (let i = 1; i < detalle.length; i++) {
     if (Number(detalle[i][1]) === Number(id)) {
@@ -287,20 +286,39 @@ function consultarDevolucion(id) {
 }
 
 /************************************************
- * BUSCAR POR PLACA (DEVUELVE HISTORIAL)
+ * LISTAR DEVOLUCIONES
+ ************************************************/
+function listarDevoluciones() {
+  const hoja = obtenerHoja(HOJA_DEVOLUCIONES);
+
+  if (hoja.getLastRow() <= 1) return [];
+
+  return hoja
+    .getRange(2, 1, hoja.getLastRow() - 1, 6)
+    .getValues();
+}
+
+/************************************************
+ * BUSCAR POR PLACA
  ************************************************/
 function buscarPlaca(placa) {
   placa = String(placa).trim().toUpperCase();
   const hoja = obtenerHoja(HOJA_DEVOLUCIONES);
   const datos = hoja.getDataRange().getValues();
-  const resultados = [];
 
   for (let i = 1; i < datos.length; i++) {
     if (String(datos[i][3]).trim().toUpperCase() === placa) {
-      resultados.push(buscarDevolucion(datos[i][0]));
+      return {
+        id: datos[i][0],
+        fecha: datos[i][1],
+        funcionario: datos[i][2],
+        placa: datos[i][3],
+        cedula: datos[i][4],
+        nombre: datos[i][5]
+      };
     }
   }
-  return resultados;
+  return null;
 }
 
 /************************************************
@@ -349,7 +367,7 @@ function actualizarDevolucion(datos) {
       }
     }
 
-    if (filaCabecera === -1) throw new Error("No existe la devolución especificada.");
+    if (filaCabecera === -1) throw new Error("No existe la devolución.");
 
     hojaCabecera.getRange(filaCabecera, 1, 1, 6).setValues([[
       datos.id,
@@ -377,7 +395,7 @@ function actualizarDevolucion(datos) {
         idDetalle++,
         datos.id,
         item.motivo,
-        item.observacion || ""
+        item.observacion
       ]);
     });
 
@@ -417,127 +435,122 @@ function dashboard() {
 }
 
 /************************************************
- * FUNCIÓN AUXILIAR PARA OBTENER LAS IMÁGENES
+ * GENERAR PDF DE UNA DEVOLUCIÓN POR ID
  ************************************************/
-function obtenerBlobImagen(url) {
+function generarPDFDevolucion(idDevolucion) {
   try {
-    // Si es URL de GitHub Pages, la convertimos a rawusercontent por seguridad
-    let urlRaw = url.replace("github.io", "raw.githubusercontent.com").replace("/DEVOLUCION/", "/DEVOLUCION/main/");
-    
-    const respuesta = UrlFetchApp.fetch(urlRaw, {
-      muteHttpExceptions: true,
-      headers: { "User-Agent": "Mozilla/5.0" }
-    });
-    
-    if (respuesta.getResponseCode() === 200) {
-      return respuesta.getBlob();
-    } else {
-      // Intentar con la URL original por si no es GitHub Pages
-      const respOriginal = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
-      if (respOriginal.getResponseCode() === 200) return respOriginal.getBlob();
-    }
-  } catch (e) {
-    Logger.log("Error al cargar imagen (" + url + "): " + e.message);
-  }
-  return null;
-}
+    const datos = buscarDevolucion(idDevolucion);
 
-/************************************************
- * GENERAR PDF CON ENCABEZADO Y PIE DE PÁGINA
- ************************************************/
-function generarPDFDevolucion(id) {
-  try {
-    const datos = buscarDevolucion(id);
-    if (!datos) throw new Error("No se encontró la devolución ID: " + id);
-
-    const doc = DocumentApp.create("DEVOLUCION_" + id);
-    const body = doc.getBody();
-
-    // ==========================================
-    // 1. IMAGEN DE ENCABEZADO (PARTE SUPERIOR)
-    // ==========================================
-    const imgEncabezadoBlob = obtenerBlobImagen(encabezadoURL);
-    if (imgEncabezadoBlob) {
-      const header = doc.getHeader() || doc.addHeader();
-      const pHeader = header.appendParagraph("");
-      pHeader.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
-      
-      const img = pHeader.appendImage(imgEncabezadoBlob);
-      // Ajustar dimensiones según necesites (Ancho, Alto en píxeles)
-      img.setWidth(500).setHeight(80); 
+    if (!datos || !datos.id) {
+      throw new Error("No se encontró la devolución con ID: " + idDevolucion);
     }
 
-    // ==========================================
-    // 2. CONTENIDO DEL DOCUMENTO
-    // ==========================================
-    const titulo = body.appendParagraph("SECRETARIA DE MOVILIDAD\nMUNICIPIO DE LA CEJA - ANTIOQUIA\nCOMPROBANTE DE DEVOLUCIÓN DE TRÁMITE #" + datos.id);
-    titulo.setHeading(DocumentApp.ParagraphHeading.HEADING1);
-    titulo.getAttributes()[DocumentApp.Attribute.FONT_SIZE] = 14;
+    const fecha = Utilities.formatDate(
+      new Date(datos.fecha),
+      Session.getScriptTimeZone(),
+      "dd/MM/yyyy"
+    );
 
-    body.appendParagraph(""); // Espacio
+    let html = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: Arial, sans-serif; font-size: 12px; color: #333; padding: 20px; }
+  .header { background: #0d6efd; color: white; padding: 15px; border-radius: 6px; }
+  .title { font-size: 20px; font-weight: bold; }
+  .table-info { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  .table-info td { border: 1px solid #CCC; padding: 8px; }
+  .label { background: #F5F5F5; font-weight: bold; width: 25%; }
+  .table-detalle { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
+  .table-detalle th { background: #0d6efd; color: white; border: 1px solid #CCC; padding: 8px; text-align: left; }
+  .table-detalle td { border: 1px solid #CCC; padding: 8px; vertical-align: top; word-wrap: break-word; }
+  .firmas { margin-top: 70px; width: 100%; text-align: center; }
+  .linea { width: 220px; border-top: 1px solid #000; margin: 0 auto 6px auto; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="title">SECRETARIA DE MOVILIDAD</div>
+  <div class="title">MUNICIPIO DE LA CEJA - ANTIOQUIA</div>
+  <div class="title">COMPROBANTE DE DEVOLUCIÓN DE TRÁMITE #${datos.id}</div>
+</div>
 
-    // Tabla de Datos
-    const tablaDatos = body.appendTable([
-      ["Fecha", datos.fecha, "Placa", datos.placa],
-      ["Cédula", datos.cedula, "", ""],
-      ["Ciudadano", datos.nombre, "", ""]
-    ]);
+<table class="table-info">
+  <tr>
+    <td class="label">Fecha</td>
+    <td>${fecha}</td>
+    <td class="label">Placa</td>
+    <td><strong>${datos.placa}</strong></td>
+  </tr>
+  <tr>
+    <td class="label">Cédula</td>
+    <td colspan="3">${datos.cedula}</td>
+  </tr>
+  <tr>
+    <td class="label">Ciudadano</td>
+    <td colspan="3">${datos.nombre}</td>
+  </tr>
+</table>
 
-    body.appendParagraph("\nMotivos de Devolución").setBold(true);
+<h3 style="color:#0d6efd; margin-top:25px;">Motivos de Devolución</h3>
 
-    // Tabla de Detalle
-    const tablaDetalle = body.appendTable();
-    const headerRow = tablaDetalle.appendTableRow();
-    headerRow.appendTableCell("Motivo").setBold(true);
-    headerRow.appendTableCell("Observación").setBold(true);
+<table class="table-detalle">
+  <colgroup>
+    <col style="width:60%">
+    <col style="width:40%">
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Motivo</th>
+      <th>Observación</th>
+    </tr>
+  </thead>
+  <tbody>`;
 
     datos.detalle.forEach(function(item) {
-      const fila = tablaDetalle.appendTableRow();
-      fila.appendTableCell(item.motivo);
-      fila.appendTableCell(item.observacion);
+      html += `
+    <tr>
+      <td><strong>${item.motivo}</strong></td>
+      <td>${item.observacion || ""}</td>
+    </tr>`;
     });
 
-    body.appendParagraph("\n\n\n");
+    html += `
+  </tbody>
+</table>
 
-    // Firmas
-    const tablaFirmas = body.appendTable([
-      ["___________________________________", "___________________________________"],
-      [datos.funcionario + "\nFuncionario Responsable", datos.nombre + "\nCiudadano / Recibido"]
-    ]);
-    tablaFirmas.setBorderWidth(0);
+<table class="firmas">
+  <tr>
+    <td width="50%">
+      <div class="linea"></div>
+      <b>${datos.funcionario}</b><br>Funcionario Responsable
+    </td>
+    <td width="50%">
+      <div class="linea"></div>
+      <b>${datos.nombre}</b><br>Ciudadano / Recibido
+    </td>
+  </tr>
+</table>
+</body>
+</html>`;
 
-    // ==========================================
-    // 3. IMAGEN DE PIE DE PÁGINA (PARTE INFERIOR)
-    // ==========================================
-    const imgPieBlob = obtenerBlobImagen(pieURL);
-    if (imgPieBlob) {
-      const footer = doc.getFooter() || doc.addFooter();
-      const pFooter = footer.appendParagraph("");
-      pFooter.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
-      
-      const imgPie = pFooter.appendImage(imgPieBlob);
-      // Ajustar dimensiones (Ancho, Alto en píxeles)
-      imgPie.setWidth(500).setHeight(50);
-    }
-
-    doc.saveAndClose();
-
-    // ==========================================
-    // 4. EXPORTAR A BASE64 Y BORRAR TEMPORAL
-    // ==========================================
-    const pdfBlob = DriveApp.getFileById(doc.getId()).getBlob();
-    const pdfBase64 = Utilities.base64Encode(pdfBlob.getBytes());
-
-    // Borrar el borrador de Google Docs
-    DriveApp.getFileById(doc.getId()).setTrashed(true);
+    const blob = HtmlService
+      .createHtmlOutput(html)
+      .getAs(MimeType.PDF)
+      .setName("Devolucion_" + datos.placa + "_ID_" + datos.id + ".pdf");
 
     return {
       ok: true,
-      nombreArchivo: "DEVOLUCION_" + id + ".pdf",
-      base64: pdfBase64
+      base64: Utilities.base64Encode(blob.getBytes()),
+      nombreArchivo: blob.getName()
     };
 
   } catch (error) {
-    return { ok: false, mensaje: "Error al generar PDF: " + error.message };
+    return {
+      ok: false,
+      mensaje: error.message
+    };
   }
 }
