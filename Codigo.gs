@@ -7,7 +7,8 @@ const HOJA_DEVOLUCIONES = "DEVOLUCIONES";
 const HOJA_DETALLE = "DEVOLUCIONES_DETALLES";
 const HOJA_FUNCIONARIOS = "FUNCIONARIOS";
 const HOJA_MOTIVOS = "MOTIVOS";
-
+const encabezado = imagenBase64("1wPY_QJ4G_W7rz5bdkz7ObGc0L0cN9_ML");
+const pie = imagenBase64("1m-KztMZ-KSlX-tu4BS61qrRQ-9TX8YpR");
 /************************************************
  * MANEJADOR DE PETICIONES GET
  ************************************************/
@@ -613,4 +614,14 @@ function generarPDFDevolucion(idDevolucion) {
       mensaje: error.message
     };
   }
+}
+
+function imagenBase64(id) {
+  const archivo = DriveApp.getFileById(id);
+  const blob = archivo.getBlob();
+
+  return "data:" +
+         blob.getContentType() +
+         ";base64," +
+         Utilities.base64Encode(blob.getBytes());
 }
