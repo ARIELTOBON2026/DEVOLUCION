@@ -2,8 +2,8 @@
  * SISTEMA DE DEVOLUCIÓN DE TRÁMITES (VERSIÓN API PARA GITHUB PAGES)
  * Codigo.gs
  ************************************************/
-const encabezadoURL = "https://arieltobon2026.github.io/DEVOLUCION/img/Encabezado.png";
-const pieURL = "https://arieltobon2026.github.io/DEVOLUCION/img/PiePagina.png";
+const encabezadoURL = "https://raw.githubusercontent.com/arieltobon2026/DEVOLUCION/main/img/Encabezado.png";
+const pieURL = "https://raw.githubusercontent.com/arieltobon2026/DEVOLUCION/main/img/PiePagina.png";
 
 const HOJA_DEVOLUCIONES = "DEVOLUCIONES";
 const HOJA_DETALLE = "DEVOLUCIONES_DETALLES";
