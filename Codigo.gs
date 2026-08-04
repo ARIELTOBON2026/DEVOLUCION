@@ -435,7 +435,7 @@ function dashboard() {
 }
 
 /************************************************
- * GENERAR PDF DE UNA DEVOLUCIÓN POR ID
+ * GENERAR PDF DE UNA DEVOLUCIÓN POR ID (CON ENCABEZADO Y PIE)
  ************************************************/
 function generarPDFDevolucion(idDevolucion) {
   try {
@@ -451,55 +451,125 @@ function generarPDFDevolucion(idDevolucion) {
       "dd/MM/yyyy"
     );
 
+    // Imágenes codificadas en Base64
+    const imgEncabezado = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABLAAAAGACAYAAAC19V/MAAAgAElEQVR4nOy9f3xc1X3n+5s7I0kjjSR7/LAse23/wBIsG2zLsmSMyUY4sR3i2E3iOE5ip2m/2mSbdpNt0iZdtpum3Xbb/d5m0yS33XbbTdt/t03/TdqkTdqXNE03f9I2bdpm083+E3fM/sR2jLGx... (se inserta automáticamente en la plantilla)";
+
+    // Se construye la plantilla HTML
     let html = `
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <style>
-  body { font-family: Arial, sans-serif; font-size: 12px; color: #333; padding: 20px; }
-  .header { background: #0d6efd; color: white; padding: 15px; border-radius: 6px; }
-  .title { font-size: 20px; font-weight: bold; }
-  .table-info { width: 100%; border-collapse: collapse; margin-top: 20px; }
-  .table-info td { border: 1px solid #CCC; padding: 8px; }
-  .label { background: #F5F5F5; font-weight: bold; width: 25%; }
-  .table-detalle { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
-  .table-detalle th { background: #0d6efd; color: white; border: 1px solid #CCC; padding: 8px; text-align: left; }
-  .table-detalle td { border: 1px solid #CCC; padding: 8px; vertical-align: top; word-wrap: break-word; }
-  .firmas { margin-top: 70px; width: 100%; text-align: center; }
-  .linea { width: 220px; border-top: 1px solid #000; margin: 0 auto 6px auto; }
+  @page {
+    margin: 10mm;
+  }
+  body { 
+    font-family: 'Segoe UI', Arial, sans-serif; 
+    font-size: 11px; 
+    color: #333; 
+    margin: 0;
+    padding: 0;
+  }
+  .header-img {
+    width: 100%;
+    max-height: 120px;
+    object-fit: contain;
+    margin-bottom: 10px;
+  }
+  .footer-img {
+    width: 100%;
+    max-height: 100px;
+    object-fit: contain;
+    margin-top: 30px;
+  }
+  .doc-title { 
+    background: #0d6efd; 
+    color: white; 
+    padding: 10px; 
+    border-radius: 4px; 
+    text-align: center;
+    font-size: 14px; 
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+  .table-info { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-top: 10px; 
+  }
+  .table-info td { 
+    border: 1px solid #CCC; 
+    padding: 6px 10px; 
+  }
+  .label { 
+    background: #F5F5F5; 
+    font-weight: bold; 
+    width: 20%; 
+  }
+  .table-detalle { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-top: 15px; 
+    table-layout: fixed; 
+  }
+  .table-detalle th { 
+    background: #0d6efd; 
+    color: white; 
+    border: 1px solid #CCC; 
+    padding: 6px 10px; 
+    text-align: left; 
+  }
+  .table-detalle td { 
+    border: 1px solid #CCC; 
+    padding: 6px 10px; 
+    vertical-align: top; 
+    word-wrap: break-word; 
+  }
+  .firmas { 
+    margin-top: 50px; 
+    width: 100%; 
+    text-align: center; 
+  }
+  .linea { 
+    width: 200px; 
+    border-top: 1px solid #000; 
+    margin: 0 auto 6px auto; 
+  }
 </style>
 </head>
 <body>
-<div class="header">
-  <div class="title">SECRETARIA DE MOVILIDAD</div>
-  <div class="title">MUNICIPIO DE LA CEJA - ANTIOQUIA</div>
-  <div class="title">COMPROBANTE DE DEVOLUCIÓN DE TRÁMITE #${datos.id}</div>
+
+<!-- ENCABEZADO -->
+<img src="${imgEncabezado}" class="header-img" alt="Encabezado Secretaría de Movilidad">
+
+<div class="doc-title">
+  COMPROBANTE DE DEVOLUCIÓN DE TRÁMITE #${datos.id}
 </div>
 
 <table class="table-info">
   <tr>
-    <td class="label">Fecha</td>
+    <td class="label">Fecha:</td>
     <td>${fecha}</td>
-    <td class="label">Placa</td>
+    <td class="label">Placa:</td>
     <td><strong>${datos.placa}</strong></td>
   </tr>
   <tr>
-    <td class="label">Cédula</td>
+    <td class="label">Cédula:</td>
     <td colspan="3">${datos.cedula}</td>
   </tr>
   <tr>
-    <td class="label">Ciudadano</td>
+    <td class="label">Ciudadano:</td>
     <td colspan="3">${datos.nombre}</td>
   </tr>
 </table>
 
-<h3 style="color:#0d6efd; margin-top:25px;">Motivos de Devolución</h3>
+<h3 style="color:#0d6efd; margin-top:20px; margin-bottom:8px;">Motivos de Devolución</h3>
 
 <table class="table-detalle">
   <colgroup>
-    <col style="width:60%">
-    <col style="width:40%">
+    <col style="width:50%">
+    <col style="width:50%">
   </colgroup>
   <thead>
     <tr>
@@ -533,6 +603,10 @@ function generarPDFDevolucion(idDevolucion) {
     </td>
   </tr>
 </table>
+
+<!-- PIE DE PÁGINA -->
+<img src="${imgPiePagina}" class="footer-img" alt="Pie de página Secretaría de Movilidad">
+
 </body>
 </html>`;
 
