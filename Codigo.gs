@@ -405,159 +405,316 @@ function dashboard() {
   };
 }
 
-/************************************************
- * GENERACIÓN DE PDF (CON DETECCIÓN DE IMÁGENES BASE64)
- ************************************************/
 function generarPDFDevolucion(idDevolucion) {
+
   try {
+
     const datos = buscarDevolucion(idDevolucion);
 
-    if (!datos || !datos.id) {
+    if (!datos) {
       throw new Error("No se encontró la devolución.");
     }
 
     const ID_ENCABEZADO = "1wPY_QJ4G_W7rz5bdkz7ObGc0L0cN9_ML";
     const ID_PIE = "1m-KztMZ-KSlX-tu4BS61qrRQ-9TX8YpR";
 
-    // Función auxiliar para obtener Base64 con su MIME type exacto
-    function obtenerImagenBase64(idDrive) {
-      try {
-        const archivo = DriveApp.getFileById(idDrive);
-        const blob = archivo.getBlob();
-        const mimeType = blob.getContentType(); // Detecta si es image/png, image/jpeg, etc.
-        const base64Data = Utilities.base64Encode(blob.getBytes());
-        return `data:${mimeType};base64,${base64Data}`;
-      } catch (err) {
-        Logger.log("Error al cargar la imagen " + idDrive + ": " + err.message);
-        return ""; // Si falla, retorna vacío para que no bloquee la generación
-      }
+    function imagen64(id){
+
+      const blob = DriveApp
+        .getFileById(id)
+        .getBlob();
+
+      return "data:" +
+             blob.getContentType() +
+             ";base64," +
+             Utilities.base64Encode(blob.getBytes());
+
     }
 
-    const encabezado = obtenerImagenBase64(ID_ENCABEZADO);
-    const pie = obtenerImagenBase64(ID_PIE);
+    const encabezado = imagen64(ID_ENCABEZADO);
+    const pie = imagen64(ID_PIE);
 
-    // Formatear la fecha evitando desajuste de zona horaria UTC
-    let fechaStr = datos.fecha;
-    if (typeof datos.fecha === 'string' && datos.fecha.includes('-')) {
-      const partes = datos.fecha.split('T')[0].split('-');
-      fechaStr = `${partes[2]}/${partes[1]}/${partes[0]}`;
+    let fecha = datos.fecha;
+
+    if (fecha instanceof Date){
+
+      fecha = Utilities.formatDate(
+        fecha,
+        Session.getScriptTimeZone(),
+        "dd/MM/yyyy"
+      );
+
+    }else{
+
+      fecha = fecha.split("-").reverse().join("/");
+
     }
 
-    let html = `
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<style>
-@page { size: letter; margin: 15mm; }
-body { font-family: Arial, sans-serif; font-size: 10pt; color: #222; margin: 0; padding: 0; }
+    let filas = "";
 
-.encabezado { width: 100%; text-align: center; margin-bottom: 10px; }
-.encabezado img { max-width: 100%; max-height: 120px; display: block; margin: 0 auto; }
+    datos.detalle.forEach(function(f){
 
-.titulo { text-align: center; font-size: 16pt; font-weight: bold; margin-top: 10px; color: #003A70; }
-.subtitulo { text-align: center; font-size: 11pt; margin-bottom: 15px; }
+      filas += `
+      <tr>
+          <td>${f.motivo}</td>
+          <td>${f.observacion || ""}</td>
+      </tr>`;
 
-table { width: 100%; border-collapse: collapse; }
-.info td { border: 1px solid #CFCFCF; padding: 6px 8px; }
-.label { background: #EFEFEF; font-weight: bold; width: 20%; }
-
-.detalle { margin-top: 15px; }
-.detalle th { background: #003A70; color: white; padding: 6px 8px; border: 1px solid #DDD; text-align: left; }
-.detalle td { padding: 6px 8px; border: 1px solid #DDD; vertical-align: top; }
-.detalle tr:nth-child(even) { background: #F8F8F8; }
-
-.firmas { margin-top: 50px; width: 100%; }
-.linea { width: 200px; border-top: 1px solid #000; margin: 0 auto 5px auto; }
-
-.footer { width: 100%; text-align: center; margin-top: 30px; }
-.footer img { max-width: 100%; max-height: 80px; display: block; margin: 0 auto; }
-</style>
-</head>
-<body>
-
-${encabezado ? `<div class="encabezado"><img src="${encabezado}"></div>` : ''}
-
-<div class="titulo">COMPROBANTE DE DEVOLUCIÓN DE TRÁMITE</div>
-<div class="subtitulo">Radicado No. ${datos.id}</div>
-
-<table class="info">
-  <tr>
-    <td class="label">Fecha</td>
-    <td>${fechaStr}</td>
-    <td class="label">Placa</td>
-    <td><b>${datos.placa}</b></td>
-  </tr>
-  <tr>
-    <td class="label">Funcionario</td>
-    <td>${datos.funcionario}</td>
-    <td class="label">Cédula</td>
-    <td>${datos.cedula}</td>
-  </tr>
-  <tr>
-    <td class="label">Ciudadano</td>
-    <td colspan="3">${datos.nombre}</td>
-  </tr>
-</table>
-
-<h4 style="color:#003A70; margin-top: 15px; margin-bottom: 5px;">Motivos de devolución</h4>
-
-<table class="detalle">
-  <thead>
-    <tr>
-      <th width="35%">Motivo</th>
-      <th>Observación</th>
-    </tr>
-  </thead>
-  <tbody>`;
-
-    datos.detalle.forEach(function(fila) {
-      html += `
-    <tr>
-      <td><b>${fila.motivo}</b></td>
-      <td>${fila.observacion || ""}</td>
-    </tr>`;
     });
 
-    html += `
-  </tbody>
+    const html = `
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<style>
+
+@page{
+    size:letter;
+    margin:20mm;
+}
+
+body{
+
+    font-family:Arial;
+    font-size:10pt;
+    color:#222;
+
+}
+
+table{
+
+    border-collapse:collapse;
+    width:100%;
+
+}
+
+.info td{
+
+    border:1px solid #bdbdbd;
+    padding:6px;
+
+}
+
+.detalle th{
+
+    background:#0c4da2;
+    color:white;
+    border:1px solid #999;
+    padding:6px;
+
+}
+
+.detalle td{
+
+    border:1px solid #999;
+    padding:6px;
+
+}
+
+.titulo{
+
+    text-align:center;
+    font-size:18px;
+    font-weight:bold;
+    margin-top:15px;
+    margin-bottom:5px;
+
+}
+
+.subtitulo{
+
+    text-align:center;
+    margin-bottom:15px;
+
+}
+
+.label{
+
+    background:#efefef;
+    font-weight:bold;
+    width:22%;
+
+}
+
+.linea{
+
+    width:220px;
+    border-top:1px solid black;
+    margin:auto;
+    margin-top:50px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<table>
+
+<tr>
+
+<td align="center">
+
+<img src="${encabezado}" width="720">
+
+</td>
+
+</tr>
+
 </table>
 
-<table class="firmas">
-  <tr>
-    <td align="center" style="width: 50%;">
-      <div class="linea"></div>
-      <b>${datos.funcionario}</b><br>
-      Funcionario Responsable
-    </td>
-    <td align="center" style="width: 50%;">
-      <div class="linea"></div>
-      <b>${datos.nombre}</b><br>
-      Ciudadano
-    </td>
-  </tr>
+<div class="titulo">
+
+COMPROBANTE DE DEVOLUCIÓN DE TRÁMITE
+
+</div>
+
+<div class="subtitulo">
+
+Radicado No. ${datos.id}
+
+</div>
+
+<table class="info">
+
+<tr>
+
+<td class="label">Fecha</td>
+<td>${fecha}</td>
+
+<td class="label">Placa</td>
+<td><b>${datos.placa}</b></td>
+
+</tr>
+
+<tr>
+
+<td class="label">Funcionario</td>
+<td>${datos.funcionario}</td>
+
+<td class="label">Cédula</td>
+<td>${datos.cedula}</td>
+
+</tr>
+
+<tr>
+
+<td class="label">Ciudadano</td>
+
+<td colspan="3">
+
+${datos.nombre}
+
+</td>
+
+</tr>
+
 </table>
 
-${pie ? `<div class="footer"><img src="${pie}"></div>` : ''}
+<br>
+
+<table class="detalle">
+
+<tr>
+
+<th width="35%">Motivo</th>
+
+<th>Observación</th>
+
+</tr>
+
+${filas}
+
+</table>
+
+<br><br><br>
+
+<table>
+
+<tr>
+
+<td align="center">
+
+<div class="linea"></div>
+
+<b>${datos.funcionario}</b><br>
+
+Funcionario Responsable
+
+</td>
+
+<td align="center">
+
+<div class="linea"></div>
+
+<b>${datos.nombre}</b><br>
+
+Ciudadano
+
+</td>
+
+</tr>
+
+</table>
+
+<br><br>
+
+<table>
+
+<tr>
+
+<td align="center">
+
+<img src="${pie}" width="720">
+
+</td>
+
+</tr>
+
+</table>
 
 </body>
-</html>`;
+
+</html>
+`;
 
     const pdf = HtmlService
       .createHtmlOutput(html)
       .getAs(MimeType.PDF)
-      .setName(`Devolucion_${datos.placa}_${datos.id}.pdf`);
+      .setName(
+        "Devolucion_" +
+        datos.placa +
+        "_" +
+        datos.id +
+        ".pdf"
+      );
 
     return {
-      ok: true,
-      base64: Utilities.base64Encode(pdf.getBytes()),
-      nombreArchivo: pdf.getName()
+
+      ok:true,
+
+      nombreArchivo:pdf.getName(),
+
+      base64:Utilities.base64Encode(pdf.getBytes())
+
     };
 
-  } catch (error) {
-    return {
-      ok: false,
-      mensaje: error.message
+  } catch(error){
+
+    return{
+
+      ok:false,
+
+      mensaje:error.message
+
     };
+
   }
+
 }
