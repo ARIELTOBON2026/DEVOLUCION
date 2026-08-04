@@ -1,6 +1,6 @@
 /************************************************
- * SISTEMA DE DEVOLUCIÓN DE TRÁMITES (VERSIÓN API PARA GITHUB PAGES)
- * Codigo.gs
+ * SISTEMA DE DEVOLUCIÓN DE TRÁMITES (API GITHUB PAGES)
+ * Codigo.gs - Optimizado & Corregido
  ************************************************/
 
 const HOJA_DEVOLUCIONES = "DEVOLUCIONES";
@@ -9,7 +9,7 @@ const HOJA_FUNCIONARIOS = "FUNCIONARIOS";
 const HOJA_MOTIVOS = "MOTIVOS";
 
 /************************************************
- * MANEJADOR DE PETICIONES GET (Para consultar datos)
+ * MANEJADOR DE PETICIONES GET
  ************************************************/
 function doGet(e) {
   try {
@@ -44,10 +44,11 @@ function doGet(e) {
 }
 
 /************************************************
- * MANEJADOR DE PETICIONES POST (Para enviar/guardar datos)
+ * MANEJADOR DE PETICIONES POST
  ************************************************/
 function doPost(e) {
   try {
+    // Maneja payload formateado desde fetch cliente (JSON string)
     const contenido = JSON.parse(e.postData.contents);
     const accion = contenido.accion;
     const payload = contenido.payload;
@@ -79,7 +80,7 @@ function doPost(e) {
 }
 
 /************************************************
- * FUNCIÓN AUXILIAR PARA DEVOLVER EN FORMATO JSON
+ * FUNCIONES AUXILIARES Y DE RED
  ************************************************/
 function responderJSON(objeto) {
   return ContentService
@@ -87,76 +88,49 @@ function responderJSON(objeto) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-/************************************************
- * OBTENER HOJA
- ************************************************/
 function obtenerHoja(nombre) {
-  const hoja = SpreadsheetApp
-    .getActiveSpreadsheet()
-    .getSheetByName(nombre);
-
-  if (!hoja) {
-    throw new Error("No existe la hoja: " + nombre);
-  }
-
+  const hoja = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(nombre);
+  if (!hoja) throw new Error("No existe la hoja: " + nombre);
   return hoja;
 }
 
-/************************************************
- * OBTENER SIGUIENTE ID
- ************************************************/
 function siguienteID(hoja) {
   const ultimaFila = hoja.getLastRow();
-
-  if (ultimaFila <= 1) {
-    return 1;
-  }
+  if (ultimaFila <= 1) return 1;
 
   const ids = hoja
     .getRange(2, 1, ultimaFila - 1, 1)
     .getValues()
     .flat()
     .map(Number)
-    .filter(id => !isNaN(id));
+    .filter(id => !isNaN(id) && id > 0);
 
   return ids.length ? Math.max(...ids) + 1 : 1;
 }
 
-/************************************************
- * FECHA ACTUAL
- ************************************************/
 function fechaActual() {
-  return Utilities.formatDate(
-    new Date(),
-    Session.getScriptTimeZone(),
-    "yyyy-MM-dd"
-  );
+  return Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd");
 }
 
 /************************************************
- * LISTAR FUNCIONARIOS
+ * LISTAR DATOS
  ************************************************/
 function listarFuncionarios() {
   const hoja = obtenerHoja(HOJA_FUNCIONARIOS);
   const ultimaFila = hoja.getLastRow();
-
   if (ultimaFila < 2) return [];
 
   return hoja
     .getRange(2, 1, ultimaFila - 1, 1)
     .getDisplayValues()
     .flat()
-    .filter(nombre => nombre !== "");
+    .filter(nombre => nombre.trim() !== "");
 }
 
-/************************************************
- * LISTAR MOTIVOS DE DEVOLUCIÓN
- ************************************************/
 function obtenerMotivos() {
   const hoja = obtenerHoja(HOJA_MOTIVOS);
   const ultimaFila = hoja.getLastRow();
-
-  if (ultimaFila <= 1) return [];
+  if (ultimaFila < 2) return [];
 
   return hoja
     .getRange(2, 1, ultimaFila - 1, 1)
@@ -166,7 +140,7 @@ function obtenerMotivos() {
 }
 
 /************************************************
- * VALIDAR DATOS DE CABECERA
+ * VALIDACIONES
  ************************************************/
 function validarCabecera(datos) {
   if (!datos) throw new Error("No se recibieron datos.");
@@ -187,9 +161,15 @@ function validarCabecera(datos) {
 }
 
 /************************************************
- * GUARDAR DEVOLUCIÓN
+ * GUARDAR DEVOLUCIÓN (CON LOCK DE SEGURIDAD)
  ************************************************/
 function guardarDevolucion(datos) {
+  const lock = LockService.getScriptLock();
+  // Esperar hasta 10 segundos para bloquear proceso concurrente
+  if (!lock.tryLock(10000)) {
+    return { ok: false, mensaje: "El sistema está ocupado. Intenta de nuevo en unos segundos." };
+  }
+
   try {
     datos = validarCabecera(datos);
 
@@ -208,26 +188,17 @@ function guardarDevolucion(datos) {
       datos.nombre
     ]);
 
-    // Preparar y Guardar Detalle
+    // Guardar Detalle
     let idDetalle = siguienteID(hojaDetalle);
-    const registrosDetalle = [];
-
-    datos.detalle.forEach(function(item) {
-      registrosDetalle.push([
-        idDetalle++,
-        idDevolucion,
-        item.motivo,
-        item.observacion
-      ]);
-    });
+    const registrosDetalle = datos.detalle.map(item => [
+      idDetalle++,
+      idDevolucion,
+      item.motivo,
+      item.observacion || ""
+    ]);
 
     hojaDetalle
-      .getRange(
-        hojaDetalle.getLastRow() + 1,
-        1,
-        registrosDetalle.length,
-        registrosDetalle[0].length
-      )
+      .getRange(hojaDetalle.getLastRow() + 1, 1, registrosDetalle.length, registrosDetalle[0].length)
       .setValues(registrosDetalle);
 
     return {
@@ -237,15 +208,14 @@ function guardarDevolucion(datos) {
     };
 
   } catch (error) {
-    return {
-      ok: false,
-      mensaje: error.message
-    };
+    return { ok: false, mensaje: error.message };
+  } finally {
+    lock.releaseLock();
   }
 }
 
 /************************************************
- * BUSCAR DEVOLUCIÓN POR ID
+ * CONSULTAS Y BÚSQUEDAS
  ************************************************/
 function buscarDevolucion(id) {
   const hojaCabecera = obtenerHoja(HOJA_DEVOLUCIONES);
@@ -259,7 +229,10 @@ function buscarDevolucion(id) {
   for (let i = 1; i < cabecera.length; i++) {
     if (Number(cabecera[i][0]) === Number(id)) {
       respuesta.id = cabecera[i][0];
-      respuesta.fecha = cabecera[i][1];
+      // Si la fecha viene como Date Object de Apps Script, la formateamos como string YYYY-MM-DD
+      respuesta.fecha = cabecera[i][1] instanceof Date 
+        ? Utilities.formatDate(cabecera[i][1], Session.getScriptTimeZone(), "yyyy-MM-dd") 
+        : cabecera[i][1];
       respuesta.funcionario = cabecera[i][2];
       respuesta.placa = cabecera[i][3];
       respuesta.cedula = cabecera[i][4];
@@ -267,6 +240,8 @@ function buscarDevolucion(id) {
       break;
     }
   }
+
+  if (!respuesta.id) return null;
 
   for (let i = 1; i < detalle.length; i++) {
     if (Number(detalle[i][1]) === Number(id)) {
@@ -285,71 +260,74 @@ function consultarDevolucion(id) {
   return buscarDevolucion(id);
 }
 
-/************************************************
- * LISTAR DEVOLUCIONES
- ************************************************/
-function listarDevoluciones() {
-  const hoja = obtenerHoja(HOJA_DEVOLUCIONES);
-
-  if (hoja.getLastRow() <= 1) return [];
-
-  return hoja
-    .getRange(2, 1, hoja.getLastRow() - 1, 6)
-    .getValues();
-}
-
-/************************************************
- * BUSCAR POR PLACA
- ************************************************/
 function buscarPlaca(placa) {
   placa = String(placa).trim().toUpperCase();
   const hoja = obtenerHoja(HOJA_DEVOLUCIONES);
   const datos = hoja.getDataRange().getValues();
+  const resultados = [];
 
   for (let i = 1; i < datos.length; i++) {
     if (String(datos[i][3]).trim().toUpperCase() === placa) {
-      return {
+      resultados.push({
         id: datos[i][0],
-        fecha: datos[i][1],
+        fecha: datos[i][1] instanceof Date 
+          ? Utilities.formatDate(datos[i][1], Session.getScriptTimeZone(), "yyyy-MM-dd") 
+          : datos[i][1],
         funcionario: datos[i][2],
         placa: datos[i][3],
         cedula: datos[i][4],
         nombre: datos[i][5]
-      };
+      });
     }
   }
-  return null;
+  return resultados; // Retorna array de coincidencias
 }
 
 /************************************************
- * ELIMINAR DEVOLUCIÓN
+ * ELIMINAR DEVOLUCIÓN (OPTIMIZADO EN MEMORIA)
  ************************************************/
 function eliminarDevolucion(id) {
-  const hojaCabecera = obtenerHoja(HOJA_DEVOLUCIONES);
-  const hojaDetalle = obtenerHoja(HOJA_DETALLE);
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(10000)) return { ok: false, mensaje: "Sistema ocupado." };
 
-  const cabecera = hojaCabecera.getDataRange().getValues();
-  for (let i = cabecera.length - 1; i >= 1; i--) {
-    if (Number(cabecera[i][0]) === Number(id)) {
-      hojaCabecera.deleteRow(i + 1);
-      break;
+  try {
+    const hojaCabecera = obtenerHoja(HOJA_DEVOLUCIONES);
+    const hojaDetalle = obtenerHoja(HOJA_DETALLE);
+
+    // Filtrar Cabecera
+    const datosCabecera = hojaCabecera.getDataRange().getValues();
+    const nuevaCabecera = datosCabecera.filter((fila, index) => index === 0 || Number(fila[0]) !== Number(id));
+
+    // Filtrar Detalle
+    const datosDetalle = hojaDetalle.getDataRange().getValues();
+    const nuevoDetalle = datosDetalle.filter((fila, index) => index === 0 || Number(fila[1]) !== Number(id));
+
+    // Reescribir hojas
+    hojaCabecera.clearContents();
+    if (nuevaCabecera.length > 0) {
+      hojaCabecera.getRange(1, 1, nuevaCabecera.length, nuevaCabecera[0].length).setValues(nuevaCabecera);
     }
-  }
 
-  const detalle = hojaDetalle.getDataRange().getValues();
-  for (let i = detalle.length - 1; i >= 1; i--) {
-    if (Number(detalle[i][1]) === Number(id)) {
-      hojaDetalle.deleteRow(i + 1);
+    hojaDetalle.clearContents();
+    if (nuevoDetalle.length > 0) {
+      hojaDetalle.getRange(1, 1, nuevoDetalle.length, nuevoDetalle[0].length).setValues(nuevoDetalle);
     }
-  }
 
-  return { ok: true, mensaje: "Registro eliminado correctamente." };
+    return { ok: true, mensaje: "Registro eliminado correctamente." };
+  } catch(error) {
+    return { ok: false, mensaje: error.message };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 /************************************************
  * ACTUALIZAR DEVOLUCIÓN
  ************************************************/
 function actualizarDevolucion(datos) {
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(10000)) return { ok: false, mensaje: "Sistema ocupado." };
+
   try {
     datos = validarCabecera(datos);
     if (!datos.id) throw new Error("No se recibió el ID de la devolución.");
@@ -369,6 +347,7 @@ function actualizarDevolucion(datos) {
 
     if (filaCabecera === -1) throw new Error("No existe la devolución.");
 
+    // Actualizar fila en Cabecera
     hojaCabecera.getRange(filaCabecera, 1, 1, 6).setValues([[
       datos.id,
       datos.fecha,
@@ -378,37 +357,29 @@ function actualizarDevolucion(datos) {
       datos.nombre
     ]]);
 
-    // Eliminar detalle anterior
-    const detalle = hojaDetalle.getDataRange().getValues();
-    for (let i = detalle.length - 1; i >= 1; i--) {
-      if (Number(detalle[i][1]) === Number(datos.id)) {
-        hojaDetalle.deleteRow(i + 1);
-      }
-    }
+    // Limpiar detalle viejo y reescribir en memoria
+    const datosDetalle = hojaDetalle.getDataRange().getValues();
+    const detalleLimpio = datosDetalle.filter((fila, idx) => idx === 0 || Number(fila[1]) !== Number(datos.id));
 
-    // Insertar nuevo detalle
     let idDetalle = siguienteID(hojaDetalle);
-    const registros = [];
-
-    datos.detalle.forEach(function(item) {
-      registros.push([
+    datos.detalle.forEach(item => {
+      detalleLimpio.push([
         idDetalle++,
         datos.id,
         item.motivo,
-        item.observacion
+        item.observacion || ""
       ]);
     });
 
-    if (registros.length > 0) {
-      hojaDetalle
-        .getRange(hojaDetalle.getLastRow() + 1, 1, registros.length, registros[0].length)
-        .setValues(registros);
-    }
+    hojaDetalle.clearContents();
+    hojaDetalle.getRange(1, 1, detalleLimpio.length, detalleLimpio[0].length).setValues(detalleLimpio);
 
     return { ok: true, mensaje: "Devolución actualizada correctamente." };
 
   } catch (error) {
     return { ok: false, mensaje: error.message };
+  } finally {
+    lock.releaseLock();
   }
 }
 
@@ -433,344 +404,138 @@ function dashboard() {
     fecha: fechaActual()
   };
 }
+
+/************************************************
+ * GENERACIÓN DE PDF (CON CORRECCIÓN DE FECHA)
+ ************************************************/
 function generarPDFDevolucion(idDevolucion) {
-
   try {
-
     const datos = buscarDevolucion(idDevolucion);
 
     if (!datos || !datos.id) {
       throw new Error("No se encontró la devolución.");
     }
 
-    /************************************************
-     * ID DE LAS IMÁGENES EN DRIVE
-     ************************************************/
     const ID_ENCABEZADO = "1wPY_QJ4G_W7rz5bdkz7ObGc0L0cN9_ML";
     const ID_PIE = "1m-KztMZ-KSlX-tu4BS61qrRQ-9TX8YpR";
 
-    const encabezado =
-      "data:image/jpeg;base64," +
-      Utilities.base64Encode(
-        DriveApp.getFileById(ID_ENCABEZADO)
-        .getBlob()
-        .getBytes()
-      );
-
-    const pie =
-      "data:image/png;base64," +
-      Utilities.base64Encode(
-        DriveApp.getFileById(ID_PIE)
-        .getBlob()
-        .getBytes()
-      );
-
-    const fecha = Utilities.formatDate(
-      new Date(datos.fecha),
-      Session.getScriptTimeZone(),
-      "dd/MM/yyyy"
+    const encabezado = "data:image/jpeg;base64," + Utilities.base64Encode(
+      DriveApp.getFileById(ID_ENCABEZADO).getBlob().getBytes()
     );
+
+    const pie = "data:image/png;base64," + Utilities.base64Encode(
+      DriveApp.getFileById(ID_PIE).getBlob().getBytes()
+    );
+
+    // Formatear la fecha evitando el desajuste de zona horaria UTC
+    let fechaStr = datos.fecha;
+    if (typeof datos.fecha === 'string' && datos.fecha.includes('-')) {
+      const partes = datos.fecha.split('T')[0].split('-');
+      fechaStr = `${partes[2]}/${partes[1]}/${partes[0]}`;
+    }
 
     let html = `
 <!DOCTYPE html>
 <html>
-
 <head>
-
 <meta charset="UTF-8">
-
 <style>
-
-@page{
-size:letter;
-margin:18mm;
-}
-
-body{
-
-font-family:Arial;
-font-size:11pt;
-color:#222;
-margin:0;
-padding:0;
-
-}
-
-.encabezado img{
-
-width:100%;
-
-}
-
-.titulo{
-
-text-align:center;
-font-size:18pt;
-font-weight:bold;
-margin-top:15px;
-color:#003A70;
-
-}
-
-.subtitulo{
-
-text-align:center;
-font-size:11pt;
-margin-bottom:20px;
-
-}
-
-table{
-
-width:100%;
-border-collapse:collapse;
-
-}
-
-.info td{
-
-border:1px solid #CFCFCF;
-padding:8px;
-
-}
-
-.label{
-
-background:#EFEFEF;
-font-weight:bold;
-width:22%;
-
-}
-
-.detalle{
-
-margin-top:20px;
-
-}
-
-.detalle th{
-
-background:#003A70;
-color:white;
-padding:8px;
-border:1px solid #DDD;
-
-}
-
-.detalle td{
-
-padding:8px;
-border:1px solid #DDD;
-vertical-align:top;
-
-}
-
-.detalle tr:nth-child(even){
-
-background:#F8F8F8;
-
-}
-
-.firmas{
-
-margin-top:70px;
-
-}
-
-.linea{
-
-width:220px;
-border-top:1px solid #000;
-margin:auto;
-
-}
-
-.footer{
-
-margin-top:50px;
-
-}
-
-.footer img{
-
-width:100%;
-
-}
-
+@page { size: letter; margin: 18mm; }
+body { font-family: Arial, sans-serif; font-size: 11pt; color: #222; margin: 0; padding: 0; }
+.encabezado img, .footer img { width: 100%; }
+.titulo { text-align: center; font-size: 18pt; font-weight: bold; margin-top: 15px; color: #003A70; }
+.subtitulo { text-align: center; font-size: 11pt; margin-bottom: 20px; }
+table { width: 100%; border-collapse: collapse; }
+.info td { border: 1px solid #CFCFCF; padding: 8px; }
+.label { background: #EFEFEF; font-weight: bold; width: 22%; }
+.detalle { margin-top: 20px; }
+.detalle th { background: #003A70; color: white; padding: 8px; border: 1px solid #DDD; }
+.detalle td { padding: 8px; border: 1px solid #DDD; vertical-align: top; }
+.detalle tr:nth-child(even) { background: #F8F8F8; }
+.firmas { margin-top: 70px; }
+.linea { width: 220px; border-top: 1px solid #000; margin: auto; }
+.footer { margin-top: 50px; }
 </style>
-
 </head>
-
 <body>
 
-<div class="encabezado">
-
-<img src="${encabezado}">
-
-</div>
-
-<div class="titulo">
-
-COMPROBANTE DE DEVOLUCIÓN DE TRÁMITE
-
-</div>
-
-<div class="subtitulo">
-
-Radicado No. ${datos.id}
-
-</div>
+<div class="encabezado"><img src="${encabezado}"></div>
+<div class="titulo">COMPROBANTE DE DEVOLUCIÓN DE TRÁMITE</div>
+<div class="subtitulo">Radicado No. ${datos.id}</div>
 
 <table class="info">
-
-<tr>
-
-<td class="label">Fecha</td>
-<td>${fecha}</td>
-
-<td class="label">Placa</td>
-<td><b>${datos.placa}</b></td>
-
-</tr>
-
-<tr>
-
-<td class="label">Funcionario</td>
-<td>${datos.funcionario}</td>
-
-<td class="label">Cédula</td>
-<td>${datos.cedula}</td>
-
-</tr>
-
-<tr>
-
-<td class="label">Ciudadano</td>
-
-<td colspan="3">
-
-${datos.nombre}
-
-</td>
-
-</tr>
-
+  <tr>
+    <td class="label">Fecha</td>
+    <td>${fechaStr}</td>
+    <td class="label">Placa</td>
+    <td><b>${datos.placa}</b></td>
+  </tr>
+  <tr>
+    <td class="label">Funcionario</td>
+    <td>${datos.funcionario}</td>
+    <td class="label">Cédula</td>
+    <td>${datos.cedula}</td>
+  </tr>
+  <tr>
+    <td class="label">Ciudadano</td>
+    <td colspan="3">${datos.nombre}</td>
+  </tr>
 </table>
 
-<h3 style="color:#003A70">
-
-Motivos de devolución
-
-</h3>
+<h3 style="color:#003A70">Motivos de devolución</h3>
 
 <table class="detalle">
+  <tr>
+    <th width="35%">Motivo</th>
+    <th>Observación</th>
+  </tr>`;
 
-<tr>
-
-<th width="35%">Motivo</th>
-
-<th>Observación</th>
-
-</tr>
-`;
-
-    datos.detalle.forEach(function(fila){
-
+    datos.detalle.forEach(function(fila) {
       html += `
-<tr>
-
-<td><b>${fila.motivo}</b></td>
-
-<td>${fila.observacion || ""}</td>
-
-</tr>
-`;
-
+  <tr>
+    <td><b>${fila.motivo}</b></td>
+    <td>${fila.observacion || ""}</td>
+  </tr>`;
     });
 
     html += `
-
 </table>
 
 <table class="firmas">
-
-<tr>
-
-<td align="center">
-
-<div class="linea"></div>
-
-<br>
-
-<b>${datos.funcionario}</b>
-
-<br>
-
-Funcionario Responsable
-
-</td>
-
-<td align="center">
-
-<div class="linea"></div>
-
-<br>
-
-<b>${datos.nombre}</b>
-
-<br>
-
-Ciudadano
-
-</td>
-
-</tr>
-
+  <tr>
+    <td align="center">
+      <div class="linea"></div><br>
+      <b>${datos.funcionario}</b><br>
+      Funcionario Responsable
+    </td>
+    <td align="center">
+      <div class="linea"></div><br>
+      <b>${datos.nombre}</b><br>
+      Ciudadano
+    </td>
+  </tr>
 </table>
 
-<div class="footer">
-
-<img src="${pie}">
-
-</div>
+<div class="footer"><img src="${pie}"></div>
 
 </body>
-
-</html>
-`;
+</html>`;
 
     const pdf = HtmlService
       .createHtmlOutput(html)
       .getAs(MimeType.PDF)
-      .setName(
-        "Devolucion_" +
-        datos.placa +
-        "_" +
-        datos.id +
-        ".pdf"
-      );
+      .setName(`Devolucion_${datos.placa}_${datos.id}.pdf`);
 
     return {
-
-      ok:true,
-
-      base64:Utilities.base64Encode(pdf.getBytes()),
-
-      nombreArchivo:pdf.getName()
-
+      ok: true,
+      base64: Utilities.base64Encode(pdf.getBytes()),
+      nombreArchivo: pdf.getName()
     };
 
-  } catch(error){
-
-    return{
-
-      ok:false,
-
-      mensaje:error.message
-
+  } catch (error) {
+    return {
+      ok: false,
+      mensaje: error.message
     };
-
   }
-
 }
-
