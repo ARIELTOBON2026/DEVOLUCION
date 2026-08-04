@@ -406,7 +406,7 @@ function dashboard() {
 }
 
 /************************************************
- * GENERACIÓN DE PDF (CON ENCABEZADO Y PIE CORREGIDOS)
+ * GENERACIÓN DE PDF DEVOLUCIÓN (OPTIMIZADO)
  ************************************************/
 function generarPDFDevolucion(idDevolucion) {
   try {
@@ -419,23 +419,9 @@ function generarPDFDevolucion(idDevolucion) {
     const ID_ENCABEZADO = "1wPY_QJ4G_W7rz5bdkz7ObGc0L0cN9_ML";
     const ID_PIE = "1m-KztMZ-KSlX-tu4BS61qrRQ-9TX8YpR";
 
-    // Función optimizada para obtener base64 limpia
-    function obtenerBase64Drive(id) {
-      try {
-        const archivo = DriveApp.getFileById(id);
-        const blob = archivo.getBlob();
-        const mimeType = blob.getContentType();
-        const base64Data = Utilities.base64Encode(blob.getBytes());
-        return `data:${mimeType};base64,${base64Data}`;
-      } catch (err) {
-        // En caso de que falle por permisos o ID inválido
-        Logger.log("Error al cargar imagen " + id + ": " + err.message);
-        return ""; 
-      }
-    }
-
-    const encabezadoBase64 = obtenerBase64Drive(ID_ENCABEZADO);
-    const pieBase64 = obtenerBase64Drive(ID_PIE);
+    // URLs directas de transmisión pública de Google Drive (evita errores de Base64 en PDF)
+    const urlEncabezado = "https://lh3.googleusercontent.com/d/" + ID_ENCABEZADO;
+    const urlPie = "https://lh3.googleusercontent.com/d/" + ID_PIE;
 
     // Formatear Fecha
     let fecha = datos.fecha;
@@ -447,15 +433,17 @@ function generarPDFDevolucion(idDevolucion) {
 
     // Filas de los detalles
     let filas = "";
-    datos.detalle.forEach(function(f) {
-      filas += `
-      <tr>
-          <td>${f.motivo}</td>
-          <td>${f.observacion || ""}</td>
-      </tr>`;
-    });
+    if (datos.detalle && datos.detalle.length > 0) {
+      datos.detalle.forEach(function(f) {
+        filas += `
+        <tr>
+            <td>${f.motivo}</td>
+            <td>${f.observacion || ""}</td>
+        </tr>`;
+      });
+    }
 
-    // Renderizar HTML con estilos corregidos para las imágenes
+    // Plantilla HTML para la conversión a PDF
     const html = `
 <!DOCTYPE html>
 <html>
@@ -464,12 +452,12 @@ function generarPDFDevolucion(idDevolucion) {
 <style>
   @page {
     size: letter;
-    margin: 15mm 15mm 15mm 15mm;
+    margin: 12mm;
   }
   body {
-    font-family: Arial, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
     font-size: 10pt;
-    color: #222;
+    color: #222222;
     margin: 0;
     padding: 0;
   }
@@ -477,114 +465,130 @@ function generarPDFDevolucion(idDevolucion) {
     border-collapse: collapse;
     width: 100%;
   }
-  .header-footer-img {
+  .img-banner {
     width: 100%;
     max-width: 100%;
     height: auto;
     display: block;
-    margin: 0 auto;
   }
   .info td {
     border: 1px solid #bdbdbd;
-    padding: 6px;
+    padding: 6px 8px;
   }
   .detalle th {
-    background: #0c4da2;
-    color: white;
-    border: 1px solid #999;
-    padding: 6px;
+    background-color: #0c4da2;
+    color: #ffffff;
+    border: 1px solid #0c4da2;
+    padding: 6px 8px;
+    text-align: left;
   }
   .detalle td {
-    border: 1px solid #999;
-    padding: 6px;
+    border: 1px solid #999999;
+    padding: 6px 8px;
   }
   .titulo {
     text-align: center;
-    font-size: 16pt;
+    font-size: 15pt;
     font-weight: bold;
     margin-top: 15px;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
+    color: #111111;
   }
   .subtitulo {
     text-align: center;
+    font-size: 11pt;
     margin-bottom: 15px;
+    color: #555555;
   }
   .label {
-    background: #efefef;
+    background-color: #f2f2f2;
     font-weight: bold;
-    width: 22%;
+    width: 20%;
   }
   .linea {
-    width: 200px;
-    border-top: 1px solid black;
+    width: 220px;
+    border-top: 1px solid #000000;
     margin: 0 auto 5px auto;
   }
-  .contenedor-firmas {
-    margin-top: 40px;
+  .tabla-firmas {
+    margin-top: 50px;
+    margin-bottom: 20px;
   }
 </style>
 </head>
 <body>
 
-<!-- ENCABEZADO -->
-${encabezadoBase64 ? `<img src="${encabezadoBase64}" class="header-footer-img" />` : ''}
-
-<div class="titulo">COMPROBANTE DE DEVOLUCIÓN DE TRÁMITE</div>
-<div class="subtitulo">Radicado No. ${datos.id}</div>
-
-<table class="info">
-  <tr>
-    <td class="label">Fecha</td>
-    <td>${fecha}</td>
-    <td class="label">Placa</td>
-    <td><b>${datos.placa}</b></td>
-  </tr>
-  <tr>
-    <td class="label">Funcionario</td>
-    <td>${datos.funcionario}</td>
-    <td class="label">Cédula</td>
-    <td>${datos.cedula}</td>
-  </tr>
-  <tr>
-    <td class="label">Ciudadano</td>
-    <td colspan="3">${datos.nombre}</td>
-  </tr>
-</table>
-
-<br>
-
-<table class="detalle">
-  <thead>
+  <!-- ENCABEZADO -->
+  <table width="100%" style="margin-bottom: 10px;">
     <tr>
-      <th width="35%">Motivo</th>
-      <th>Observación</th>
+      <td align="center">
+        <img src="${urlEncabezado}" class="img-banner" />
+      </td>
     </tr>
-  </thead>
-  <tbody>
-    ${filas}
-  </tbody>
-</table>
+  </table>
 
-<!-- FIRMAS -->
-<table class="contenedor-firmas">
-  <tr>
-    <td align="center" style="vertical-align: top;">
-      <div class="linea"></div>
-      <b>${datos.funcionario}</b><br>
-      Funcionario Responsable
-    </td>
-    <td align="center" style="vertical-align: top;">
-      <div class="linea"></div>
-      <b>${datos.nombre}</b><br>
-      Ciudadano
-    </td>
-  </tr>
-</table>
+  <div class="titulo">COMPROBANTE DE DEVOLUCIÓN DE TRÁMITE</div>
+  <div class="subtitulo">Radicado No. ${datos.id}</div>
 
-<br><br>
+  <!-- INFORMACIÓN GENERAL -->
+  <table class="info">
+    <tr>
+      <td class="label">Fecha</td>
+      <td>${fecha}</td>
+      <td class="label">Placa</td>
+      <td><b>${datos.placa}</b></td>
+    </tr>
+    <tr>
+      <td class="label">Funcionario</td>
+      <td>${datos.funcionario}</td>
+      <td class="label">Cédula</td>
+      <td>${datos.cedula}</td>
+    </tr>
+    <tr>
+      <td class="label">Ciudadano</td>
+      <td colspan="3">${datos.nombre}</td>
+    </tr>
+  </table>
 
-<!-- PIE DE PÁGINA -->
-${pieBase64 ? `<img src="${pieBase64}" class="header-footer-img" />` : ''}
+  <br>
+
+  <!-- MOTIVOS Y DETALLES -->
+  <table class="detalle">
+    <thead>
+      <tr>
+        <th width="40%">Motivo</th>
+        <th>Observación</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${filas}
+    </tbody>
+  </table>
+
+  <!-- FIRMAS -->
+  <table class="tabla-firmas">
+    <tr>
+      <td align="center" style="vertical-align: top;">
+        <div class="linea"></div>
+        <b>${datos.funcionario}</b><br>
+        Funcionario Responsable
+      </td>
+      <td align="center" style="vertical-align: top;">
+        <div class="linea"></div>
+        <b>${datos.nombre}</b><br>
+        Ciudadano / Recibido
+      </td>
+    </tr>
+  </table>
+
+  <!-- PIE DE PÁGINA -->
+  <table width="100%">
+    <tr>
+      <td align="center">
+        <img src="${urlPie}" class="img-banner" />
+      </td>
+    </tr>
+  </table>
 
 </body>
 </html>
