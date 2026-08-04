@@ -487,3 +487,9 @@ function generarPDFDevolucion(id) {
     return { ok: false, mensaje: "Error al generar PDF: " + error.message };
   }
 }
+function descargarPDF(base64Data, nombreArchivo) {
+  const link = document.createElement("a");
+  link.href = "data:application/pdf;base64," + base64Data;
+  link.download = nombreArchivo;
+  link.click();
+}
