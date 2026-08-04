@@ -2,21 +2,20 @@
  * SISTEMA DE DEVOLUCIÓN DE TRÁMITES (VERSIÓN API PARA GITHUB PAGES)
  * Codigo.gs
  ************************************************/
-const encabezadoURL =
-  "https://arieltobon2026.github.io/DEVOLUCION/img/Encabezado.png";
-const pieURL =
-  "https://arieltobon2026.github.io/DEVOLUCION/img/PiePagina.png";
+const encabezadoURL = "https://arieltobon2026.github.io/DEVOLUCION/img/Encabezado.png";
+const pieURL = "https://arieltobon2026.github.io/DEVOLUCION/img/PiePagina.png";
+
 const HOJA_DEVOLUCIONES = "DEVOLUCIONES";
 const HOJA_DETALLE = "DEVOLUCIONES_DETALLES";
 const HOJA_FUNCIONARIOS = "FUNCIONARIOS";
 const HOJA_MOTIVOS = "MOTIVOS";
 
 /************************************************
- * MANEJADOR DE PETICIONES GET (Para consultar datos)
+ * MANEJADOR DE PETICIONES GET
  ************************************************/
 function doGet(e) {
   try {
-    const accion = e.parameter.accion;
+    const accion = e ? e.parameter.accion : null;
     let respuesta = {};
 
     switch (accion) {
@@ -47,10 +46,14 @@ function doGet(e) {
 }
 
 /************************************************
- * MANEJADOR DE PETICIONES POST (Para enviar/guardar datos)
+ * MANEJADOR DE PETICIONES POST
  ************************************************/
 function doPost(e) {
   try {
+    if (!e || !e.postData || !e.postData.contents) {
+      throw new Error("No se recibieron datos POST.");
+    }
+
     const contenido = JSON.parse(e.postData.contents);
     const accion = contenido.accion;
     const payload = contenido.payload;
@@ -82,6 +85,14 @@ function doPost(e) {
 }
 
 /************************************************
+ * MANEJADOR PREFLIGHT (CORS)
+ ************************************************/
+function doOptions(e) {
+  return ContentService.createTextOutput("")
+    .setMimeType(ContentService.MimeType.TEXT);
+}
+
+/************************************************
  * FUNCIÓN AUXILIAR PARA DEVOLVER EN FORMATO JSON
  ************************************************/
 function responderJSON(objeto) {
@@ -94,33 +105,24 @@ function responderJSON(objeto) {
  * OBTENER HOJA
  ************************************************/
 function obtenerHoja(nombre) {
-  const hoja = SpreadsheetApp
-    .getActiveSpreadsheet()
-    .getSheetByName(nombre);
-
-  if (!hoja) {
-    throw new Error("No existe la hoja: " + nombre);
-  }
-
+  const hoja = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(nombre);
+  if (!hoja) throw new Error("No existe la hoja: " + nombre);
   return hoja;
 }
 
 /************************************************
- * OBTENER SIGUIENTE ID
+ * OBTENER SIGUIENTE ID (CORREGIDO)
  ************************************************/
 function siguienteID(hoja) {
   const ultimaFila = hoja.getLastRow();
-
-  if (ultimaFila <= 1) {
-    return 1;
-  }
+  if (ultimaFila <= 1) return 1;
 
   const ids = hoja
     .getRange(2, 1, ultimaFila - 1, 1)
     .getValues()
     .flat()
     .map(Number)
-    .filter(id => !isNaN(id));
+    .filter(id => !isNaN(id) && id > 0);
 
   return ids.length ? Math.max(...ids) + 1 : 1;
 }
@@ -129,11 +131,7 @@ function siguienteID(hoja) {
  * FECHA ACTUAL
  ************************************************/
 function fechaActual() {
-  return Utilities.formatDate(
-    new Date(),
-    Session.getScriptTimeZone(),
-    "yyyy-MM-dd"
-  );
+  return Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd");
 }
 
 /************************************************
@@ -142,14 +140,13 @@ function fechaActual() {
 function listarFuncionarios() {
   const hoja = obtenerHoja(HOJA_FUNCIONARIOS);
   const ultimaFila = hoja.getLastRow();
-
   if (ultimaFila < 2) return [];
 
   return hoja
     .getRange(2, 1, ultimaFila - 1, 1)
     .getDisplayValues()
     .flat()
-    .filter(nombre => nombre !== "");
+    .filter(nombre => nombre.trim() !== "");
 }
 
 /************************************************
@@ -158,8 +155,7 @@ function listarFuncionarios() {
 function obtenerMotivos() {
   const hoja = obtenerHoja(HOJA_MOTIVOS);
   const ultimaFila = hoja.getLastRow();
-
-  if (ultimaFila <= 1) return [];
+  if (ultimaFila < 2) return [];
 
   return hoja
     .getRange(2, 1, ultimaFila - 1, 1)
@@ -178,7 +174,7 @@ function validarCabecera(datos) {
   if (!datos.placa) throw new Error("Debe ingresar la placa.");
   if (!datos.cedula) throw new Error("Debe ingresar la cédula.");
   if (!datos.nombre) throw new Error("Debe ingresar el nombre del ciudadano.");
-  if (!datos.detalle || datos.detalle.length === 0) {
+  if (!datos.detalle || !Array.isArray(datos.detalle) || datos.detalle.length === 0) {
     throw new Error("Debe agregar al menos un motivo de devolución.");
   }
 
@@ -220,7 +216,7 @@ function guardarDevolucion(datos) {
         idDetalle++,
         idDevolucion,
         item.motivo,
-        item.observacion
+        item.observacion || ""
       ]);
     });
 
@@ -240,10 +236,7 @@ function guardarDevolucion(datos) {
     };
 
   } catch (error) {
-    return {
-      ok: false,
-      mensaje: error.message
-    };
+    return { ok: false, mensaje: error.message };
   }
 }
 
@@ -257,19 +250,24 @@ function buscarDevolucion(id) {
   const cabecera = hojaCabecera.getDataRange().getValues();
   const detalle = hojaDetalle.getDataRange().getValues();
 
-  const respuesta = { detalle: [] };
+  let respuesta = null;
 
   for (let i = 1; i < cabecera.length; i++) {
     if (Number(cabecera[i][0]) === Number(id)) {
-      respuesta.id = cabecera[i][0];
-      respuesta.fecha = cabecera[i][1];
-      respuesta.funcionario = cabecera[i][2];
-      respuesta.placa = cabecera[i][3];
-      respuesta.cedula = cabecera[i][4];
-      respuesta.nombre = cabecera[i][5];
+      respuesta = {
+        id: cabecera[i][0],
+        fecha: cabecera[i][1] instanceof Date ? Utilities.formatDate(cabecera[i][1], Session.getScriptTimeZone(), "yyyy-MM-dd") : cabecera[i][1],
+        funcionario: cabecera[i][2],
+        placa: cabecera[i][3],
+        cedula: cabecera[i][4],
+        nombre: cabecera[i][5],
+        detalle: []
+      };
       break;
     }
   }
+
+  if (!respuesta) return null;
 
   for (let i = 1; i < detalle.length; i++) {
     if (Number(detalle[i][1]) === Number(id)) {
@@ -289,39 +287,20 @@ function consultarDevolucion(id) {
 }
 
 /************************************************
- * LISTAR DEVOLUCIONES
- ************************************************/
-function listarDevoluciones() {
-  const hoja = obtenerHoja(HOJA_DEVOLUCIONES);
-
-  if (hoja.getLastRow() <= 1) return [];
-
-  return hoja
-    .getRange(2, 1, hoja.getLastRow() - 1, 6)
-    .getValues();
-}
-
-/************************************************
- * BUSCAR POR PLACA
+ * BUSCAR POR PLACA (DEVUELVE HISTORIAL)
  ************************************************/
 function buscarPlaca(placa) {
   placa = String(placa).trim().toUpperCase();
   const hoja = obtenerHoja(HOJA_DEVOLUCIONES);
   const datos = hoja.getDataRange().getValues();
+  const resultados = [];
 
   for (let i = 1; i < datos.length; i++) {
     if (String(datos[i][3]).trim().toUpperCase() === placa) {
-      return {
-        id: datos[i][0],
-        fecha: datos[i][1],
-        funcionario: datos[i][2],
-        placa: datos[i][3],
-        cedula: datos[i][4],
-        nombre: datos[i][5]
-      };
+      resultados.push(buscarDevolucion(datos[i][0]));
     }
   }
-  return null;
+  return resultados;
 }
 
 /************************************************
@@ -370,7 +349,7 @@ function actualizarDevolucion(datos) {
       }
     }
 
-    if (filaCabecera === -1) throw new Error("No existe la devolución.");
+    if (filaCabecera === -1) throw new Error("No existe la devolución especificada.");
 
     hojaCabecera.getRange(filaCabecera, 1, 1, 6).setValues([[
       datos.id,
@@ -398,7 +377,7 @@ function actualizarDevolucion(datos) {
         idDetalle++,
         datos.id,
         item.motivo,
-        item.observacion
+        item.observacion || ""
       ]);
     });
 
@@ -436,58 +415,75 @@ function dashboard() {
     fecha: fechaActual()
   };
 }
+
+/************************************************
+ * GENERAR PDF DEVOLUCIÓN (COMPLETAMENTE CORREGIDO)
+ ************************************************/
 function generarPDFDevolucion(id) {
+  try {
+    const datos = buscarDevolucion(id);
+    if (!datos) throw new Error("No se encontró la devolución ID: " + id);
 
-  const doc = DocumentApp.create("DEVOLUCION_" + id);
-  const body = doc.getBody();
+    const doc = DocumentApp.create("DEVOLUCION_" + id);
+    const body = doc.getBody();
 
-  // Encabezado
-  const imgEncabezado = UrlFetchApp.fetch(encabezadoURL).getBlob();
-  body.appendImage(imgEncabezado);
+    // Imagen Encabezado
+    try {
+      const imgEncabezado = UrlFetchApp.fetch(encabezadoURL).getBlob();
+      body.appendImage(imgEncabezado);
+    } catch (e) {
+      // Continuar si la imagen no carga
+    }
 
-  body.appendParagraph("DEVOLUCIÓN DE TRÁMITES")
-      .setHeading(DocumentApp.ParagraphHeading.HEADING1);
+    body.appendParagraph("DEVOLUCIÓN DE TRÁMITES")
+        .setHeading(DocumentApp.ParagraphHeading.HEADING1);
 
-  body.appendParagraph("");
+    body.appendParagraph("ID Registro: " + datos.id);
+    body.appendParagraph("Fecha: " + datos.fecha);
+    body.appendParagraph("Funcionario: " + datos.funcionario);
+    body.appendParagraph("Placa: " + datos.placa);
+    body.appendParagraph("Cédula: " + datos.cedula);
+    body.appendParagraph("Ciudadano: " + datos.nombre);
+    body.appendParagraph("");
 
-  body.appendParagraph("Fecha: " + datos.fecha);
-  body.appendParagraph("Funcionario: " + datos.funcionario);
-  body.appendParagraph("Ciudadano: " + datos.ciudadano);
+    // Tabla de Detalle
+    const tabla = body.appendTable();
+    const headerRow = tabla.appendTableRow();
+    headerRow.appendTableCell("Motivo");
+    headerRow.appendTableCell("Observación");
 
-  // Tabla
-  const tabla = body.appendTable();
-
-  tabla.appendTableRow()
-       .appendTableCell("Placa")
-       .getParentTableRow()
-       .appendTableCell("Motivo")
-       .getParentTableRow()
-       .appendTableCell("Observación");
-
-  detalle.forEach(function(f){
-
+    datos.detalle.forEach(function(item) {
       const fila = tabla.appendTableRow();
+      fila.appendTableCell(item.motivo);
+      fila.appendTableCell(item.observacion);
+    });
 
-      fila.appendTableCell(f.placa);
-      fila.appendTableCell(f.motivo);
-      fila.appendTableCell(f.observacion);
+    body.appendParagraph("");
 
-  });
+    // Imagen Pie
+    try {
+      const imgPie = UrlFetchApp.fetch(pieURL).getBlob();
+      body.appendImage(imgPie);
+    } catch (e) {
+      // Continuar si la imagen no carga
+    }
 
-  body.appendParagraph("");
+    doc.saveAndClose();
 
-  // Pie
-  const imgPie = UrlFetchApp.fetch(pieURL).getBlob();
-  body.appendImage(imgPie);
+    // Obtener PDF en Base64 para enviar a GitHub Pages
+    const pdfBlob = DriveApp.getFileById(doc.getId()).getBlob();
+    const pdfBase64 = Utilities.base64Encode(pdfBlob.getBytes());
 
-  doc.saveAndClose();
+    // Eliminar archivo temporal de Google Docs
+    DriveApp.getFileById(doc.getId()).setTrashed(true);
 
-  const pdf = DriveApp
-      .getFileById(doc.getId())
-      .getBlob()
-      .setName("DEVOLUCION_" + id + ".pdf");
+    return {
+      ok: true,
+      nombreArchivo: "DEVOLUCION_" + id + ".pdf",
+      base64: pdfBase64
+    };
 
-  DriveApp.getFileById(doc.getId()).setTrashed(true);
-
-  return pdf;
+  } catch (error) {
+    return { ok: false, mensaje: "Error al generar PDF: " + error.message };
+  }
 }
