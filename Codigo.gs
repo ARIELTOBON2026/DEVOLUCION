@@ -5,7 +5,7 @@
 const encabezadoURL =
   "https://arieltobon2026.github.io/DEVOLUCION/img/encabezado.png";
 const pieURL =
-  "https://arieltobon2026.github.io/DEVOLUCION/img/pie.png";
+  "https://arieltobon2026.github.io/DEVOLUCION/img/PiePagina.png";
 const HOJA_DEVOLUCIONES = "DEVOLUCIONES";
 const HOJA_DETALLE = "DEVOLUCIONES_DETALLES";
 const HOJA_FUNCIONARIOS = "FUNCIONARIOS";
