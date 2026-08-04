@@ -454,9 +454,13 @@ function generarPDFDevolucion(idDevolucion) {
       "dd/MM/yyyy"
     );
 
-    // URLs de las imágenes de Encabezado y Pie de Página
+    // URLs de las imágenes
     const encabezadoURL = "https://arieltobon2026.github.io/DEVOLUCION/img/Encabezado.png";
     const piePaginaURL = "https://arieltobon2026.github.io/DEVOLUCION/img/PiePagina.png";
+
+    // Convertir imágenes externas a formato Data URI (Base64)
+    const encabezadoBase64 = obtenerImagenBase64(encabezadoURL);
+    const piePaginaBase64 = obtenerImagenBase64(piePaginaURL);
 
     let html = `
 <!DOCTYPE html>
@@ -541,8 +545,8 @@ function generarPDFDevolucion(idDevolucion) {
 </head>
 <body>
 
-<!-- Imagen de Encabezado -->
-<img src="${encabezadoURL}" class="img-header" alt="Encabezado" />
+<!-- Imagen de Encabezado embebida en Base64 -->
+${encabezadoBase64 ? `<img src="${encabezadoBase64}" class="img-header" alt="Encabezado" />` : ''}
 
 <div class="header">
   <div class="title">SECRETARÍA DE MOVILIDAD</div>
@@ -607,8 +611,8 @@ function generarPDFDevolucion(idDevolucion) {
   </tr>
 </table>
 
-<!-- Imagen de Pie de Página -->
-<img src="${piePaginaURL}" class="img-footer" alt="Pie de Página" />
+<!-- Imagen de Pie de Página embebida en Base64 -->
+${piePaginaBase64 ? `<img src="${piePaginaBase64}" class="img-footer" alt="Pie de Página" />` : ''}
 
 </body>
 </html>`;
@@ -630,4 +634,22 @@ function generarPDFDevolucion(idDevolucion) {
       mensaje: error.message
     };
   }
+}
+
+/**
+ * Función auxiliar para descargar una imagen por URL y convertirla a Data URI Base64
+ */
+function obtenerImagenBase64(url) {
+  try {
+    const respuesta = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    if (respuesta.getResponseCode() === 200) {
+      const blob = respuesta.getBlob();
+      const contentType = blob.getContentType();
+      const base64Data = Utilities.base64Encode(blob.getBytes());
+      return "data:" + contentType + ";base64," + base64Data;
+    }
+  } catch (e) {
+    Logger.log("Error al cargar la imagen (" + url + "): " + e.toString());
+  }
+  return null;
 }
