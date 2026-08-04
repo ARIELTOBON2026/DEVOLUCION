@@ -433,17 +433,37 @@ function dashboard() {
     fecha: fechaActual()
   };
 }
-
-/************************************************
- * GENERAR PDF DE UNA DEVOLUCIÓN POR ID (CON ENCABEZADO Y PIE)
- ************************************************/
 function generarPDFDevolucion(idDevolucion) {
+
   try {
+
     const datos = buscarDevolucion(idDevolucion);
 
     if (!datos || !datos.id) {
-      throw new Error("No se encontró la devolución con ID: " + idDevolucion);
+      throw new Error("No se encontró la devolución.");
     }
+
+    /************************************************
+     * ID DE LAS IMÁGENES EN DRIVE
+     ************************************************/
+    const ID_ENCABEZADO = "1wPY_QJ4G_W7rz5bdkz7ObGc0L0cN9_ML";
+    const ID_PIE = "1m-KztMZ-KSlX-tu4BS61qrRQ-9TX8YpR";
+
+    const encabezado =
+      "data:image/jpeg;base64," +
+      Utilities.base64Encode(
+        DriveApp.getFileById(ID_ENCABEZADO)
+        .getBlob()
+        .getBytes()
+      );
+
+    const pie =
+      "data:image/png;base64," +
+      Utilities.base64Encode(
+        DriveApp.getFileById(ID_PIE)
+        .getBlob()
+        .getBytes()
+      );
 
     const fecha = Utilities.formatDate(
       new Date(datos.fecha),
@@ -451,180 +471,306 @@ function generarPDFDevolucion(idDevolucion) {
       "dd/MM/yyyy"
     );
 
-    // Imágenes codificadas en Base64
-    const imgEncabezado = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABLAAAAGACAYAAAC19V/MAAAgAElEQVR4nOy9f3xc1X3n+5s7I0kjjSR7/LAse23/wBIsG2zLsmSMyUY4sR3i2E3iOE5ip2m/2mSbdpNt0iZdtpum3Xbb/d5m0yS33XbbTdt/t03/TdqkTdqXNE03f9I2bdpm083+E3fM/sR2jLGx... (se inserta automáticamente en la plantilla)";
-
-    // Se construye la plantilla HTML
     let html = `
 <!DOCTYPE html>
 <html>
+
 <head>
+
 <meta charset="UTF-8">
+
 <style>
-  @page {
-    margin: 10mm;
-  }
-  body { 
-    font-family: 'Segoe UI', Arial, sans-serif; 
-    font-size: 11px; 
-    color: #333; 
-    margin: 0;
-    padding: 0;
-  }
-  .header-img {
-    width: 100%;
-    max-height: 120px;
-    object-fit: contain;
-    margin-bottom: 10px;
-  }
-  .footer-img {
-    width: 100%;
-    max-height: 100px;
-    object-fit: contain;
-    margin-top: 30px;
-  }
-  .doc-title { 
-    background: #0d6efd; 
-    color: white; 
-    padding: 10px; 
-    border-radius: 4px; 
-    text-align: center;
-    font-size: 14px; 
-    font-weight: bold;
-    margin-bottom: 15px;
-  }
-  .table-info { 
-    width: 100%; 
-    border-collapse: collapse; 
-    margin-top: 10px; 
-  }
-  .table-info td { 
-    border: 1px solid #CCC; 
-    padding: 6px 10px; 
-  }
-  .label { 
-    background: #F5F5F5; 
-    font-weight: bold; 
-    width: 20%; 
-  }
-  .table-detalle { 
-    width: 100%; 
-    border-collapse: collapse; 
-    margin-top: 15px; 
-    table-layout: fixed; 
-  }
-  .table-detalle th { 
-    background: #0d6efd; 
-    color: white; 
-    border: 1px solid #CCC; 
-    padding: 6px 10px; 
-    text-align: left; 
-  }
-  .table-detalle td { 
-    border: 1px solid #CCC; 
-    padding: 6px 10px; 
-    vertical-align: top; 
-    word-wrap: break-word; 
-  }
-  .firmas { 
-    margin-top: 50px; 
-    width: 100%; 
-    text-align: center; 
-  }
-  .linea { 
-    width: 200px; 
-    border-top: 1px solid #000; 
-    margin: 0 auto 6px auto; 
-  }
+
+@page{
+size:letter;
+margin:18mm;
+}
+
+body{
+
+font-family:Arial;
+font-size:11pt;
+color:#222;
+margin:0;
+padding:0;
+
+}
+
+.encabezado img{
+
+width:100%;
+
+}
+
+.titulo{
+
+text-align:center;
+font-size:18pt;
+font-weight:bold;
+margin-top:15px;
+color:#003A70;
+
+}
+
+.subtitulo{
+
+text-align:center;
+font-size:11pt;
+margin-bottom:20px;
+
+}
+
+table{
+
+width:100%;
+border-collapse:collapse;
+
+}
+
+.info td{
+
+border:1px solid #CFCFCF;
+padding:8px;
+
+}
+
+.label{
+
+background:#EFEFEF;
+font-weight:bold;
+width:22%;
+
+}
+
+.detalle{
+
+margin-top:20px;
+
+}
+
+.detalle th{
+
+background:#003A70;
+color:white;
+padding:8px;
+border:1px solid #DDD;
+
+}
+
+.detalle td{
+
+padding:8px;
+border:1px solid #DDD;
+vertical-align:top;
+
+}
+
+.detalle tr:nth-child(even){
+
+background:#F8F8F8;
+
+}
+
+.firmas{
+
+margin-top:70px;
+
+}
+
+.linea{
+
+width:220px;
+border-top:1px solid #000;
+margin:auto;
+
+}
+
+.footer{
+
+margin-top:50px;
+
+}
+
+.footer img{
+
+width:100%;
+
+}
+
 </style>
+
 </head>
+
 <body>
 
-<!-- ENCABEZADO -->
-<img src="${imgEncabezado}" class="header-img" alt="Encabezado Secretaría de Movilidad">
+<div class="encabezado">
 
-<div class="doc-title">
-  COMPROBANTE DE DEVOLUCIÓN DE TRÁMITE #${datos.id}
+<img src="${encabezado}">
+
 </div>
 
-<table class="table-info">
-  <tr>
-    <td class="label">Fecha:</td>
-    <td>${fecha}</td>
-    <td class="label">Placa:</td>
-    <td><strong>${datos.placa}</strong></td>
-  </tr>
-  <tr>
-    <td class="label">Cédula:</td>
-    <td colspan="3">${datos.cedula}</td>
-  </tr>
-  <tr>
-    <td class="label">Ciudadano:</td>
-    <td colspan="3">${datos.nombre}</td>
-  </tr>
+<div class="titulo">
+
+COMPROBANTE DE DEVOLUCIÓN DE TRÁMITE
+
+</div>
+
+<div class="subtitulo">
+
+Radicado No. ${datos.id}
+
+</div>
+
+<table class="info">
+
+<tr>
+
+<td class="label">Fecha</td>
+<td>${fecha}</td>
+
+<td class="label">Placa</td>
+<td><b>${datos.placa}</b></td>
+
+</tr>
+
+<tr>
+
+<td class="label">Funcionario</td>
+<td>${datos.funcionario}</td>
+
+<td class="label">Cédula</td>
+<td>${datos.cedula}</td>
+
+</tr>
+
+<tr>
+
+<td class="label">Ciudadano</td>
+
+<td colspan="3">
+
+${datos.nombre}
+
+</td>
+
+</tr>
+
 </table>
 
-<h3 style="color:#0d6efd; margin-top:20px; margin-bottom:8px;">Motivos de Devolución</h3>
+<h3 style="color:#003A70">
 
-<table class="table-detalle">
-  <colgroup>
-    <col style="width:50%">
-    <col style="width:50%">
-  </colgroup>
-  <thead>
-    <tr>
-      <th>Motivo</th>
-      <th>Observación</th>
-    </tr>
-  </thead>
-  <tbody>`;
+Motivos de devolución
 
-    datos.detalle.forEach(function(item) {
+</h3>
+
+<table class="detalle">
+
+<tr>
+
+<th width="35%">Motivo</th>
+
+<th>Observación</th>
+
+</tr>
+`;
+
+    datos.detalle.forEach(function(fila){
+
       html += `
-    <tr>
-      <td><strong>${item.motivo}</strong></td>
-      <td>${item.observacion || ""}</td>
-    </tr>`;
+<tr>
+
+<td><b>${fila.motivo}</b></td>
+
+<td>${fila.observacion || ""}</td>
+
+</tr>
+`;
+
     });
 
     html += `
-  </tbody>
+
 </table>
 
 <table class="firmas">
-  <tr>
-    <td width="50%">
-      <div class="linea"></div>
-      <b>${datos.funcionario}</b><br>Funcionario Responsable
-    </td>
-    <td width="50%">
-      <div class="linea"></div>
-      <b>${datos.nombre}</b><br>Ciudadano / Recibido
-    </td>
-  </tr>
+
+<tr>
+
+<td align="center">
+
+<div class="linea"></div>
+
+<br>
+
+<b>${datos.funcionario}</b>
+
+<br>
+
+Funcionario Responsable
+
+</td>
+
+<td align="center">
+
+<div class="linea"></div>
+
+<br>
+
+<b>${datos.nombre}</b>
+
+<br>
+
+Ciudadano
+
+</td>
+
+</tr>
+
 </table>
 
-<!-- PIE DE PÁGINA -->
-<img src="${imgPiePagina}" class="footer-img" alt="Pie de página Secretaría de Movilidad">
+<div class="footer">
+
+<img src="${pie}">
+
+</div>
 
 </body>
-</html>`;
 
-    const blob = HtmlService
+</html>
+`;
+
+    const pdf = HtmlService
       .createHtmlOutput(html)
       .getAs(MimeType.PDF)
-      .setName("Devolucion_" + datos.placa + "_ID_" + datos.id + ".pdf");
+      .setName(
+        "Devolucion_" +
+        datos.placa +
+        "_" +
+        datos.id +
+        ".pdf"
+      );
 
     return {
-      ok: true,
-      base64: Utilities.base64Encode(blob.getBytes()),
-      nombreArchivo: blob.getName()
+
+      ok:true,
+
+      base64:Utilities.base64Encode(pdf.getBytes()),
+
+      nombreArchivo:pdf.getName()
+
     };
 
-  } catch (error) {
-    return {
-      ok: false,
-      mensaje: error.message
+  } catch(error){
+
+    return{
+
+      ok:false,
+
+      mensaje:error.message
+
     };
+
   }
+
 }
+
