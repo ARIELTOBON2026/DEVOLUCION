@@ -468,6 +468,7 @@ function generarPDFDevolucion(idDevolucion) {
     size: letter;
     margin: 10mm;
   }
+<img src="${encabezado}" style="width:100%;display:block; margin-bottom:15px;">
   body {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 10pt;
@@ -532,7 +533,7 @@ function generarPDFDevolucion(idDevolucion) {
 </style>
 </head>
 <body>
-
+<img src="${pie}" style="width:100%;display:block;">
   <!-- ENCABEZADO -->
   ${encabezadoBase64 ? `<div style="text-align: center; margin-bottom: 10px;"><img src="${encabezadoBase64}" class="img-banner" /></div>` : ''}
 
