@@ -451,6 +451,11 @@ function generarPDFDevolucion(idDevolucion) {
       "dd/MM/yyyy"
     );
 
+    const LOGO_ID = "1wPY_QJ4G_W7rz5bdkz7ObGc0L0cN9_ML";
+    const logoBlob = DriveApp.getFileById(LOGO_ID).getBlob();
+    const logo64 = Utilities.base64Encode(logoBlob.getBytes());
+    const logoTipo = logoBlob.getContentType();
+
     let html = `
 <!DOCTYPE html>
 <html>
@@ -458,7 +463,7 @@ function generarPDFDevolucion(idDevolucion) {
 <meta charset="UTF-8">
 <style>
   body { font-family: Arial, sans-serif; font-size: 12px; color: #333; padding: 20px; }
-  .header { background: #0d6efd; color: white; padding: 15px; border-radius: 6px; }
+  .logo-superior{text-align:center;margin-bottom:10px}.logo-superior img{width:120px;height:auto}.header{text-align:center;color:#666;padding:5px 0}.title{font-size:20px;font-weight:bold;}
   .title { font-size: 20px; font-weight: bold; }
   .table-info { width: 100%; border-collapse: collapse; margin-top: 20px; }
   .table-info td { border: 1px solid #CCC; padding: 8px; }
@@ -471,6 +476,7 @@ function generarPDFDevolucion(idDevolucion) {
 </style>
 </head>
 <body>
+<div class="logo-superior"><img src="data:${logoTipo};base64,${logo64}"></div>
 <div class="header">
   <div class="title">SECRETARIA DE MOVILIDAD</div>
   <div class="title">MUNICIPIO DE LA CEJA - ANTIOQUIA</div>
