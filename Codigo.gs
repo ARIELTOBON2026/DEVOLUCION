@@ -417,23 +417,34 @@ function dashboard() {
 }
 
 /************************************************
- * GENERAR PDF DEVOLUCIÓN (CON IMÁGENES CORREGIDAS)
+ * FUNCIÓN AUXILIAR PARA OBTENER LAS IMÁGENES
  ************************************************/
-function obtenerBlobDesdeURL(url) {
+function obtenerBlobImagen(url) {
   try {
-    const respuesta = UrlFetchApp.fetch(url, {
+    // Si es URL de GitHub Pages, la convertimos a rawusercontent por seguridad
+    let urlRaw = url.replace("github.io", "raw.githubusercontent.com").replace("/DEVOLUCION/", "/DEVOLUCION/main/");
+    
+    const respuesta = UrlFetchApp.fetch(urlRaw, {
       muteHttpExceptions: true,
       headers: { "User-Agent": "Mozilla/5.0" }
     });
+    
     if (respuesta.getResponseCode() === 200) {
       return respuesta.getBlob();
+    } else {
+      // Intentar con la URL original por si no es GitHub Pages
+      const respOriginal = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+      if (respOriginal.getResponseCode() === 200) return respOriginal.getBlob();
     }
   } catch (e) {
-    Logger.log("Error descargando imagen desde: " + url + " - " + e.message);
+    Logger.log("Error al cargar imagen (" + url + "): " + e.message);
   }
   return null;
 }
 
+/************************************************
+ * GENERAR PDF CON ENCABEZADO Y PIE DE PÁGINA
+ ************************************************/
 function generarPDFDevolucion(id) {
   try {
     const datos = buscarDevolucion(id);
@@ -442,53 +453,82 @@ function generarPDFDevolucion(id) {
     const doc = DocumentApp.create("DEVOLUCION_" + id);
     const body = doc.getBody();
 
-    // 1. Imagen Encabezado
-    const imgEncabezado = obtenerBlobDesdeURL(encabezadoURL);
-    if (imgEncabezado) {
-      const imgObj = body.appendImage(imgEncabezado);
-      // Opcional: Ajustar ancho/alto si la imagen sale muy grande
-      // imgObj.setWidth(500).setHeight(100); 
+    // ==========================================
+    // 1. IMAGEN DE ENCABEZADO (PARTE SUPERIOR)
+    // ==========================================
+    const imgEncabezadoBlob = obtenerBlobImagen(encabezadoURL);
+    if (imgEncabezadoBlob) {
+      const header = doc.getHeader() || doc.addHeader();
+      const pHeader = header.appendParagraph("");
+      pHeader.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+      
+      const img = pHeader.appendImage(imgEncabezadoBlob);
+      // Ajustar dimensiones según necesites (Ancho, Alto en píxeles)
+      img.setWidth(500).setHeight(80); 
     }
 
-    body.appendParagraph("DEVOLUCIÓN DE TRÁMITES")
-        .setHeading(DocumentApp.ParagraphHeading.HEADING1);
+    // ==========================================
+    // 2. CONTENIDO DEL DOCUMENTO
+    // ==========================================
+    const titulo = body.appendParagraph("SECRETARIA DE MOVILIDAD\nMUNICIPIO DE LA CEJA - ANTIOQUIA\nCOMPROBANTE DE DEVOLUCIÓN DE TRÁMITE #" + datos.id);
+    titulo.setHeading(DocumentApp.ParagraphHeading.HEADING1);
+    titulo.getAttributes()[DocumentApp.Attribute.FONT_SIZE] = 14;
 
-    body.appendParagraph("ID Registro: " + datos.id);
-    body.appendParagraph("Fecha: " + datos.fecha);
-    body.appendParagraph("Funcionario: " + datos.funcionario);
-    body.appendParagraph("Placa: " + datos.placa);
-    body.appendParagraph("Cédula: " + datos.cedula);
-    body.appendParagraph("Ciudadano: " + datos.nombre);
-    body.appendParagraph("");
+    body.appendParagraph(""); // Espacio
 
-    // 2. Tabla de Detalle
-    const tabla = body.appendTable();
-    const headerRow = tabla.appendTableRow();
-    headerRow.appendTableCell("Motivo");
-    headerRow.appendTableCell("Observación");
+    // Tabla de Datos
+    const tablaDatos = body.appendTable([
+      ["Fecha", datos.fecha, "Placa", datos.placa],
+      ["Cédula", datos.cedula, "", ""],
+      ["Ciudadano", datos.nombre, "", ""]
+    ]);
+
+    body.appendParagraph("\nMotivos de Devolución").setBold(true);
+
+    // Tabla de Detalle
+    const tablaDetalle = body.appendTable();
+    const headerRow = tablaDetalle.appendTableRow();
+    headerRow.appendTableCell("Motivo").setBold(true);
+    headerRow.appendTableCell("Observación").setBold(true);
 
     datos.detalle.forEach(function(item) {
-      const fila = tabla.appendTableRow();
+      const fila = tablaDetalle.appendTableRow();
       fila.appendTableCell(item.motivo);
       fila.appendTableCell(item.observacion);
     });
 
-    body.appendParagraph("");
+    body.appendParagraph("\n\n\n");
 
-    // 3. Imagen Pie
-    const imgPie = obtenerBlobDesdeURL(pieURL);
-    if (imgPie) {
-      const imgObjPie = body.appendImage(imgPie);
-      // imgObjPie.setWidth(500).setHeight(80);
+    // Firmas
+    const tablaFirmas = body.appendTable([
+      ["___________________________________", "___________________________________"],
+      [datos.funcionario + "\nFuncionario Responsable", datos.nombre + "\nCiudadano / Recibido"]
+    ]);
+    tablaFirmas.setBorderWidth(0);
+
+    // ==========================================
+    // 3. IMAGEN DE PIE DE PÁGINA (PARTE INFERIOR)
+    // ==========================================
+    const imgPieBlob = obtenerBlobImagen(pieURL);
+    if (imgPieBlob) {
+      const footer = doc.getFooter() || doc.addFooter();
+      const pFooter = footer.appendParagraph("");
+      pFooter.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+      
+      const imgPie = pFooter.appendImage(imgPieBlob);
+      // Ajustar dimensiones (Ancho, Alto en píxeles)
+      imgPie.setWidth(500).setHeight(50);
     }
 
     doc.saveAndClose();
 
-    // Exportar PDF
+    // ==========================================
+    // 4. EXPORTAR A BASE64 Y BORRAR TEMPORAL
+    // ==========================================
     const pdfBlob = DriveApp.getFileById(doc.getId()).getBlob();
     const pdfBase64 = Utilities.base64Encode(pdfBlob.getBytes());
 
-    // Enviar a la papelera el archivo borrador de Docs
+    // Borrar el borrador de Google Docs
     DriveApp.getFileById(doc.getId()).setTrashed(true);
 
     return {
