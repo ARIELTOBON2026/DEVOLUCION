@@ -502,7 +502,7 @@ function generarPDFDevolucion(idDevolucion) {
         <img class="header-logo" src="${URL_LOGO_ENCABEZADO}" alt="Logo Encabezado">
       </td>` : ''}
       <td class="header-text-cell">
-        <div class="title-main">SECRETARÍA DE MOVILIDAD</div>
+        <div class="title-main">SECRETARÍA DE MOVILIDAD correcion</div>
         <div class="title-sub">MUNICIPIO DE LA CEJA - ANTIOQUIA</div>
         <div class="title-id">COMPROBANTE DE DEVOLUCIÓN DE TRÁMITE #${datos.id}</div>
       </td>
