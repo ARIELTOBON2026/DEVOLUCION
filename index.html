@@ -1,526 +1,527 @@
-/************************************************
- * SISTEMA DE DEVOLUCIÓN DE TRÁMITES (VERSIÓN API PARA GITHUB PAGES)
- * Codigo.gs - CÓDIGO COMPLETO CORREGIDO Y OPTIMIZADO
- ************************************************/
+<!DOCTYPE html>
+<html lang="es">
 
-const HOJA_DEVOLUCIONES = "DEVOLUCIONES";
-const HOJA_DETALLE = "DEVOLUCIONES_DETALLES";
-const HOJA_FUNCIONARIOS = "FUNCIONARIOS";
-const HOJA_MOTIVOS = "MOTIVOS";
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DEVOLUCIÓN DE TRÁMITES</title>
 
-/************************************************
- * MANEJADOR DE PETICIONES GET (Para consultar datos)
- ************************************************/
-function doGet(e) {
-  try {
-    const accion = e && e.parameter ? e.parameter.accion : null;
-    let respuesta = {};
-
-    switch (accion) {
-      case "listarFuncionarios":
-        respuesta = { ok: true, datos: listarFuncionarios() };
-        break;
-      case "obtenerMotivos":
-        respuesta = { ok: true, datos: obtenerMotivos() };
-        break;
-      case "dashboard":
-        respuesta = { ok: true, datos: dashboard() };
-        break;
-      case "buscarPlaca":
-        respuesta = { ok: true, datos: buscarPlaca(e.parameter.placa) };
-        break;
-      case "consultarDevolucion":
-        respuesta = { ok: true, datos: consultarDevolucion(e.parameter.id) };
-        break;
-      default:
-        respuesta = { ok: false, mensaje: "Acción GET no válida o no especificada." };
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
     }
 
-    return responderJSON(respuesta);
-
-  } catch (error) {
-    return responderJSON({ ok: false, mensaje: error.message });
-  }
-}
-
-/************************************************
- * MANEJADOR DE PETICIONES POST (Para enviar/guardar datos)
- ************************************************/
-function doPost(e) {
-  try {
-    if (!e || !e.postData || !e.postData.contents) {
-      throw new Error("No se recibieron datos en el cuerpo de la petición.");
+    body {
+      background: #eef2f7;
+      padding: 20px;
     }
 
-    const contenido = JSON.parse(e.postData.contents);
-    const accion = contenido.accion;
-    const payload = contenido.payload;
-
-    let respuesta = {};
-
-    switch (accion) {
-      case "guardarDevolucion":
-        respuesta = guardarDevolucion(payload);
-        break;
-      case "actualizarDevolucion":
-        respuesta = actualizarDevolucion(payload);
-        break;
-      case "eliminarDevolucion":
-        respuesta = eliminarDevolucion(payload ? payload.id : null);
-        break;
-      case "generarPDF":
-        respuesta = generarPDFDevolucion(payload ? payload.id : null);
-        break;
-      default:
-        respuesta = { ok: false, mensaje: "Acción POST no válida o no especificada." };
+    h1 {
+      text-align: center;
+      color: #0d6efd;
+      margin-bottom: 20px;
+      font-size: 28px;
     }
 
-    return responderJSON(respuesta);
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, .1);
+    }
 
-  } catch (error) {
-    return responderJSON({ ok: false, mensaje: error.message });
-  }
-}
+    .grid {
+      display: grid;
+      grid-template-columns: 140px 1fr 140px 180px 1fr;
+      gap: 15px;
+      align-items: end;
+    }
 
-/************************************************
- * FUNCIÓN AUXILIAR PARA DEVOLVER EN FORMATO JSON
- ************************************************/
-function responderJSON(objeto) {
-  return ContentService
-    .createTextOutput(JSON.stringify(objeto))
-    .setMimeType(ContentService.MimeType.JSON);
-}
+    .gridDetalle {
+      display: grid;
+      grid-template-columns: 1fr 2fr 120px;
+      gap: 15px;
+      align-items: end;
+    }
 
-/************************************************
- * OBTENER HOJA DE CÁLCULO
- ************************************************/
-function obtenerHoja(nombre) {
-  const hoja = SpreadsheetApp
-    .getActiveSpreadsheet()
-    .getSheetByName(nombre);
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #444;
+      font-size: 14px;
+    }
 
-  if (!hoja) {
-    throw new Error("No existe la hoja: " + nombre);
-  }
+    input, select {
+      width: 100%;
+      height: 42px;
+      border: 1px solid #CCC;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 14px;
+    }
 
-  return hoja;
-}
+    input:focus, select:focus {
+      outline: none;
+      border-color: #0d6efd;
+      box-shadow: 0 0 4px rgba(13, 110, 253, .3);
+    }
 
-/************************************************
- * OBTENER SIGUIENTE ID
- ************************************************/
-function siguienteID(hoja) {
-  const ultimaFila = hoja.getLastRow();
-  if (ultimaFila <= 1) return 1;
+    /* Estilos base para todos los botones */
+    button, .btn {
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #fff;
+      height: 42px;
+      padding: 0 18px;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background-color .2s, transform .1s, opacity .2s;
+    }
 
-  const ids = hoja
-    .getRange(2, 1, ultimaFila - 1, 1)
-    .getValues()
-    .flat()
-    .map(Number)
-    .filter(id => !isNaN(id) && id > 0);
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
 
-  return ids.length ? Math.max(...ids) + 1 : 1;
-}
+    button:disabled {
+      background-color: #a5a5a5 !important;
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
 
-/************************************************
- * FECHA ACTUAL (YYYY-MM-DD)
- ************************************************/
-function fechaActual() {
-  return Utilities.formatDate(
-    new Date(),
-    Session.getScriptTimeZone(),
-    "yyyy-MM-dd"
-  );
-}
+    /* Botón Nuevo en color NARANJA */
+    .btnNuevo { 
+      background-color: #ff9800; 
+      border: 1px solid #ff9800;
+      color: #ffffff;
+    }
+    .btnNuevo:hover:not(:disabled) { 
+      background-color: #f57c00; 
+      border-color: #f57c00;
+    }
 
-/************************************************
- * LISTAR FUNCIONARIOS
- ************************************************/
-function listarFuncionarios() {
-  const hoja = obtenerHoja(HOJA_FUNCIONARIOS);
-  const ultimaFila = hoja.getLastRow();
-  if (ultimaFila < 2) return [];
+    .btnAgregar { background: #0d6efd; width: 100%; }
+    .btnAgregar:hover:not(:disabled) { background: #0b5ed7; }
 
-  return hoja
-    .getRange(2, 1, ultimaFila - 1, 1)
-    .getDisplayValues()
-    .flat()
-    .filter(nombre => nombre.trim() !== "");
-}
+    .btnGuardar { background: #198754; }
+    .btnGuardar:hover:not(:disabled) { background: #157347; }
 
-/************************************************
- * LISTAR MOTIVOS DE DEVOLUCIÓN
- ************************************************/
-function obtenerMotivos() {
-  const hoja = obtenerHoja(HOJA_MOTIVOS);
-  const ultimaFila = hoja.getLastRow();
-  if (ultimaFila <= 1) return [];
+    .btnPDF { background: #dc3545; }
+    .btnPDF:hover:not(:disabled) { background: #bb2d3b; }
 
-  return hoja
-    .getRange(2, 1, ultimaFila - 1, 1)
-    .getDisplayValues()
-    .flat()
-    .filter(motivo => motivo.trim() !== "");
-}
+    .btnEliminar {
+      background: #dc3545;
+      height: 34px;
+      padding: 0 12px;
+      font-size: 12px;
+    }
+    .btnEliminar:hover:not(:disabled) { background: #bb2d3b; }
 
-/************************************************
- * VALIDAR DATOS DE CABECERA
- ************************************************/
-function validarCabecera(datos) {
-  if (!datos) throw new Error("No se recibieron datos.");
-  if (!datos.fecha) throw new Error("Debe indicar la fecha.");
-  if (!datos.funcionario) throw new Error("Debe seleccionar un funcionario.");
-  if (!datos.placa) throw new Error("Debe ingresar la placa.");
-  if (!datos.cedula) throw new Error("Debe ingresar la cédula.");
-  if (!datos.nombre) throw new Error("Debe ingresar el nombre del ciudadano.");
-  if (!datos.detalle || !Array.isArray(datos.detalle) || datos.detalle.length === 0) {
-    throw new Error("Debe agregar al menos un motivo de devolución.");
-  }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
 
-  datos.placa = datos.placa.toString().toUpperCase().trim();
-  datos.nombre = datos.nombre.toString().toUpperCase().trim();
-  datos.cedula = String(datos.cedula).trim();
+    th {
+      background: #0d6efd;
+      color: #fff;
+      padding: 12px;
+      text-align: left;
+      font-size: 14px;
+    }
 
-  return datos;
-}
+    td {
+      border: 1px solid #DDD;
+      padding: 10px;
+      font-size: 14px;
+    }
 
-/************************************************
- * GUARDAR DEVOLUCIÓN
- ************************************************/
-function guardarDevolucion(datos) {
-  try {
-    datos = validarCabecera(datos);
+    tbody tr:nth-child(even) { background: #f8f9fa; }
 
-    const hojaCabecera = obtenerHoja(HOJA_DEVOLUCIONES);
-    const hojaDetalle = obtenerHoja(HOJA_DETALLE);
+    .footer {
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
 
-    const idDevolucion = siguienteID(hojaCabecera);
+    .loader {
+      display: none;
+      text-align: center;
+      padding: 12px;
+      color: #0d6efd;
+      font-weight: bold;
+    }
 
-    // Guardar Cabecera
-    hojaCabecera.appendRow([
-      idDevolucion,
-      datos.fecha,
-      datos.funcionario,
-      datos.placa,
-      datos.cedula,
-      datos.nombre
-    ]);
+    @media (max-width: 1000px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+      .gridDetalle { grid-template-columns: 1fr; }
+    }
 
-    // Preparar y Guardar Detalle
-    let idDetalle = siguienteID(hojaDetalle);
-    const registrosDetalle = datos.detalle.map(item => [
-      idDetalle++,
-      idDevolucion,
-      item.motivo,
-      item.observacion || ""
-    ]);
+    @media (max-width: 650px) {
+      .grid { grid-template-columns: 1fr; }
+      .footer { flex-direction: column; }
+      .footer button { width: 100%; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
 
-    hojaDetalle
-      .getRange(
-        hojaDetalle.getLastRow() + 1,
-        1,
-        registrosDetalle.length,
-        registrosDetalle[0].length
-      )
-      .setValues(registrosDetalle);
+<body>
 
-    return {
-      ok: true,
-      id: idDevolucion,
-      mensaje: "La devolución fue guardada correctamente."
+  <h1>DEVOLUCIÓN DE TRÁMITES</h1>
+
+  <!-- CABECERA DE FORMULARIO -->
+  <div class="card">
+    <div class="grid">
+      <div>
+        <label for="fecha">Fecha</label>
+        <input type="date" id="fecha">
+      </div>
+
+      <div>
+        <label for="funcionario">Funcionario</label>
+        <select id="funcionario">
+          <option value="">Cargando...</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="placa">Placa</label>
+        <input id="placa" maxlength="10" placeholder="ABC123" autocomplete="off">
+      </div>
+
+      <div>
+        <label for="cedula">CC Ciudadano</label>
+        <input id="cedula" maxlength="15" placeholder="Solo números">
+      </div>
+
+      <div>
+        <label for="nombre">Nombre Ciudadano</label>
+        <input id="nombre" placeholder="Nombre completo">
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN DE MOTIVOS Y DETALLES -->
+  <div class="card">
+    <h2 style="margin-bottom:15px; color:#0d6efd; font-size: 18px;">
+      Motivos de Devolución
+    </h2>
+
+    <div class="gridDetalle">
+      <div>
+        <label for="motivo">Motivo devolución</label>
+        <select id="motivo">
+          <option value="">Cargando...</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="observacion">Observación</label>
+        <input id="observacion" maxlength="250" placeholder="Añada un comentario o detalle...">
+      </div>
+
+      <div>
+        <button class="btnAgregar" onclick="agregarDetalle()">Agregar</button>
+      </div>
+    </div>
+
+    <table id="tablaDetalle">
+      <thead>
+        <tr>
+          <th width="35%">Motivo</th>
+          <th>Observación</th>
+          <th width="100" style="text-align: center;">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Filas dinámicas -->
+      </tbody>
+    </table>
+
+    <div class="loader" id="loader">
+      Procesando solicitud, por favor espere...
+    </div>
+
+    <!-- BOTONES DE ACCIÓN -->
+    <div class="footer">
+      <button id="btnNuevo" class="btnNuevo" onclick="nuevoRegistro()">
+        ➕ Nuevo
+      </button>
+
+      <button id="btnExportarPDF" class="btnPDF" onclick="exportarPDF()" disabled>
+        📄 Exportar a PDF
+      </button>
+
+      <button id="btnGuardar" class="btnGuardar" onclick="guardar()">
+        💾 Guardar Devolución
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // URL de la API de Google Apps Script
+    const URL_API = "https://script.google.com/macros/s/AKfycbwcyO-uDYxAfg7rBp-wD9vazfkP6DIkteWuzC-UgC4WoJmd-bWtdE6jEdVEaM9U0742Gg/exec";
+
+    let detalle = [];
+    let ultimoIdGuardado = null;
+
+    window.onload = function () {
+      document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
+
+      document.getElementById("placa").addEventListener("input", function () {
+        this.value = this.value.toUpperCase();
+      });
+
+      document.getElementById("nombre").addEventListener("input", function () {
+        this.value = this.value.toUpperCase();
+      });
+
+      document.getElementById("cedula").addEventListener("input", function () {
+        this.value = this.value.replace(/\D/g, "");
+      });
+
+      cargarFuncionarios();
+      cargarMotivos();
+      renderizarTabla();
     };
 
-  } catch (error) {
-    return { ok: false, mensaje: error.message };
-  }
-}
-
-/************************************************
- * BUSCAR DEVOLUCIÓN POR ID
- ************************************************/
-function buscarDevolucion(id) {
-  if (!id) return { detalle: [] };
-
-  const hojaCabecera = obtenerHoja(HOJA_DEVOLUCIONES);
-  const hojaDetalle = obtenerHoja(HOJA_DETALLE);
-
-  const cabecera = hojaCabecera.getDataRange().getValues();
-  const detalle = hojaDetalle.getDataRange().getValues();
-
-  const respuesta = { detalle: [] };
-
-  for (let i = 1; i < cabecera.length; i++) {
-    if (Number(cabecera[i][0]) === Number(id)) {
-      respuesta.id = cabecera[i][0];
-      respuesta.fecha = cabecera[i][1];
-      respuesta.funcionario = cabecera[i][2];
-      respuesta.placa = cabecera[i][3];
-      respuesta.cedula = cabecera[i][4];
-      respuesta.nombre = cabecera[i][5];
-      break;
-    }
-  }
-
-  for (let i = 1; i < detalle.length; i++) {
-    if (Number(detalle[i][1]) === Number(id)) {
-      respuesta.detalle.push({
-        id: detalle[i][0],
-        motivo: detalle[i][2],
-        observacion: detalle[i][3]
+    function mostrarMensaje(icono, titulo, mensaje) {
+      Swal.fire({
+        icon: icono,
+        title: titulo,
+        text: mensaje,
+        confirmButtonText: "Aceptar",
+        confirmButtonColor: "#0d6efd",
+        allowOutsideClick: false
       });
     }
-  }
 
-  return respuesta;
-}
+    function cargarFuncionarios() {
+      fetch(`${URL_API}?accion=listarFuncionarios`)
+        .then(response => response.json())
+        .then(res => {
+          if (res.ok) {
+            const combo = document.getElementById("funcionario");
+            combo.innerHTML = '<option value="">Seleccione...</option>';
+            res.datos.forEach(f => combo.innerHTML += `<option value="${f}">${f}</option>`);
+          } else {
+            mostrarMensaje("error", "Error", "Error al cargar funcionarios: " + res.mensaje);
+          }
+        })
+        .catch(err => mostrarMensaje("error", "Error", "Error al conectar con la API: " + err.message));
+    }
 
-function consultarDevolucion(id) {
-  return buscarDevolucion(id);
-}
+    function cargarMotivos() {
+      fetch(`${URL_API}?accion=obtenerMotivos`)
+        .then(response => response.json())
+        .then(res => {
+          if (res.ok) {
+            const combo = document.getElementById("motivo");
+            combo.innerHTML = '<option value="">Seleccione un motivo...</option>';
+            res.datos.forEach(m => combo.innerHTML += `<option value="${m}">${m}</option>`);
+          } else {
+            mostrarMensaje("error", "Error", "Error al cargar motivos: " + res.mensaje);
+          }
+        })
+        .catch(err => mostrarMensaje("error", "Error", "Error al conectar con la API: " + err.message));
+    }
 
-/************************************************
- * LISTAR DEVOLUCIONES
- ************************************************/
-function listarDevoluciones() {
-  const hoja = obtenerHoja(HOJA_DEVOLUCIONES);
-  if (hoja.getLastRow() <= 1) return [];
+    function agregarDetalle() {
+      const comboMotivo = document.getElementById("motivo");
+      const inputObs = document.getElementById("observacion");
+      const motivo = comboMotivo.value;
+      const observacion = inputObs.value.trim();
 
-  return hoja
-    .getRange(2, 1, hoja.getLastRow() - 1, 6)
-    .getValues();
-}
+      if (!motivo) {
+        mostrarMensaje("warning", "Atención", "Seleccione un motivo de devolución.");
+        comboMotivo.focus();
+        return;
+      }
 
-/************************************************
- * BUSCAR POR PLACA
- ************************************************/
-function buscarPlaca(placa) {
-  if (!placa) return null;
-  placa = String(placa).trim().toUpperCase();
+      detalle.push({ motivo, observacion });
+      comboMotivo.value = "";
+      inputObs.value = "";
+      renderizarTabla();
+    }
 
-  const hoja = obtenerHoja(HOJA_DEVOLUCIONES);
-  const datos = hoja.getDataRange().getValues();
+    function eliminarFila(index) {
+      detalle.splice(index, 1);
+      renderizarTabla();
+    }
 
-  for (let i = 1; i < datos.length; i++) {
-    if (String(datos[i][3]).trim().toUpperCase() === placa) {
-      return {
-        id: datos[i][0],
-        fecha: datos[i][1],
-        funcionario: datos[i][2],
-        placa: datos[i][3],
-        cedula: datos[i][4],
-        nombre: datos[i][5]
+    function renderizarTabla() {
+      const tbody = document.querySelector("#tablaDetalle tbody");
+      tbody.innerHTML = "";
+
+      if (detalle.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#888;">No hay motivos agregados.</td></tr>`;
+        return;
+      }
+
+      detalle.forEach((item, index) => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${item.motivo}</td>
+            <td>${item.observacion || '-'}</td>
+            <td style="text-align:center;">
+              <button class="btnEliminar" onclick="eliminarFila(${index})">Eliminar</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function guardar() {
+      if (detalle.length === 0) {
+        mostrarMensaje("warning", "Atención", "Debe agregar al menos un motivo antes de guardar.");
+        return;
+      }
+
+      const datos = {
+        fecha: document.getElementById("fecha").value,
+        funcionario: document.getElementById("funcionario").value,
+        placa: document.getElementById("placa").value,
+        cedula: document.getElementById("cedula").value,
+        nombre: document.getElementById("nombre").value,
+        detalle: detalle
       };
+
+      const btnGuardar = document.getElementById("btnGuardar");
+      const btnExportarPDF = document.getElementById("btnExportarPDF");
+      const loader = document.getElementById("loader");
+
+      btnGuardar.disabled = true;
+      loader.style.display = "block";
+
+      fetch(URL_API, {
+        method: "POST",
+        body: JSON.stringify({
+          accion: "guardarDevolucion",
+          payload: datos
+        })
+      })
+      .then(response => response.json())
+      .then(res => {
+        btnGuardar.disabled = false;
+        loader.style.display = "none";
+
+        if (res.ok) {
+          mostrarMensaje("success", "¡Éxito!", res.mensaje);
+          ultimoIdGuardado = res.id;
+          btnExportarPDF.disabled = false;
+        } else {
+          mostrarMensaje("error", "Error", "Error: " + res.mensaje);
+        }
+      })
+      .catch(err => {
+        btnGuardar.disabled = false;
+        loader.style.display = "none";
+        mostrarMensaje("error", "Error Crítico", "Error de servidor: " + err.message);
+      });
     }
-  }
-  return null;
-}
 
-/************************************************
- * ELIMINAR DEVOLUCIÓN
- ************************************************/
-function eliminarDevolucion(id) {
-  if (!id) return { ok: false, mensaje: "ID no proporcionado." };
-
-  const hojaCabecera = obtenerHoja(HOJA_DEVOLUCIONES);
-  const hojaDetalle = obtenerHoja(HOJA_DETALLE);
-
-  const cabecera = hojaCabecera.getDataRange().getValues();
-  for (let i = cabecera.length - 1; i >= 1; i--) {
-    if (Number(cabecera[i][0]) === Number(id)) {
-      hojaCabecera.deleteRow(i + 1);
-      break;
-    }
-  }
-
-  const detalle = hojaDetalle.getDataRange().getValues();
-  for (let i = detalle.length - 1; i >= 1; i--) {
-    if (Number(detalle[i][1]) === Number(id)) {
-      hojaDetalle.deleteRow(i + 1);
-    }
-  }
-
-  return { ok: true, mensaje: "Registro eliminado correctamente." };
-}
-
-/************************************************
- * ACTUALIZAR DEVOLUCIÓN
- ************************************************/
-function actualizarDevolucion(datos) {
-  try {
-    datos = validarCabecera(datos);
-    if (!datos.id) throw new Error("No se recibió el ID de la devolución.");
-
-    const hojaCabecera = obtenerHoja(HOJA_DEVOLUCIONES);
-    const hojaDetalle = obtenerHoja(HOJA_DETALLE);
-
-    const cabecera = hojaCabecera.getDataRange().getValues();
-    let filaCabecera = -1;
-
-    for (let i = 1; i < cabecera.length; i++) {
-      if (Number(cabecera[i][0]) === Number(datos.id)) {
-        filaCabecera = i + 1;
-        break;
+    function exportarPDF() {
+      if (!ultimoIdGuardado) {
+        mostrarMensaje("info", "Información", "Primero debe guardar el registro para poder exportarlo a PDF.");
+        return;
       }
+
+      const btnExportarPDF = document.getElementById("btnExportarPDF");
+      const loader = document.getElementById("loader");
+
+      btnExportarPDF.disabled = true;
+      loader.innerText = "Generando archivo PDF, por favor espere...";
+      loader.style.display = "block";
+
+      fetch(URL_API, {
+        method: "POST",
+        body: JSON.stringify({
+          accion: "generarPDF",
+          payload: { id: ultimoIdGuardado }
+        })
+      })
+      .then(response => response.json())
+      .then(res => {
+        btnExportarPDF.disabled = false;
+        loader.style.display = "none";
+        loader.innerText = "Procesando solicitud, por favor espere...";
+
+        if (res.ok) {
+          const link = document.createElement("a");
+          link.href = "data:application/pdf;base64," + res.base64;
+          link.download = res.nombreArchivo;
+          link.click();
+          mostrarMensaje("success", "Descarga completada", "El archivo PDF ha sido generado correctamente.");
+        } else {
+          mostrarMensaje("error", "Error PDF", "Error al generar PDF: " + res.mensaje);
+        }
+      })
+      .catch(err => {
+        btnExportarPDF.disabled = false;
+        loader.style.display = "none";
+        mostrarMensaje("error", "Error Servidor", "Error al procesar PDF: " + err.message);
+      });
     }
 
-    if (filaCabecera === -1) throw new Error("No existe la devolución especificada.");
+    function nuevoRegistro() {
+      const tieneDatos = detalle.length > 0 || 
+                         document.getElementById("placa").value || 
+                         document.getElementById("cedula").value || 
+                         document.getElementById("nombre").value;
 
-    hojaCabecera.getRange(filaCabecera, 1, 1, 6).setValues([[
-      datos.id,
-      datos.fecha,
-      datos.funcionario,
-      datos.placa,
-      datos.cedula,
-      datos.nombre
-    ]]);
-
-    // Eliminar detalle anterior
-    const detalle = hojaDetalle.getDataRange().getValues();
-    for (let i = detalle.length - 1; i >= 1; i--) {
-      if (Number(detalle[i][1]) === Number(datos.id)) {
-        hojaDetalle.deleteRow(i + 1);
-      }
-    }
-
-    // Insertar nuevo detalle
-    let idDetalle = siguienteID(hojaDetalle);
-    const registros = datos.detalle.map(item => [
-      idDetalle++,
-      datos.id,
-      item.motivo,
-      item.observacion || ""
-    ]);
-
-    if (registros.length > 0) {
-      hojaDetalle
-        .getRange(hojaDetalle.getLastRow() + 1, 1, registros.length, registros[0].length)
-        .setValues(registros);
-    }
-
-    return { ok: true, mensaje: "Devolución actualizada correctamente." };
-
-  } catch (error) {
-    return { ok: false, mensaje: error.message };
-  }
-}
-
-/************************************************
- * DASHBOARD Y MÉTRICAS
- ************************************************/
-function dashboard() {
-  const hojaDev = obtenerHoja(HOJA_DEVOLUCIONES);
-  const hojaDet = obtenerHoja(HOJA_DETALLE);
-
-  return {
-    devoluciones: Math.max(0, hojaDev.getLastRow() - 1),
-    motivos: Math.max(0, hojaDet.getLastRow() - 1),
-    funcionarios: listarFuncionarios().length,
-    fecha: fechaActual()
-  };
-}
-
-/************************************************
- * GENERAR PDF USANDO PLANTILLA DE GOOGLE DOCS
- ************************************************/
-function generarPDFDevolucion(idDevolucion) {
-  let copiaDoc = null;
-
-  try {
-    const datos = buscarDevolucion(idDevolucion);
-
-    if (!datos || !datos.id) {
-      throw new Error("No existe la devolución con el ID especificado.");
-    }
-
-    // ID de tu plantilla de Google Docs
-    const ID_PLANTILLA = "1Knnv5Uas66UC5Wsx4ir2JAFjbhROVZoKH9mw0N10RyM";
-    const archivoPlantilla = DriveApp.getFileById(ID_PLANTILLA);
-
-    // 1. Crear copia temporal de la plantilla
-    const nombreCopia = `Devolucion_Temp_${datos.id}`;
-    copiaDoc = archivoPlantilla.makeCopy(nombreCopia);
-    const doc = DocumentApp.openById(copiaDoc.getId());
-    const body = doc.getBody();
-
-    // 2. Formatear Fecha
-    let fecha = "";
-    if (datos.fecha instanceof Date) {
-      fecha = Utilities.formatDate(datos.fecha, Session.getScriptTimeZone(), "dd/MM/yyyy");
-    } else if (typeof datos.fecha === "string" && datos.fecha.includes("-")) {
-      const partes = datos.fecha.split("T")[0].split("-");
-      fecha = partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : datos.fecha;
-    } else {
-      fecha = datos.fecha || "";
-    }
-
-    // 3. Reemplazar comodines simples en la plantilla
-    body.replaceText("{{ID}}", String(datos.id || ""));
-    body.replaceText("{{FECHA}}", fecha);
-    body.replaceText("{{PLACA}}", String(datos.placa || "").toUpperCase());
-    body.replaceText("{{CEDULA}}", String(datos.cedula || ""));
-    body.replaceText("{{FUNCIONARIO}}", String(datos.funcionario || ""));
-    body.replaceText("{{NOMBRE}}", String(datos.nombre || "").toUpperCase());
-
-    // 4. Insertar Tabla con el Detalle de Motivos
-    // Si la plantilla contiene la etiqueta {{TABLA_MOTIVOS}}, la reemplaza por una tabla con bordes
-    const elementoTabla = body.findText("{{TABLA_MOTIVOS}}");
-    if (elementoTabla) {
-      const parent = elementoTabla.getElement().getParent();
-      const index = body.getChildIndex(parent);
-
-      // Crear tabla
-      const tabla = body.insertTable(index);
-      
-      // Encabezado
-      const headerRow = tabla.appendTableRow();
-      headerRow.appendTableCell("MOTIVO DE DEVOLUCIÓN").setBold(true);
-      headerRow.appendTableCell("OBSERVACIÓN").setBold(true);
-
-      // Filas de datos
-      if (datos.detalle && Array.isArray(datos.detalle) && datos.detalle.length > 0) {
-        datos.detalle.forEach(item => {
-          const row = tabla.appendTableRow();
-          row.appendTableCell(item.motivo || "");
-          row.appendTableCell(item.observacion || "");
+      if (tieneDatos) {
+        Swal.fire({
+          title: '¿Crear nuevo registro?',
+          text: "Los datos ingresados en este formulario se limpiarán.",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#0d6efd',
+          cancelButtonColor: '#dc3545',
+          confirmButtonText: 'Sí, limpiar',
+          cancelButtonText: 'Cancelar'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            limpiarFormulario();
+          }
         });
       } else {
-        const row = tabla.appendTableRow();
-        row.appendTableCell("No existen motivos registrados").setColSpan(2);
+        limpiarFormulario();
       }
-
-      // Eliminar el comodín del documento
-      body.removeChild(parent);
     }
 
-    // Guardar y cerrar cambios en la copia
-    doc.saveAndClose();
+    function limpiarFormulario() {
+      document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
+      document.getElementById("funcionario").value = "";
+      document.getElementById("placa").value = "";
+      document.getElementById("cedula").value = "";
+      document.getElementById("nombre").value = "";
+      document.getElementById("motivo").value = "";
+      document.getElementById("observacion").value = "";
+      
+      detalle = [];
+      ultimoIdGuardado = null;
 
-    // 5. Convertir la copia a PDF
-    const pdfBlob = copiaDoc.getAs(MimeType.PDF);
-    const nombrePDF = `DEVOLUCION_${datos.id}.pdf`;
-    pdfBlob.setName(nombrePDF);
+      document.getElementById("btnExportarPDF").disabled = true;
+      document.getElementById("btnGuardar").disabled = false;
 
-    // 6. Eliminar el documento temporal de Google Drive
-    copiaDoc.setTrashed(true);
-
-    // 7. Retornar la respuesta en base64 para el frontend en GitHub Pages
-    return {
-      ok: true,
-      nombreArchivo: nombrePDF,
-      base64: Utilities.base64Encode(pdfBlob.getBytes())
-    };
-
-  } catch (error) {
-    // Si ocurrió un error y la copia temporal fue creada, enviarla a la papelera
-    if (copiaDoc) {
-      try { copiaDoc.setTrashed(true); } catch (e) {}
+      renderizarTabla();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  </script>
+</body>
 
-    Logger.log("Error en generarPDFDevolucion: " + error.message);
-    return {
-      ok: false,
-      mensaje: error.message
-    };
-  }
-}
+</html>
