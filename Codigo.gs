@@ -452,8 +452,8 @@ function generarPDFDevolucion(idDevolucion) {
     );
 
     // Reemplaza estas constantes con las URLs públicas o cadenas Base64 de tus imágenes
-    const URL_LOGO_ENCABEZADO = "https://ejemplo.com/logo-header.png"; 
-    const URL_LOGO_PIE_PAGINA = "https://ejemplo.com/logo-footer.png";
+    const URL_LOGO_ENCABEZADO = "https://arieltobon2026.github.io/DEVOLUCION/img/Encabezado.png"; 
+    const URL_LOGO_PIE_PAGINA = "https://arieltobon2026.github.io/DEVOLUCION/img/PiePagina.png";
 
     let html = `
 <!DOCTYPE html>
