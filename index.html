@@ -274,7 +274,7 @@
 
   <script>
     // URL de la API de Google Apps Script
-    const URL_API = "https://script.google.com/macros/s/AKfycbw2vAfEOx0KDRX_V-HmKJc-mf-rz4XrnCzYVpHjDImzfIS6LIcP3KxG4EdKw74ZFCr5Yw/exec";
+    const URL_API = "https://script.google.com/macros/s/AKfycby1XhwCcL4KgcMPtsq-aLtVpyB_-ZgrjSK6lPK_jUhsXAmMMJSIk_ZS7edm9QDN3cQGJg/exec";
 
     let detalle = [];
     let ultimoIdGuardado = null;
@@ -467,7 +467,13 @@
           link.click();
           mostrarMensaje("success", "Descarga completada", "El archivo PDF ha sido generado correctamente.");
         } else {
-          mostrarMensaje("error", "Error PDF", "Error al generar PDF: " + res.mensaje);
+          console.log(res);
+
+mostrarMensaje(
+  "error",
+  "Error PDF",
+  res.mensaje + "\n\n" + (res.stack || "")
+);
         }
       })
       .catch(err => {
