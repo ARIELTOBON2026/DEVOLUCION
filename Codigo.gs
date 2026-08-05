@@ -451,30 +451,63 @@ function generarPDFDevolucion(idDevolucion) {
       "dd/MM/yyyy"
     );
 
+    // Reemplaza estas constantes con las URLs públicas o cadenas Base64 de tus imágenes
+    const URL_LOGO_ENCABEZADO = "https://ejemplo.com/logo-header.png"; 
+    const URL_LOGO_PIE_PAGINA = "https://ejemplo.com/logo-footer.png";
+
     let html = `
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <style>
-  body { font-family: Arial, sans-serif; font-size: 12px; color: #333; padding: 20px; }
+  body { font-family: Arial, sans-serif; font-size: 12px; color: #333; padding: 15px; }
+  
+  /* Estilos del Encabezado */
   .header { background: #0d6efd; color: white; padding: 15px; border-radius: 6px; }
-  .title { font-size: 20px; font-weight: bold; }
+  .header-table { width: 100%; border-collapse: collapse; }
+  .header-logo-cell { width: 80px; vertical-align: middle; text-align: left; }
+  .header-logo { max-width: 80px; max-height: 70px; display: block; }
+  .header-text-cell { vertical-align: middle; padding-left: 12px; }
+  .title-main { font-size: 18px; font-weight: bold; color: #FFFFFF; line-height: 1.2; }
+  .title-sub { font-size: 13px; font-weight: bold; color: #E0E0E0; margin-top: 3px; }
+  .title-id { font-size: 13px; font-weight: bold; color: #FFFFFF; margin-top: 5px; }
+
+  /* Tablas de Información */
   .table-info { width: 100%; border-collapse: collapse; margin-top: 20px; }
   .table-info td { border: 1px solid #CCC; padding: 8px; }
   .label { background: #F5F5F5; font-weight: bold; width: 25%; }
+  
+  /* Tabla Detalle */
   .table-detalle { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
   .table-detalle th { background: #0d6efd; color: white; border: 1px solid #CCC; padding: 8px; text-align: left; }
   .table-detalle td { border: 1px solid #CCC; padding: 8px; vertical-align: top; word-wrap: break-word; }
-  .firmas { margin-top: 70px; width: 100%; text-align: center; }
+  
+  /* Firmas */
+  .firmas { margin-top: 50px; width: 100%; text-align: center; }
   .linea { width: 220px; border-top: 1px solid #000; margin: 0 auto 6px auto; }
+  
+  /* Pie de página */
+  .footer { margin-top: 40px; text-align: center; width: 100%; }
+  .footer-img { max-width: 100%; max-height: 60px; height: auto; }
 </style>
 </head>
 <body>
+
 <div class="header">
-  <div class="title">SECRETARIA DE MOVILIDAD</div>
-  <div class="title">MUNICIPIO DE LA CEJA - ANTIOQUIA</div>
-  <div class="title">COMPROBANTE DE DEVOLUCIÓN DE TRÁMITE #${datos.id}</div>
+  <table class="header-table">
+    <tr>
+      ${URL_LOGO_ENCABEZADO ? `
+      <td class="header-logo-cell">
+        <img class="header-logo" src="${URL_LOGO_ENCABEZADO}" alt="Logo Encabezado">
+      </td>` : ''}
+      <td class="header-text-cell">
+        <div class="title-main">SECRETARÍA DE MOVILIDAD</div>
+        <div class="title-sub">MUNICIPIO DE LA CEJA - ANTIOQUIA</div>
+        <div class="title-id">COMPROBANTE DE DEVOLUCIÓN DE TRÁMITE #${datos.id}</div>
+      </td>
+    </tr>
+  </table>
 </div>
 
 <table class="table-info">
@@ -494,7 +527,7 @@ function generarPDFDevolucion(idDevolucion) {
   </tr>
 </table>
 
-<h3 style="color:#0d6efd; margin-top:25px;">Motivos de Devolución</h3>
+<h3 style="color:#0d6efd; margin-top:25px; margin-bottom:10px;">Motivos de Devolución</h3>
 
 <table class="table-detalle">
   <colgroup>
@@ -533,6 +566,12 @@ function generarPDFDevolucion(idDevolucion) {
     </td>
   </tr>
 </table>
+
+${URL_LOGO_PIE_PAGINA ? `
+<div class="footer">
+  <img class="footer-img" src="${URL_LOGO_PIE_PAGINA}" alt="Pie de página">
+</div>` : ''}
+
 </body>
 </html>`;
 
