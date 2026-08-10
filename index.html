@@ -1,0 +1,2609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="description"
+    content="Sistema Maestro-Detalle de Devoluciones - Secretaría de Movilidad"
+  >
+
+  <title>
+    Sistema Maestro-Detalle de Devoluciones
+  </title>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+      background:
+        linear-gradient(
+          135deg,
+          #f4f7fb 0%,
+          #e9eef5 100%
+        );
+
+      color: #1f2937;
+
+      min-height: 100vh;
+    }
+
+
+    /* =====================================================
+       ENCABEZADO
+       ===================================================== */
+
+    .header {
+      background: #ffffff;
+
+      border-bottom:
+        1px solid #d9dee7;
+
+      padding: 18px 25px;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      gap: 20px;
+
+      box-shadow:
+        0 2px 8px rgba(0,0,0,.08);
+
+      position: sticky;
+
+      top: 0;
+
+      z-index: 100;
+    }
+
+
+    .header-left {
+      display: flex;
+
+      align-items: center;
+
+      gap: 15px;
+    }
+
+
+    .logo {
+      width: 62px;
+
+      height: 62px;
+
+      object-fit: contain;
+
+      border-radius: 8px;
+    }
+
+
+    .header-title h1 {
+      font-size: 21px;
+
+      color: #17365d;
+
+      margin-bottom: 5px;
+    }
+
+
+    .header-title p {
+      font-size: 13px;
+
+      color: #6b7280;
+    }
+
+
+    .status {
+      display: flex;
+
+      align-items: center;
+
+      gap: 8px;
+
+      font-size: 13px;
+
+      color: #374151;
+    }
+
+
+    .status-dot {
+      width: 10px;
+
+      height: 10px;
+
+      border-radius: 50%;
+
+      background: #16a34a;
+
+      box-shadow:
+        0 0 0 4px rgba(22,163,74,.12);
+    }
+
+
+    /* =====================================================
+       CONTENEDOR
+       ===================================================== */
+
+    .container {
+      width: 96%;
+
+      max-width: 1450px;
+
+      margin: 25px auto;
+
+      display: grid;
+
+      grid-template-columns:
+        minmax(0, 1fr)
+        minmax(350px, 500px);
+
+      gap: 22px;
+    }
+
+
+    .card {
+      background: #ffffff;
+
+      border-radius: 12px;
+
+      border:
+        1px solid #dce2ea;
+
+      box-shadow:
+        0 5px 18px rgba(15,23,42,.07);
+
+      padding: 22px;
+    }
+
+
+    .card-title {
+      font-size: 18px;
+
+      color: #17365d;
+
+      margin-bottom: 20px;
+
+      padding-bottom: 12px;
+
+      border-bottom:
+        2px solid #edf1f6;
+    }
+
+
+    /* =====================================================
+       FORMULARIO
+       ===================================================== */
+
+    .form-grid {
+      display: grid;
+
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+      gap: 16px;
+    }
+
+
+    .form-group {
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 6px;
+    }
+
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+
+    label {
+      font-weight: 600;
+
+      font-size: 13px;
+
+      color: #374151;
+    }
+
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+
+      border:
+        1px solid #cbd5e1;
+
+      border-radius: 7px;
+
+      padding: 11px 12px;
+
+      font-size: 14px;
+
+      font-family: inherit;
+
+      background: #fff;
+
+      outline: none;
+
+      transition:
+        border-color .2s,
+        box-shadow .2s;
+    }
+
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #2563eb;
+
+      box-shadow:
+        0 0 0 3px rgba(37,99,235,.10);
+    }
+
+
+    input[readonly] {
+      background: #f3f4f6;
+
+      color: #4b5563;
+    }
+
+
+    textarea {
+      resize: vertical;
+
+      min-height: 80px;
+    }
+
+
+    /* =====================================================
+       DETALLE
+       ===================================================== */
+
+    .detalle-header {
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      gap: 10px;
+
+      margin-bottom: 15px;
+    }
+
+
+    .detalle-header h3 {
+      font-size: 16px;
+
+      color: #17365d;
+    }
+
+
+    .detalle-item {
+      border:
+        1px solid #dbe2ea;
+
+      border-radius: 9px;
+
+      padding: 15px;
+
+      margin-bottom: 12px;
+
+      background: #f8fafc;
+
+      position: relative;
+    }
+
+
+    .detalle-grid {
+      display: grid;
+
+      grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr);
+
+      gap: 12px;
+    }
+
+
+    .detalle-remove {
+      position: absolute;
+
+      top: 9px;
+
+      right: 9px;
+
+      border: none;
+
+      background: #fee2e2;
+
+      color: #b91c1c;
+
+      width: 28px;
+
+      height: 28px;
+
+      border-radius: 50%;
+
+      cursor: pointer;
+
+      font-weight: bold;
+
+      font-size: 15px;
+    }
+
+
+    .detalle-remove:hover {
+      background: #fecaca;
+    }
+
+
+    /* =====================================================
+       BOTONES
+       ===================================================== */
+
+    .buttons {
+      display: flex;
+
+      flex-wrap: wrap;
+
+      gap: 10px;
+
+      margin-top: 22px;
+    }
+
+
+    button {
+      border: none;
+
+      border-radius: 7px;
+
+      padding: 11px 18px;
+
+      font-size: 14px;
+
+      font-weight: 600;
+
+      cursor: pointer;
+
+      transition:
+        transform .1s,
+        opacity .2s,
+        background .2s;
+    }
+
+
+    button:active {
+      transform: scale(.98);
+    }
+
+
+    button:disabled {
+      opacity: .55;
+
+      cursor: not-allowed;
+    }
+
+
+    .btn-primary {
+      background: #17365d;
+
+      color: #fff;
+    }
+
+
+    .btn-primary:hover {
+      background: #0f2947;
+    }
+
+
+    .btn-secondary {
+      background: #64748b;
+
+      color: #fff;
+    }
+
+
+    .btn-success {
+      background: #15803d;
+
+      color: #fff;
+    }
+
+
+    .btn-danger {
+      background: #b91c1c;
+
+      color: #fff;
+    }
+
+
+    .btn-add {
+      background: #2563eb;
+
+      color: #fff;
+
+      padding:
+        8px 13px;
+
+      font-size: 13px;
+    }
+
+
+    /* =====================================================
+       TABLA
+       ===================================================== */
+
+    .table-wrapper {
+      width: 100%;
+
+      overflow-x: auto;
+
+      border:
+        1px solid #dbe2ea;
+
+      border-radius: 8px;
+    }
+
+
+    table {
+      width: 100%;
+
+      border-collapse: collapse;
+
+      font-size: 13px;
+    }
+
+
+    th {
+      background: #17365d;
+
+      color: #fff;
+
+      padding: 11px 9px;
+
+      text-align: left;
+
+      white-space: nowrap;
+    }
+
+
+    td {
+      padding: 10px 9px;
+
+      border-bottom:
+        1px solid #e5e7eb;
+
+      vertical-align: middle;
+    }
+
+
+    tr:hover td {
+      background: #f8fafc;
+    }
+
+
+    .empty {
+      text-align: center;
+
+      color: #6b7280;
+
+      padding: 30px 10px;
+    }
+
+
+    .action-button {
+      padding:
+        7px 10px;
+
+      font-size: 12px;
+
+      background: #2563eb;
+
+      color: white;
+    }
+
+
+    /* =====================================================
+       MENSAJES
+       ===================================================== */
+
+    .message {
+      display: none;
+
+      padding: 12px 15px;
+
+      border-radius: 8px;
+
+      margin-bottom: 18px;
+
+      font-size: 14px;
+    }
+
+
+    .message.show {
+      display: block;
+    }
+
+
+    .message.success {
+      background: #dcfce7;
+
+      border:
+        1px solid #86efac;
+
+      color: #166534;
+    }
+
+
+    .message.error {
+      background: #fee2e2;
+
+      border:
+        1px solid #fca5a5;
+
+      color: #991b1b;
+    }
+
+
+    .message.info {
+      background: #dbeafe;
+
+      border:
+        1px solid #93c5fd;
+
+      color: #1e40af;
+    }
+
+
+    /* =====================================================
+       LOADING
+       ===================================================== */
+
+    .loading {
+      display: none;
+
+      position: fixed;
+
+      inset: 0;
+
+      background:
+        rgba(15,23,42,.45);
+
+      z-index: 1000;
+
+      align-items: center;
+
+      justify-content: center;
+    }
+
+
+    .loading.show {
+      display: flex;
+    }
+
+
+    .loading-box {
+      background: #fff;
+
+      padding: 28px 35px;
+
+      border-radius: 12px;
+
+      text-align: center;
+
+      box-shadow:
+        0 15px 40px rgba(0,0,0,.25);
+    }
+
+
+    .spinner {
+      width: 38px;
+
+      height: 38px;
+
+      border:
+        4px solid #e5e7eb;
+
+      border-top-color:
+        #17365d;
+
+      border-radius: 50%;
+
+      animation:
+        spin .8s linear infinite;
+
+      margin:
+        0 auto 15px;
+    }
+
+
+    @keyframes spin {
+
+      to {
+        transform:
+          rotate(360deg);
+      }
+
+    }
+
+
+    /* =====================================================
+       MODAL
+       ===================================================== */
+
+    .modal {
+      display: none;
+
+      position: fixed;
+
+      inset: 0;
+
+      background:
+        rgba(15,23,42,.55);
+
+      z-index: 900;
+
+      align-items: center;
+
+      justify-content: center;
+
+      padding: 20px;
+    }
+
+
+    .modal.show {
+      display: flex;
+    }
+
+
+    .modal-content {
+      width: 100%;
+
+      max-width: 900px;
+
+      max-height: 90vh;
+
+      overflow-y: auto;
+
+      background: #fff;
+
+      border-radius: 12px;
+
+      padding: 24px;
+
+      box-shadow:
+        0 20px 50px rgba(0,0,0,.25);
+    }
+
+
+    .modal-header {
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      margin-bottom: 18px;
+    }
+
+
+    .modal-close {
+      background: #f1f5f9;
+
+      color: #374151;
+
+      width: 34px;
+
+      height: 34px;
+
+      padding: 0;
+
+      border-radius: 50%;
+    }
+
+
+    /* =====================================================
+       FOOTER
+       ===================================================== */
+
+    footer {
+      text-align: center;
+
+      color: #6b7280;
+
+      font-size: 12px;
+
+      padding:
+        20px;
+
+      margin-top: 10px;
+    }
+
+
+    /* =====================================================
+       RESPONSIVE
+       ===================================================== */
+
+    @media (max-width: 1000px) {
+
+      .container {
+        grid-template-columns: 1fr;
+      }
+
+    }
+
+
+    @media (max-width: 700px) {
+
+      .header {
+        align-items: flex-start;
+
+        flex-direction: column;
+      }
+
+
+      .form-grid,
+      .detalle-grid {
+        grid-template-columns: 1fr;
+      }
+
+
+      .form-group.full {
+        grid-column: auto;
+      }
+
+
+      .container {
+        width: 94%;
+
+        margin-top: 15px;
+      }
+
+    }
+
+  </style>
+</head>
+
+
+<body>
+
+
+  <!-- ===================================================
+       ENCABEZADO
+       =================================================== -->
+
+  <header class="header">
+
+    <div class="header-left">
+
+      <!--
+        Si tienes logo institucional,
+        reemplaza esta URL por la ruta de tu imagen.
+      -->
+      <img
+        class="logo"
+        src="logo.png"
+        alt="Secretaría de Movilidad"
+        onerror="this.style.display='none';"
+      >
+
+      <div class="header-title">
+
+        <h1>
+          SISTEMA MAESTRO-DETALLE DE DEVOLUCIONES
+        </h1>
+
+        <p>
+          Secretaría de Movilidad
+          — La Ceja del Tambo
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="status">
+
+      <span class="status-dot"></span>
+
+      Sistema disponible
+
+    </div>
+
+  </header>
+
+
+  <!-- ===================================================
+       CONTENIDO
+       =================================================== -->
+
+  <main class="container">
+
+
+    <!-- =================================================
+         FORMULARIO
+         ================================================= -->
+
+    <section class="card">
+
+      <div class="card-title">
+        Registrar devolución
+      </div>
+
+
+      <div
+        id="message"
+        class="message"
+      ></div>
+
+
+      <div class="form-grid">
+
+
+        <!-- CONSECUTIVO -->
+
+        <div class="form-group">
+
+          <label for="consecutivo">
+            Consecutivo
+          </label>
+
+          <input
+            id="consecutivo"
+            type="text"
+            readonly
+            placeholder="Automático"
+          >
+
+        </div>
+
+
+        <!-- FECHA -->
+
+        <div class="form-group">
+
+          <label for="fecha">
+            Fecha
+          </label>
+
+          <input
+            id="fecha"
+            type="date"
+          >
+
+        </div>
+
+
+        <!-- FUNCIONARIO -->
+
+        <div class="form-group">
+
+          <label for="funcionario">
+            Funcionario
+          </label>
+
+          <select id="funcionario">
+
+            <option value="">
+              Seleccione funcionario
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- PLACA -->
+
+        <div class="form-group">
+
+          <label for="placa">
+            Placa
+          </label>
+
+          <input
+            id="placa"
+            type="text"
+            maxlength="10"
+            autocomplete="off"
+            placeholder="Ej. ABC123"
+          >
+
+        </div>
+
+
+        <!-- CÉDULA -->
+
+        <div class="form-group">
+
+          <label for="documento">
+            Documento
+          </label>
+
+          <input
+            id="documento"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            placeholder="Número de documento"
+          >
+
+        </div>
+
+
+        <!-- CIUDADANO -->
+
+        <div class="form-group">
+
+          <label for="ciudadano">
+            Ciudadano
+          </label>
+
+          <input
+            id="ciudadano"
+            type="text"
+            autocomplete="off"
+            placeholder="Nombre completo"
+          >
+
+        </div>
+
+
+      </div>
+
+
+      <!-- =================================================
+           DETALLES
+           ================================================= -->
+
+      <div
+        class="detalle-header"
+        style="margin-top:25px;"
+      >
+
+        <h3>
+          Detalle de devolución
+        </h3>
+
+        <button
+          type="button"
+          class="btn-add"
+          id="btnAgregarDetalle"
+        >
+          + Agregar motivo
+        </button>
+
+      </div>
+
+
+      <div id="detalles"></div>
+
+
+      <!-- =================================================
+           BOTONES
+           ================================================= -->
+
+      <div class="buttons">
+
+        <button
+          type="button"
+          class="btn-primary"
+          id="btnGuardar"
+        >
+          Guardar devolución
+        </button>
+
+
+        <button
+          type="button"
+          class="btn-secondary"
+          id="btnLimpiar"
+        >
+          Limpiar
+        </button>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         DEVOLUCIONES REGISTRADAS
+         ================================================= -->
+
+    <section class="card">
+
+      <div class="card-title">
+        Devoluciones registradas
+      </div>
+
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                N.º
+              </th>
+
+              <th>
+                Fecha
+              </th>
+
+              <th>
+                Funcionario
+              </th>
+
+              <th>
+                Placa
+              </th>
+
+              <th>
+                Documento
+              </th>
+
+              <th>
+                Ciudadano
+              </th>
+
+              <th>
+                Acción
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody id="tablaDevoluciones">
+
+            <tr>
+
+              <td
+                colspan="7"
+                class="empty"
+              >
+                Cargando información...
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+
+  <!-- ===================================================
+       MODAL DETALLE
+       =================================================== -->
+
+  <div
+    class="modal"
+    id="modalDetalle"
+  >
+
+    <div class="modal-content">
+
+      <div class="modal-header">
+
+        <h2>
+          Detalle de devolución
+        </h2>
+
+        <button
+          type="button"
+          class="modal-close"
+          id="btnCerrarModal"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div id="contenidoDetalle">
+
+        Cargando...
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- ===================================================
+       CARGANDO
+       =================================================== -->
+
+  <div
+    class="loading"
+    id="loading"
+  >
+
+    <div class="loading-box">
+
+      <div class="spinner"></div>
+
+      <div id="loadingText">
+        Procesando...
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- ===================================================
+       PIE DE PÁGINA
+       =================================================== -->
+
+  <footer>
+
+    Secretaría de Movilidad
+    — La Ceja del Tambo
+
+  </footer>
+
+
+
+<script>
+
+/* ======================================================
+   CONFIGURACIÓN
+   ====================================================== */
+
+
+/*
+ * IMPORTANTE:
+ *
+ * Aquí debes colocar la URL /exec de tu Web App.
+ */
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbxzoWB9fbZiPNmFplnu9xMK3cJJMr0a4nMkbmEeyD1q2tIS57kSYpvj_doN7tEN8u5QtA/exec";
+
+
+/* ======================================================
+   VARIABLES
+   ====================================================== */
+
+let funcionarios = [];
+
+let motivos = [];
+
+let devoluciones = [];
+
+
+
+/* ======================================================
+   ELEMENTOS
+   ====================================================== */
+
+const message =
+  document.getElementById("message");
+
+const loading =
+  document.getElementById("loading");
+
+const loadingText =
+  document.getElementById("loadingText");
+
+const funcionario =
+  document.getElementById("funcionario");
+
+const detalles =
+  document.getElementById("detalles");
+
+const tablaDevoluciones =
+  document.getElementById("tablaDevoluciones");
+
+const modalDetalle =
+  document.getElementById("modalDetalle");
+
+const contenidoDetalle =
+  document.getElementById("contenidoDetalle");
+
+
+
+/* ======================================================
+   INICIALIZACIÓN
+   ====================================================== */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function() {
+
+    establecerFecha();
+
+    agregarDetalle();
+
+    cargarDatos();
+
+    configurarEventos();
+
+  }
+);
+
+
+
+/* ======================================================
+   EVENTOS
+   ====================================================== */
+
+function configurarEventos() {
+
+  document
+    .getElementById("btnAgregarDetalle")
+    .addEventListener(
+      "click",
+      agregarDetalle
+    );
+
+
+  document
+    .getElementById("btnGuardar")
+    .addEventListener(
+      "click",
+      guardar
+    );
+
+
+  document
+    .getElementById("btnLimpiar")
+    .addEventListener(
+      "click",
+      limpiarFormulario
+    );
+
+
+  document
+    .getElementById("btnCerrarModal")
+    .addEventListener(
+      "click",
+      cerrarModal
+    );
+
+
+  document
+    .getElementById("placa")
+    .addEventListener(
+      "input",
+      function() {
+
+        this.value =
+          this.value
+            .toUpperCase()
+            .replace(/\s/g, "");
+
+      }
+    );
+
+
+  document
+    .getElementById("ciudadano")
+    .addEventListener(
+      "input",
+      function() {
+
+        this.value =
+          this.value.toUpperCase();
+
+      }
+    );
+
+
+  document
+    .getElementById("documento")
+    .addEventListener(
+      "input",
+      function() {
+
+        this.value =
+          this.value.replace(
+            /[^0-9]/g,
+            ""
+          );
+
+      }
+    );
+
+}
+
+
+
+/* ======================================================
+   FECHA ACTUAL
+   ====================================================== */
+
+function establecerFecha() {
+
+  const ahora =
+    new Date();
+
+  const yyyy =
+    ahora.getFullYear();
+
+  const mm =
+    String(
+      ahora.getMonth() + 1
+    ).padStart(2, "0");
+
+  const dd =
+    String(
+      ahora.getDate()
+    ).padStart(2, "0");
+
+
+  document
+    .getElementById("fecha")
+    .value =
+      `${yyyy}-${mm}-${dd}`;
+
+}
+
+
+
+/* ======================================================
+   CARGAR DATOS
+   ====================================================== */
+
+async function cargarDatos() {
+
+  mostrarLoading(
+    "Cargando información..."
+  );
+
+
+  try {
+
+    const respuesta =
+      await fetch(
+        API_URL +
+        "?action=getInitialData"
+      );
+
+
+    if (!respuesta.ok) {
+
+      throw new Error(
+        "No fue posible conectarse con el servidor."
+      );
+
+    }
+
+
+    const data =
+      await respuesta.json();
+
+
+    funcionarios =
+      data.funcionarios || [];
+
+
+    motivos =
+      data.motivos || [];
+
+
+    devoluciones =
+      data.devoluciones || [];
+
+
+    cargarFuncionarios();
+
+    mostrarDevoluciones();
+
+
+  } catch (error) {
+
+    mostrarMensaje(
+      "No se pudo cargar la información. " +
+      error.message,
+      "error"
+    );
+
+    console.error(error);
+
+  } finally {
+
+    ocultarLoading();
+
+  }
+
+}
+
+
+
+/* ======================================================
+   FUNCIONARIOS
+   ====================================================== */
+
+function cargarFuncionarios() {
+
+  funcionario.innerHTML =
+    '<option value="">Seleccione funcionario</option>';
+
+
+  funcionarios.forEach(
+    function(nombre) {
+
+      const option =
+        document.createElement("option");
+
+
+      option.value =
+        nombre;
+
+
+      option.textContent =
+        nombre;
+
+
+      funcionario.appendChild(
+        option
+      );
+
+    }
+  );
+
+}
+
+
+
+/* ======================================================
+   AGREGAR DETALLE
+   ====================================================== */
+
+function agregarDetalle() {
+
+  const div =
+    document.createElement("div");
+
+
+  div.className =
+    "detalle-item";
+
+
+  div.innerHTML = `
+
+    <button
+      type="button"
+      class="detalle-remove"
+      title="Eliminar"
+    >
+      ×
+    </button>
+
+
+    <div class="detalle-grid">
+
+
+      <div class="form-group">
+
+        <label>
+          Motivo
+        </label>
+
+        <select
+          class="motivo"
+        >
+
+          <option value="">
+            Seleccione motivo
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Observación
+        </label>
+
+        <textarea
+          class="observacion"
+          placeholder="Ingrese observación"
+        ></textarea>
+
+      </div>
+
+
+    </div>
+
+  `;
+
+
+  const select =
+    div.querySelector(
+      ".motivo"
+    );
+
+
+  motivos.forEach(
+    function(motivo) {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      option.value =
+        motivo;
+
+
+      option.textContent =
+        motivo;
+
+
+      select.appendChild(
+        option
+      );
+
+    }
+  );
+
+
+  div
+    .querySelector(
+      ".detalle-remove"
+    )
+    .addEventListener(
+      "click",
+      function() {
+
+        div.remove();
+
+      }
+    );
+
+
+  detalles.appendChild(
+    div
+  );
+
+}
+
+
+
+/* ======================================================
+   OBTENER DETALLES
+   ====================================================== */
+
+function obtenerDetalles() {
+
+  const elementos =
+    detalles.querySelectorAll(
+      ".detalle-item"
+    );
+
+
+  const resultado = [];
+
+
+  elementos.forEach(
+    function(item) {
+
+      const motivo =
+        item
+          .querySelector(".motivo")
+          .value;
+
+
+      const observacion =
+        item
+          .querySelector(".observacion")
+          .value
+          .trim();
+
+
+      if (
+        motivo ||
+        observacion
+      ) {
+
+        resultado.push({
+
+          motivo:
+            motivo,
+
+          observacion:
+            observacion
+
+        });
+
+      }
+
+    }
+  );
+
+
+  return resultado;
+
+}
+
+
+
+/* ======================================================
+   GUARDAR
+   ====================================================== */
+
+async function guardar() {
+
+  const funcionarioValor =
+    funcionario.value;
+
+
+  const placa =
+    document
+      .getElementById("placa")
+      .value
+      .trim()
+      .toUpperCase();
+
+
+  const documento =
+    document
+      .getElementById("documento")
+      .value
+      .trim();
+
+
+  const ciudadano =
+    document
+      .getElementById("ciudadano")
+      .value
+      .trim()
+      .toUpperCase();
+
+
+  const fecha =
+    document
+      .getElementById("fecha")
+      .value;
+
+
+  const detalle =
+    obtenerDetalles();
+
+
+  if (!funcionarioValor) {
+
+    mostrarMensaje(
+      "Seleccione el funcionario.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if (!placa) {
+
+    mostrarMensaje(
+      "Ingrese la placa.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if (!documento) {
+
+    mostrarMensaje(
+      "Ingrese el documento.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if (!ciudadano) {
+
+    mostrarMensaje(
+      "Ingrese el nombre del ciudadano.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if (!fecha) {
+
+    mostrarMensaje(
+      "Seleccione la fecha.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if (detalle.length === 0) {
+
+    mostrarMensaje(
+      "Agregue al menos un motivo de devolución.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const master = {
+
+    funcionario:
+      funcionarioValor,
+
+    placa:
+      placa,
+
+    documento:
+      documento,
+
+    ciudadano:
+      ciudadano,
+
+    fecha:
+      fecha
+
+  };
+
+
+  mostrarLoading(
+    "Guardando devolución..."
+  );
+
+
+  try {
+
+    /*
+     * El endpoint de Apps Script deberá
+     * recibir action=guardarDevolucion.
+     */
+
+    const respuesta =
+      await fetch(
+        API_URL +
+        "?action=guardarDevolucion" +
+        "&data=" +
+        encodeURIComponent(
+          JSON.stringify({
+            master: master,
+            detalles: detalle
+          })
+        )
+      );
+
+
+    if (!respuesta.ok) {
+
+      throw new Error(
+        "Error de comunicación con Apps Script."
+      );
+
+    }
+
+
+    const data =
+      await respuesta.json();
+
+
+    if (
+      data.error
+    ) {
+
+      throw new Error(
+        data.error
+      );
+
+    }
+
+
+    const id =
+      data.id;
+
+
+    document
+      .getElementById("consecutivo")
+      .value =
+        id;
+
+
+    mostrarMensaje(
+      "Devolución guardada correctamente. " +
+      "Consecutivo: " +
+      id,
+      "success"
+    );
+
+
+    await cargarDatos();
+
+
+    /*
+     * Preguntar si desea generar PDF.
+     */
+
+    const generar =
+      confirm(
+        "La devolución fue guardada correctamente.\n\n" +
+        "Consecutivo: " + id +
+        "\n\n" +
+        "¿Desea generar el PDF?"
+      );
+
+
+    if (generar) {
+
+      await generarPDF(id);
+
+    }
+
+
+  } catch (error) {
+
+    console.error(error);
+
+
+    mostrarMensaje(
+      "Error al guardar: " +
+      error.message,
+      "error"
+    );
+
+  } finally {
+
+    ocultarLoading();
+
+  }
+
+}
+
+
+
+/* ======================================================
+   GENERAR PDF
+   ====================================================== */
+
+async function generarPDF(id) {
+
+  if (!id) {
+
+    mostrarMensaje(
+      "No se recibió el consecutivo.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  mostrarLoading(
+    "Generando PDF..."
+  );
+
+
+  try {
+
+    const respuesta =
+      await fetch(
+        API_URL +
+        "?action=generarPDF" +
+        "&id=" +
+        encodeURIComponent(id)
+      );
+
+
+    if (!respuesta.ok) {
+
+      throw new Error(
+        "No fue posible generar el PDF."
+      );
+
+    }
+
+
+    const data =
+      await respuesta.json();
+
+
+    if (data.error) {
+
+      throw new Error(
+        data.error
+      );
+
+    }
+
+
+    if (
+      !data.base64 ||
+      !data.filename
+    ) {
+
+      throw new Error(
+        "La respuesta no contiene el PDF."
+      );
+
+    }
+
+
+    descargarBase64(
+      data.base64,
+      data.filename,
+      "application/pdf"
+    );
+
+
+    mostrarMensaje(
+      "PDF generado correctamente.",
+      "success"
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+
+    mostrarMensaje(
+      "Error al generar PDF: " +
+      error.message,
+      "error"
+    );
+
+  } finally {
+
+    ocultarLoading();
+
+  }
+
+}
+
+
+
+/* ======================================================
+   DESCARGAR BASE64
+   ====================================================== */
+
+function descargarBase64(
+  base64,
+  filename,
+  mime
+) {
+
+  const byteCharacters =
+    atob(base64);
+
+
+  const byteNumbers =
+    new Array(
+      byteCharacters.length
+    );
+
+
+  for (
+    let i = 0;
+    i < byteCharacters.length;
+    i++
+  ) {
+
+    byteNumbers[i] =
+      byteCharacters.charCodeAt(i);
+
+  }
+
+
+  const byteArray =
+    new Uint8Array(
+      byteNumbers
+    );
+
+
+  const blob =
+    new Blob(
+      [byteArray],
+      {
+        type: mime
+      }
+    );
+
+
+  const url =
+    URL.createObjectURL(
+      blob
+    );
+
+
+  const a =
+    document.createElement(
+      "a"
+    );
+
+
+  a.href =
+    url;
+
+
+  a.download =
+    filename;
+
+
+  document.body.appendChild(
+    a
+  );
+
+
+  a.click();
+
+
+  a.remove();
+
+
+  setTimeout(
+    function() {
+
+      URL.revokeObjectURL(
+        url
+      );
+
+    },
+    1000
+  );
+
+}
+
+
+
+/* ======================================================
+   MOSTRAR DEVOLUCIONES
+   ====================================================== */
+
+function mostrarDevoluciones() {
+
+  tablaDevoluciones.innerHTML =
+    "";
+
+
+  if (
+    !devoluciones ||
+    devoluciones.length === 0
+  ) {
+
+    tablaDevoluciones.innerHTML = `
+
+      <tr>
+
+        <td
+          colspan="7"
+          class="empty"
+        >
+          No existen devoluciones registradas.
+        </td>
+
+      </tr>
+
+    `;
+
+    return;
+
+  }
+
+
+  devoluciones.forEach(
+    function(dev) {
+
+      const tr =
+        document.createElement(
+          "tr"
+        );
+
+
+      tr.innerHTML = `
+
+        <td>
+          ${escapeHtml(dev.consecutivo)}
+        </td>
+
+        <td>
+          ${escapeHtml(dev.fecha)}
+        </td>
+
+        <td>
+          ${escapeHtml(dev.funcionario)}
+        </td>
+
+        <td>
+          ${escapeHtml(dev.placa)}
+        </td>
+
+        <td>
+          ${escapeHtml(dev.documento)}
+        </td>
+
+        <td>
+          ${escapeHtml(dev.ciudadano)}
+        </td>
+
+        <td>
+
+          <button
+            class="action-button"
+            type="button"
+            data-id="${escapeHtml(dev.consecutivo)}"
+          >
+            Ver / PDF
+          </button>
+
+        </td>
+
+      `;
+
+
+      tr
+        .querySelector(
+          ".action-button"
+        )
+        .addEventListener(
+          "click",
+          function() {
+
+            mostrarDetalle(
+              dev.consecutivo
+            );
+
+          }
+        );
+
+
+      tablaDevoluciones.appendChild(
+        tr
+      );
+
+    }
+  );
+
+}
+
+
+
+/* ======================================================
+   MOSTRAR DETALLE
+   ====================================================== */
+
+async function mostrarDetalle(id) {
+
+  modalDetalle.classList.add(
+    "show"
+  );
+
+
+  contenidoDetalle.innerHTML =
+    "Cargando detalle...";
+
+
+  try {
+
+    const respuesta =
+      await fetch(
+        API_URL +
+        "?action=getDetalleDevolucion" +
+        "&id=" +
+        encodeURIComponent(id)
+      );
+
+
+    if (!respuesta.ok) {
+
+      throw new Error(
+        "No se pudo consultar el detalle."
+      );
+
+    }
+
+
+    const data =
+      await respuesta.json();
+
+
+    if (data.error) {
+
+      throw new Error(
+        data.error
+      );
+
+    }
+
+
+    const lista =
+      data.detalles || [];
+
+
+    let html = `
+
+      <div
+        style="
+          margin-bottom:15px;
+          font-weight:600;
+        "
+      >
+        Consecutivo:
+        ${escapeHtml(id)}
+      </div>
+
+    `;
+
+
+    if (
+      lista.length === 0
+    ) {
+
+      html += `
+
+        <div class="empty">
+          No hay detalles registrados.
+        </div>
+
+      `;
+
+    } else {
+
+      html += `
+
+        <div class="table-wrapper">
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  N.º
+                </th>
+
+                <th>
+                  Motivo
+                </th>
+
+                <th>
+                  Observación
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+      `;
+
+
+      lista.forEach(
+        function(det) {
+
+          html += `
+
+            <tr>
+
+              <td>
+                ${escapeHtml(det.nro)}
+              </td>
+
+              <td>
+                ${escapeHtml(det.motivo)}
+              </td>
+
+              <td>
+                ${escapeHtml(det.observacion)}
+              </td>
+
+            </tr>
+
+          `;
+
+        }
+      );
+
+
+      html += `
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+
+        <div
+          style="
+            margin-top:18px;
+            display:flex;
+            justify-content:flex-end;
+          "
+        >
+
+          <button
+            type="button"
+            class="btn-success"
+            id="btnPDFModal"
+          >
+            Generar PDF
+          </button>
+
+        </div>
+
+      `;
+
+    }
+
+
+    contenidoDetalle.innerHTML =
+      html;
+
+
+    const btnPDF =
+      document.getElementById(
+        "btnPDFModal"
+      );
+
+
+    if (btnPDF) {
+
+      btnPDF.addEventListener(
+        "click",
+        function() {
+
+          generarPDF(id);
+
+        }
+      );
+
+    }
+
+
+  } catch (error) {
+
+    contenidoDetalle.innerHTML = `
+
+      <div class="message error show">
+
+        ${escapeHtml(
+          error.message
+        )}
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+
+/* ======================================================
+   CERRAR MODAL
+   ====================================================== */
+
+function cerrarModal() {
+
+  modalDetalle.classList.remove(
+    "show"
+  );
+
+}
+
+
+
+/* ======================================================
+   LIMPIAR FORMULARIO
+   ====================================================== */
+
+function limpiarFormulario() {
+
+  document
+    .getElementById("consecutivo")
+    .value = "";
+
+
+  document
+    .getElementById("placa")
+    .value = "";
+
+
+  document
+    .getElementById("documento")
+    .value = "";
+
+
+  document
+    .getElementById("ciudadano")
+    .value = "";
+
+
+  funcionario.value =
+    "";
+
+
+  establecerFecha();
+
+
+  detalles.innerHTML =
+    "";
+
+
+  agregarDetalle();
+
+
+  ocultarMensaje();
+
+}
+
+
+
+/* ======================================================
+   MENSAJES
+   ====================================================== */
+
+function mostrarMensaje(
+  texto,
+  tipo
+) {
+
+  message.textContent =
+    texto;
+
+
+  message.className =
+    "message show " +
+    tipo;
+
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+}
+
+
+function ocultarMensaje() {
+
+  message.className =
+    "message";
+
+}
+
+
+
+/* ======================================================
+   LOADING
+   ====================================================== */
+
+function mostrarLoading(
+  texto
+) {
+
+  loadingText.textContent =
+    texto ||
+    "Procesando...";
+
+
+  loading.classList.add(
+    "show"
+  );
+
+}
+
+
+function ocultarLoading() {
+
+  loading.classList.remove(
+    "show"
+  );
+
+}
+
+
+
+/* ======================================================
+   SEGURIDAD HTML
+   ====================================================== */
+
+function escapeHtml(
+  valor
+) {
+
+  if (
+    valor === null ||
+    valor === undefined
+  ) {
+
+    return "";
+
+  }
+
+
+  return String(valor)
+
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+
+    .replace(
+      /</g,
+      "&lt;"
+    )
+
+    .replace(
+      />/g,
+      "&gt;"
+    )
+
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+
+</script>
+
+</body>
+</html>
