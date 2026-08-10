@@ -16,6 +16,7 @@
   <title>
     Sistema Maestro-Detalle de Devoluciones
   </title>
+  <meta name="api-mode" content="JSONP - GitHub Pages">
 
   <style>
 
@@ -1209,7 +1210,7 @@ let motivos = [];
 
 let devoluciones = [];
 
-
+\n/* ======================================================\n   API JSONP - COMPATIBLE CON GITHUB PAGES\n   ====================================================== */\nfunction llamarAPI(action, parametros = {}) {\n\n  return new Promise(function(resolve, reject) {\n\n    const callbackName =\n      "callback_" +\n      Date.now() + "_" +\n      Math.floor(Math.random() * 100000);\n\n    const script = document.createElement("script");\n    const query = new URLSearchParams();\n\n    query.append("action", action);\n    query.append("callback", callbackName);\n\n    Object.keys(parametros).forEach(function(key) {\n      query.append(key, parametros[key]);\n    });\n\n    let terminado = false;\n\n    const timeout = setTimeout(function() {\n      if (terminado) return;\n      terminado = true;\n      limpiar();\n      reject(new Error("Tiempo de espera agotado al comunicarse con Google Apps Script."));\n    }, 30000);\n\n    window[callbackName] = function(data) {\n      if (terminado) return;\n      terminado = true;\n      clearTimeout(timeout);\n      limpiar();\n      resolve(data);\n    };\n\n    script.onerror = function() {\n      if (terminado) return;\n      terminado = true;\n      clearTimeout(timeout);\n      limpiar();\n      reject(new Error("No fue posible conectarse con Google Apps Script."));\n    };\n\n    function limpiar() {\n      try { delete window[callbackName]; } catch (e) {}\n      if (script.parentNode) script.parentNode.removeChild(script);\n    }\n\n    script.src = API_URL + "?" + query.toString();\n    document.body.appendChild(script);\n  });\n}\n\n
 
 /* ======================================================
    ELEMENTOS
@@ -1392,24 +1393,15 @@ async function cargarDatos() {
 
   try {
 
-    const respuesta =
-      await fetch(
-        API_URL +
-        "?action=getInitialData"
-      );
+    const data =
+      await llamarAPI("getInitialData");
 
-
-    if (!respuesta.ok) {
-
+    if (!data || data.ok === false) {
       throw new Error(
+        (data && data.error) ||
         "No fue posible conectarse con el servidor."
       );
-
     }
-
-
-    const data =
-      await respuesta.json();
 
 
     funcionarios =
@@ -1809,31 +1801,23 @@ async function guardar() {
      * recibir action=guardarDevolucion.
      */
 
-    const respuesta =
-      await fetch(
-        API_URL +
-        "?action=guardarDevolucion" +
-        "&data=" +
-        encodeURIComponent(
-          JSON.stringify({
+    const data =
+      await llamarAPI(
+        "guardarDevolucion",
+        {
+          data: JSON.stringify({
             master: master,
             detalles: detalle
           })
-        )
+        }
       );
 
-
-    if (!respuesta.ok) {
-
+    if (!data || data.ok === false) {
       throw new Error(
+        (data && data.error) ||
         "Error de comunicación con Apps Script."
       );
-
     }
-
-
-    const data =
-      await respuesta.json();
 
 
     if (
@@ -1934,26 +1918,18 @@ async function generarPDF(id) {
 
   try {
 
-    const respuesta =
-      await fetch(
-        API_URL +
-        "?action=generarPDF" +
-        "&id=" +
-        encodeURIComponent(id)
+    const data =
+      await llamarAPI(
+        "generarPDF",
+        { id: id }
       );
 
-
-    if (!respuesta.ok) {
-
+    if (!data || data.ok === false) {
       throw new Error(
+        (data && data.error) ||
         "No fue posible generar el PDF."
       );
-
     }
-
-
-    const data =
-      await respuesta.json();
 
 
     if (data.error) {
@@ -2233,26 +2209,18 @@ async function mostrarDetalle(id) {
 
   try {
 
-    const respuesta =
-      await fetch(
-        API_URL +
-        "?action=getDetalleDevolucion" +
-        "&id=" +
-        encodeURIComponent(id)
+    const data =
+      await llamarAPI(
+        "getDetalleDevolucion",
+        { id: id }
       );
 
-
-    if (!respuesta.ok) {
-
+    if (!data || data.ok === false) {
       throw new Error(
+        (data && data.error) ||
         "No se pudo consultar el detalle."
       );
-
     }
-
-
-    const data =
-      await respuesta.json();
 
 
     if (data.error) {
