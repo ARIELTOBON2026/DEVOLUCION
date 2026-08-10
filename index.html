@@ -1,6 +1,9 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
   <meta charset="UTF-8">
 
   <meta
@@ -13,10 +16,15 @@
     content="Sistema Maestro-Detalle de Devoluciones - Secretaría de Movilidad"
   >
 
+  <meta
+    name="api-mode"
+    content="JSONP - GitHub Pages"
+  >
+
   <title>
     Sistema Maestro-Detalle de Devoluciones
   </title>
-  <meta name="api-mode" content="JSONP - GitHub Pages">
+
 
   <style>
 
@@ -25,6 +33,7 @@
       margin: 0;
       padding: 0;
     }
+
 
     body {
       font-family:
@@ -66,7 +75,7 @@
       gap: 20px;
 
       box-shadow:
-        0 2px 8px rgba(0,0,0,.08);
+        0 2px 8px rgba(0, 0, 0, .08);
 
       position: sticky;
 
@@ -135,7 +144,7 @@
       background: #16a34a;
 
       box-shadow:
-        0 0 0 4px rgba(22,163,74,.12);
+        0 0 0 4px rgba(22, 163, 74, .12);
     }
 
 
@@ -169,7 +178,7 @@
         1px solid #dce2ea;
 
       box-shadow:
-        0 5px 18px rgba(15,23,42,.07);
+        0 5px 18px rgba(15, 23, 42, .07);
 
       padding: 22px;
     }
@@ -242,7 +251,7 @@
 
       font-family: inherit;
 
-      background: #fff;
+      background: #ffffff;
 
       outline: none;
 
@@ -258,7 +267,7 @@
       border-color: #2563eb;
 
       box-shadow:
-        0 0 0 3px rgba(37,99,235,.10);
+        0 0 0 3px rgba(37, 99, 235, .10);
     }
 
 
@@ -409,7 +418,7 @@
     .btn-primary {
       background: #17365d;
 
-      color: #fff;
+      color: #ffffff;
     }
 
 
@@ -421,33 +430,48 @@
     .btn-secondary {
       background: #64748b;
 
-      color: #fff;
+      color: #ffffff;
+    }
+
+
+    .btn-secondary:hover {
+      background: #475569;
     }
 
 
     .btn-success {
       background: #15803d;
 
-      color: #fff;
+      color: #ffffff;
+    }
+
+
+    .btn-success:hover {
+      background: #166534;
     }
 
 
     .btn-danger {
       background: #b91c1c;
 
-      color: #fff;
+      color: #ffffff;
     }
 
 
     .btn-add {
       background: #2563eb;
 
-      color: #fff;
+      color: #ffffff;
 
       padding:
         8px 13px;
 
       font-size: 13px;
+    }
+
+
+    .btn-add:hover {
+      background: #1d4ed8;
     }
 
 
@@ -479,7 +503,7 @@
     th {
       background: #17365d;
 
-      color: #fff;
+      color: #ffffff;
 
       padding: 11px 9px;
 
@@ -521,7 +545,12 @@
 
       background: #2563eb;
 
-      color: white;
+      color: #ffffff;
+    }
+
+
+    .action-button:hover {
+      background: #1d4ed8;
     }
 
 
@@ -589,7 +618,7 @@
       inset: 0;
 
       background:
-        rgba(15,23,42,.45);
+        rgba(15, 23, 42, .45);
 
       z-index: 1000;
 
@@ -605,7 +634,7 @@
 
 
     .loading-box {
-      background: #fff;
+      background: #ffffff;
 
       padding: 28px 35px;
 
@@ -614,7 +643,7 @@
       text-align: center;
 
       box-shadow:
-        0 15px 40px rgba(0,0,0,.25);
+        0 15px 40px rgba(0, 0, 0, .25);
     }
 
 
@@ -661,7 +690,7 @@
       inset: 0;
 
       background:
-        rgba(15,23,42,.55);
+        rgba(15, 23, 42, .55);
 
       z-index: 900;
 
@@ -687,14 +716,14 @@
 
       overflow-y: auto;
 
-      background: #fff;
+      background: #ffffff;
 
       border-radius: 12px;
 
       padding: 24px;
 
       box-shadow:
-        0 20px 50px rgba(0,0,0,.25);
+        0 20px 50px rgba(0, 0, 0, .25);
     }
 
 
@@ -721,6 +750,11 @@
       padding: 0;
 
       border-radius: 50%;
+    }
+
+
+    .modal-close:hover {
+      background: #e2e8f0;
     }
 
 
@@ -784,6 +818,7 @@
     }
 
   </style>
+
 </head>
 
 
@@ -798,10 +833,6 @@
 
     <div class="header-left">
 
-      <!--
-        Si tienes logo institucional,
-        reemplaza esta URL por la ruta de tu imagen.
-      -->
       <img
         class="logo"
         src="logo.png"
@@ -908,7 +939,7 @@
           <select id="funcionario">
 
             <option value="">
-              Seleccione funcionario
+              Cargando funcionarios...
             </option>
 
           </select>
@@ -971,7 +1002,6 @@
 
         </div>
 
-
       </div>
 
 
@@ -1028,7 +1058,6 @@
       </div>
 
     </section>
-
 
 
     <!-- =================================================
@@ -1107,7 +1136,6 @@
   </main>
 
 
-
   <!-- ===================================================
        MODAL DETALLE
        =================================================== -->
@@ -1147,7 +1175,6 @@
   </div>
 
 
-
   <!-- ===================================================
        CARGANDO
        =================================================== -->
@@ -1170,7 +1197,6 @@
   </div>
 
 
-
   <!-- ===================================================
        PIE DE PÁGINA
        =================================================== -->
@@ -1183,1433 +1209,2027 @@
   </footer>
 
 
-
-<script>
-
-/* ======================================================
-   CONFIGURACIÓN
-   ====================================================== */
+  <script>
 
 
-/*
- * IMPORTANTE:
- *
- * Aquí debes colocar la URL /exec de tu Web App.
- */
-const API_URL =
-  "https://script.google.com/macros/s/AKfycbxzoWB9fbZiPNmFplnu9xMK3cJJMr0a4nMkbmEeyD1q2tIS57kSYpvj_doN7tEN8u5QtA/exec";
+    /* ======================================================
+       CONFIGURACIÓN
+       ====================================================== */
+
+    /*
+     * URL REAL DE LA WEB APP DE GOOGLE APPS SCRIPT
+     *
+     * IMPORTANTE:
+     * NO colocar corchetes [ ]
+     * NO colocar paréntesis ( )
+     * NO colocar formato Markdown.
+     */
+
+    const API_URL =
+      "https://script.google.com/macros/s/AKfycbxzoWB9fbZiPNmFplnu9xMK3cJJMr0a4nMkbmEeyD1q2tIS57kSYpvj_doN7tEN8u5QtA/exec";
 
 
-/* ======================================================
-   VARIABLES
-   ====================================================== */
+    /* ======================================================
+       VARIABLES
+       ====================================================== */
 
-let funcionarios = [];
+    let funcionarios = [];
 
-let motivos = [];
+    let motivos = [];
 
-let devoluciones = [];
-
-\n/* ======================================================\n   API JSONP - COMPATIBLE CON GITHUB PAGES\n   ====================================================== */\nfunction llamarAPI(action, parametros = {}) {\n\n  return new Promise(function(resolve, reject) {\n\n    const callbackName =\n      "callback_" +\n      Date.now() + "_" +\n      Math.floor(Math.random() * 100000);\n\n    const script = document.createElement("script");\n    const query = new URLSearchParams();\n\n    query.append("action", action);\n    query.append("callback", callbackName);\n\n    Object.keys(parametros).forEach(function(key) {\n      query.append(key, parametros[key]);\n    });\n\n    let terminado = false;\n\n    const timeout = setTimeout(function() {\n      if (terminado) return;\n      terminado = true;\n      limpiar();\n      reject(new Error("Tiempo de espera agotado al comunicarse con Google Apps Script."));\n    }, 30000);\n\n    window[callbackName] = function(data) {\n      if (terminado) return;\n      terminado = true;\n      clearTimeout(timeout);\n      limpiar();\n      resolve(data);\n    };\n\n    script.onerror = function() {\n      if (terminado) return;\n      terminado = true;\n      clearTimeout(timeout);\n      limpiar();\n      reject(new Error("No fue posible conectarse con Google Apps Script."));\n    };\n\n    function limpiar() {\n      try { delete window[callbackName]; } catch (e) {}\n      if (script.parentNode) script.parentNode.removeChild(script);\n    }\n\n    script.src = API_URL + "?" + query.toString();\n    document.body.appendChild(script);\n  });\n}\n\n
-
-/* ======================================================
-   ELEMENTOS
-   ====================================================== */
-
-const message =
-  document.getElementById("message");
-
-const loading =
-  document.getElementById("loading");
-
-const loadingText =
-  document.getElementById("loadingText");
-
-const funcionario =
-  document.getElementById("funcionario");
-
-const detalles =
-  document.getElementById("detalles");
-
-const tablaDevoluciones =
-  document.getElementById("tablaDevoluciones");
-
-const modalDetalle =
-  document.getElementById("modalDetalle");
-
-const contenidoDetalle =
-  document.getElementById("contenidoDetalle");
+    let devoluciones = [];
 
 
+    /* ======================================================
+       API JSONP
+       COMPATIBLE CON GITHUB PAGES
+       ====================================================== */
 
-/* ======================================================
-   INICIALIZACIÓN
-   ====================================================== */
+    function llamarAPI(action, parametros = {}) {
 
-document.addEventListener(
-  "DOMContentLoaded",
-  function() {
+      return new Promise(function(resolve, reject) {
 
-    establecerFecha();
-
-    agregarDetalle();
-
-    cargarDatos();
-
-    configurarEventos();
-
-  }
-);
-
-
-
-/* ======================================================
-   EVENTOS
-   ====================================================== */
-
-function configurarEventos() {
-
-  document
-    .getElementById("btnAgregarDetalle")
-    .addEventListener(
-      "click",
-      agregarDetalle
-    );
-
-
-  document
-    .getElementById("btnGuardar")
-    .addEventListener(
-      "click",
-      guardar
-    );
-
-
-  document
-    .getElementById("btnLimpiar")
-    .addEventListener(
-      "click",
-      limpiarFormulario
-    );
-
-
-  document
-    .getElementById("btnCerrarModal")
-    .addEventListener(
-      "click",
-      cerrarModal
-    );
-
-
-  document
-    .getElementById("placa")
-    .addEventListener(
-      "input",
-      function() {
-
-        this.value =
-          this.value
-            .toUpperCase()
-            .replace(/\s/g, "");
-
-      }
-    );
-
-
-  document
-    .getElementById("ciudadano")
-    .addEventListener(
-      "input",
-      function() {
-
-        this.value =
-          this.value.toUpperCase();
-
-      }
-    );
-
-
-  document
-    .getElementById("documento")
-    .addEventListener(
-      "input",
-      function() {
-
-        this.value =
-          this.value.replace(
-            /[^0-9]/g,
-            ""
+        const callbackName =
+          "callback_" +
+          Date.now() +
+          "_" +
+          Math.floor(
+            Math.random() * 100000
           );
 
-      }
-    );
 
-}
+        const script =
+          document.createElement("script");
 
 
+        const query =
+          new URLSearchParams();
 
-/* ======================================================
-   FECHA ACTUAL
-   ====================================================== */
 
-function establecerFecha() {
-
-  const ahora =
-    new Date();
-
-  const yyyy =
-    ahora.getFullYear();
-
-  const mm =
-    String(
-      ahora.getMonth() + 1
-    ).padStart(2, "0");
-
-  const dd =
-    String(
-      ahora.getDate()
-    ).padStart(2, "0");
-
-
-  document
-    .getElementById("fecha")
-    .value =
-      `${yyyy}-${mm}-${dd}`;
-
-}
-
-
-
-/* ======================================================
-   CARGAR DATOS
-   ====================================================== */
-
-async function cargarDatos() {
-
-  mostrarLoading(
-    "Cargando información..."
-  );
-
-
-  try {
-
-    const data =
-      await llamarAPI("getInitialData");
-
-    if (!data || data.ok === false) {
-      throw new Error(
-        (data && data.error) ||
-        "No fue posible conectarse con el servidor."
-      );
-    }
-
-
-    funcionarios =
-      data.funcionarios || [];
-
-
-    motivos =
-      data.motivos || [];
-
-
-    devoluciones =
-      data.devoluciones || [];
-
-
-    cargarFuncionarios();
-    cargarMotivos();
-
-    mostrarDevoluciones();
-
-
-  } catch (error) {
-
-    mostrarMensaje(
-      "No se pudo cargar la información. " +
-      error.message,
-      "error"
-    );
-
-    console.error(error);
-
-  } finally {
-
-    ocultarLoading();
-
-  }
-
-}
-
-
-
-/* ======================================================
-   FUNCIONARIOS
-   ====================================================== */
-
-function cargarFuncionarios() {
-
-  funcionario.innerHTML =
-    '<option value="">Seleccione funcionario</option>';
-
-
-  funcionarios.forEach(
-    function(nombre) {
-
-      const option =
-        document.createElement("option");
-
-
-      option.value =
-        nombre;
-
-
-      option.textContent =
-        nombre;
-
-
-      funcionario.appendChild(
-        option
-      );
-
-    }
-  );
-
-}
-
-
-/* ======================================================
-   CARGAR MOTIVOS EN LOS MENÚS DESPLEGABLES
-   ====================================================== */
-
-function cargarMotivos() {
-
-  const selects =
-    detalles.querySelectorAll(".motivo");
-
-  selects.forEach(function(select) {
-
-    const valorActual = select.value;
-
-    select.innerHTML =
-      '<option value="">Seleccione motivo</option>';
-
-    motivos.forEach(function(motivo) {
-
-      const option =
-        document.createElement("option");
-
-      option.value = motivo;
-      option.textContent = motivo;
-
-      select.appendChild(option);
-
-    });
-
-    if (valorActual) {
-      select.value = valorActual;
-    }
-
-  });
-
-}
-
-
-
-/* ======================================================
-   AGREGAR DETALLE
-   ====================================================== */
-
-function agregarDetalle() {
-
-  const div =
-    document.createElement("div");
-
-
-  div.className =
-    "detalle-item";
-
-
-  div.innerHTML = `
-
-    <button
-      type="button"
-      class="detalle-remove"
-      title="Eliminar"
-    >
-      ×
-    </button>
-
-
-    <div class="detalle-grid">
-
-
-      <div class="form-group">
-
-        <label>
-          Motivo
-        </label>
-
-        <select
-          class="motivo"
-        >
-
-          <option value="">
-            Seleccione motivo
-          </option>
-
-        </select>
-
-      </div>
-
-
-      <div class="form-group">
-
-        <label>
-          Observación
-        </label>
-
-        <textarea
-          class="observacion"
-          placeholder="Ingrese observación"
-        ></textarea>
-
-      </div>
-
-
-    </div>
-
-  `;
-
-
-  const select =
-    div.querySelector(
-      ".motivo"
-    );
-
-
-  motivos.forEach(
-    function(motivo) {
-
-      const option =
-        document.createElement(
-          "option"
+        query.append(
+          "action",
+          action
         );
 
 
-      option.value =
-        motivo;
-
-
-      option.textContent =
-        motivo;
-
-
-      select.appendChild(
-        option
-      );
-
-    }
-  );
-
-
-  div
-    .querySelector(
-      ".detalle-remove"
-    )
-    .addEventListener(
-      "click",
-      function() {
-
-        div.remove();
-
-      }
-    );
-
-
-  detalles.appendChild(
-    div
-  );
-
-}
-
-
-
-/* ======================================================
-   OBTENER DETALLES
-   ====================================================== */
-
-function obtenerDetalles() {
-
-  const elementos =
-    detalles.querySelectorAll(
-      ".detalle-item"
-    );
-
-
-  const resultado = [];
-
-
-  elementos.forEach(
-    function(item) {
-
-      const motivo =
-        item
-          .querySelector(".motivo")
-          .value;
-
-
-      const observacion =
-        item
-          .querySelector(".observacion")
-          .value
-          .trim();
-
-
-      if (
-        motivo ||
-        observacion
-      ) {
-
-        resultado.push({
-
-          motivo:
-            motivo,
-
-          observacion:
-            observacion
-
-        });
-
-      }
-
-    }
-  );
-
-
-  return resultado;
-
-}
-
-
-
-/* ======================================================
-   GUARDAR
-   ====================================================== */
-
-async function guardar() {
-
-  const funcionarioValor =
-    funcionario.value;
-
-
-  const placa =
-    document
-      .getElementById("placa")
-      .value
-      .trim()
-      .toUpperCase();
-
-
-  const documento =
-    document
-      .getElementById("documento")
-      .value
-      .trim();
-
-
-  const ciudadano =
-    document
-      .getElementById("ciudadano")
-      .value
-      .trim()
-      .toUpperCase();
-
-
-  const fecha =
-    document
-      .getElementById("fecha")
-      .value;
-
-
-  const detalle =
-    obtenerDetalles();
-
-
-  if (!funcionarioValor) {
-
-    mostrarMensaje(
-      "Seleccione el funcionario.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  if (!placa) {
-
-    mostrarMensaje(
-      "Ingrese la placa.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  if (!documento) {
-
-    mostrarMensaje(
-      "Ingrese el documento.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  if (!ciudadano) {
-
-    mostrarMensaje(
-      "Ingrese el nombre del ciudadano.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  if (!fecha) {
-
-    mostrarMensaje(
-      "Seleccione la fecha.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  if (detalle.length === 0) {
-
-    mostrarMensaje(
-      "Agregue al menos un motivo de devolución.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  const master = {
-
-    funcionario:
-      funcionarioValor,
-
-    placa:
-      placa,
-
-    documento:
-      documento,
-
-    ciudadano:
-      ciudadano,
-
-    fecha:
-      fecha
-
-  };
-
-
-  mostrarLoading(
-    "Guardando devolución..."
-  );
-
-
-  try {
-
-    /*
-     * El endpoint de Apps Script deberá
-     * recibir action=guardarDevolucion.
-     */
-
-    const data =
-      await llamarAPI(
-        "guardarDevolucion",
-        {
-          data: JSON.stringify({
-            master: master,
-            detalles: detalle
-          })
-        }
-      );
-
-    if (!data || data.ok === false) {
-      throw new Error(
-        (data && data.error) ||
-        "Error de comunicación con Apps Script."
-      );
-    }
-
-
-    if (
-      data.error
-    ) {
-
-      throw new Error(
-        data.error
-      );
-
-    }
-
-
-    const id =
-      data.id;
-
-
-    document
-      .getElementById("consecutivo")
-      .value =
-        id;
-
-
-    mostrarMensaje(
-      "Devolución guardada correctamente. " +
-      "Consecutivo: " +
-      id,
-      "success"
-    );
-
-
-    await cargarDatos();
-
-
-    /*
-     * Preguntar si desea generar PDF.
-     */
-
-    const generar =
-      confirm(
-        "La devolución fue guardada correctamente.\n\n" +
-        "Consecutivo: " + id +
-        "\n\n" +
-        "¿Desea generar el PDF?"
-      );
-
-
-    if (generar) {
-
-      await generarPDF(id);
-
-    }
-
-
-  } catch (error) {
-
-    console.error(error);
-
-
-    mostrarMensaje(
-      "Error al guardar: " +
-      error.message,
-      "error"
-    );
-
-  } finally {
-
-    ocultarLoading();
-
-  }
-
-}
-
-
-
-/* ======================================================
-   GENERAR PDF
-   ====================================================== */
-
-async function generarPDF(id) {
-
-  if (!id) {
-
-    mostrarMensaje(
-      "No se recibió el consecutivo.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  mostrarLoading(
-    "Generando PDF..."
-  );
-
-
-  try {
-
-    const data =
-      await llamarAPI(
-        "generarPDF",
-        { id: id }
-      );
-
-    if (!data || data.ok === false) {
-      throw new Error(
-        (data && data.error) ||
-        "No fue posible generar el PDF."
-      );
-    }
-
-
-    if (data.error) {
-
-      throw new Error(
-        data.error
-      );
-
-    }
-
-
-    if (
-      !data.base64 ||
-      !data.filename
-    ) {
-
-      throw new Error(
-        "La respuesta no contiene el PDF."
-      );
-
-    }
-
-
-    descargarBase64(
-      data.base64,
-      data.filename,
-      "application/pdf"
-    );
-
-
-    mostrarMensaje(
-      "PDF generado correctamente.",
-      "success"
-    );
-
-
-  } catch (error) {
-
-    console.error(error);
-
-
-    mostrarMensaje(
-      "Error al generar PDF: " +
-      error.message,
-      "error"
-    );
-
-  } finally {
-
-    ocultarLoading();
-
-  }
-
-}
-
-
-
-/* ======================================================
-   DESCARGAR BASE64
-   ====================================================== */
-
-function descargarBase64(
-  base64,
-  filename,
-  mime
-) {
-
-  const byteCharacters =
-    atob(base64);
-
-
-  const byteNumbers =
-    new Array(
-      byteCharacters.length
-    );
-
-
-  for (
-    let i = 0;
-    i < byteCharacters.length;
-    i++
-  ) {
-
-    byteNumbers[i] =
-      byteCharacters.charCodeAt(i);
-
-  }
-
-
-  const byteArray =
-    new Uint8Array(
-      byteNumbers
-    );
-
-
-  const blob =
-    new Blob(
-      [byteArray],
-      {
-        type: mime
-      }
-    );
-
-
-  const url =
-    URL.createObjectURL(
-      blob
-    );
-
-
-  const a =
-    document.createElement(
-      "a"
-    );
-
-
-  a.href =
-    url;
-
-
-  a.download =
-    filename;
-
-
-  document.body.appendChild(
-    a
-  );
-
-
-  a.click();
-
-
-  a.remove();
-
-
-  setTimeout(
-    function() {
-
-      URL.revokeObjectURL(
-        url
-      );
-
-    },
-    1000
-  );
-
-}
-
-
-
-/* ======================================================
-   MOSTRAR DEVOLUCIONES
-   ====================================================== */
-
-function mostrarDevoluciones() {
-
-  tablaDevoluciones.innerHTML =
-    "";
-
-
-  if (
-    !devoluciones ||
-    devoluciones.length === 0
-  ) {
-
-    tablaDevoluciones.innerHTML = `
-
-      <tr>
-
-        <td
-          colspan="7"
-          class="empty"
-        >
-          No existen devoluciones registradas.
-        </td>
-
-      </tr>
-
-    `;
-
-    return;
-
-  }
-
-
-  devoluciones.forEach(
-    function(dev) {
-
-      const tr =
-        document.createElement(
-          "tr"
+        query.append(
+          "callback",
+          callbackName
         );
 
 
-      tr.innerHTML = `
+        Object.keys(parametros).forEach(
+          function(key) {
 
-        <td>
-          ${escapeHtml(dev.consecutivo)}
-        </td>
-
-        <td>
-          ${escapeHtml(dev.fecha)}
-        </td>
-
-        <td>
-          ${escapeHtml(dev.funcionario)}
-        </td>
-
-        <td>
-          ${escapeHtml(dev.placa)}
-        </td>
-
-        <td>
-          ${escapeHtml(dev.documento)}
-        </td>
-
-        <td>
-          ${escapeHtml(dev.ciudadano)}
-        </td>
-
-        <td>
-
-          <button
-            class="action-button"
-            type="button"
-            data-id="${escapeHtml(dev.consecutivo)}"
-          >
-            Ver / PDF
-          </button>
-
-        </td>
-
-      `;
-
-
-      tr
-        .querySelector(
-          ".action-button"
-        )
-        .addEventListener(
-          "click",
-          function() {
-
-            mostrarDetalle(
-              dev.consecutivo
+            query.append(
+              key,
+              parametros[key]
             );
 
           }
         );
 
 
-      tablaDevoluciones.appendChild(
-        tr
+        let terminado = false;
+
+
+        const timeout =
+          setTimeout(
+            function() {
+
+              if (terminado) return;
+
+              terminado = true;
+
+              limpiar();
+
+
+              reject(
+                new Error(
+                  "Tiempo de espera agotado al comunicarse con Google Apps Script."
+                )
+              );
+
+            },
+            30000
+          );
+
+
+        window[callbackName] =
+          function(data) {
+
+            if (terminado) return;
+
+            terminado = true;
+
+            clearTimeout(timeout);
+
+            limpiar();
+
+
+            console.log(
+              "Respuesta Apps Script:",
+              data
+            );
+
+
+            resolve(data);
+
+          };
+
+
+        script.onerror =
+          function() {
+
+            if (terminado) return;
+
+            terminado = true;
+
+            clearTimeout(timeout);
+
+            limpiar();
+
+
+            reject(
+              new Error(
+                "No fue posible conectarse con Google Apps Script."
+              )
+            );
+
+          };
+
+
+        function limpiar() {
+
+          try {
+
+            delete window[callbackName];
+
+          } catch (e) {
+
+            console.warn(
+              "No fue posible eliminar callback.",
+              e
+            );
+
+          }
+
+
+          if (
+            script.parentNode
+          ) {
+
+            script.parentNode.removeChild(
+              script
+            );
+
+          }
+
+        }
+
+
+        script.src =
+          API_URL +
+          "?" +
+          query.toString();
+
+
+        console.log(
+          "Consultando API:",
+          script.src
+        );
+
+
+        document.body.appendChild(
+          script
+        );
+
+      });
+
+    }
+
+
+    /* ======================================================
+       ELEMENTOS
+       ====================================================== */
+
+    const message =
+      document.getElementById(
+        "message"
+      );
+
+
+    const loading =
+      document.getElementById(
+        "loading"
+      );
+
+
+    const loadingText =
+      document.getElementById(
+        "loadingText"
+      );
+
+
+    const funcionario =
+      document.getElementById(
+        "funcionario"
+      );
+
+
+    const detalles =
+      document.getElementById(
+        "detalles"
+      );
+
+
+    const tablaDevoluciones =
+      document.getElementById(
+        "tablaDevoluciones"
+      );
+
+
+    const modalDetalle =
+      document.getElementById(
+        "modalDetalle"
+      );
+
+
+    const contenidoDetalle =
+      document.getElementById(
+        "contenidoDetalle"
+      );
+
+
+    /* ======================================================
+       INICIALIZACIÓN
+       ====================================================== */
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      function() {
+
+        establecerFecha();
+
+        configurarEventos();
+
+        agregarDetalle();
+
+        cargarDatos();
+
+      }
+    );
+
+
+    /* ======================================================
+       EVENTOS
+       ====================================================== */
+
+    function configurarEventos() {
+
+
+      document
+        .getElementById(
+          "btnAgregarDetalle"
+        )
+        .addEventListener(
+          "click",
+          agregarDetalle
+        );
+
+
+      document
+        .getElementById(
+          "btnGuardar"
+        )
+        .addEventListener(
+          "click",
+          guardar
+        );
+
+
+      document
+        .getElementById(
+          "btnLimpiar"
+        )
+        .addEventListener(
+          "click",
+          limpiarFormulario
+        );
+
+
+      document
+        .getElementById(
+          "btnCerrarModal"
+        )
+        .addEventListener(
+          "click",
+          cerrarModal
+        );
+
+
+      document
+        .getElementById(
+          "placa"
+        )
+        .addEventListener(
+          "input",
+          function() {
+
+            this.value =
+              this.value
+                .toUpperCase()
+                .replace(
+                  /\s/g,
+                  ""
+                );
+
+          }
+        );
+
+
+      document
+        .getElementById(
+          "ciudadano"
+        )
+        .addEventListener(
+          "input",
+          function() {
+
+            this.value =
+              this.value.toUpperCase();
+
+          }
+        );
+
+
+      document
+        .getElementById(
+          "documento"
+        )
+        .addEventListener(
+          "input",
+          function() {
+
+            this.value =
+              this.value.replace(
+                /[^0-9]/g,
+                ""
+              );
+
+          }
+        );
+
+    }
+
+
+    /* ======================================================
+       FECHA ACTUAL
+       ====================================================== */
+
+    function establecerFecha() {
+
+      const ahora =
+        new Date();
+
+
+      const yyyy =
+        ahora.getFullYear();
+
+
+      const mm =
+        String(
+          ahora.getMonth() + 1
+        ).padStart(
+          2,
+          "0"
+        );
+
+
+      const dd =
+        String(
+          ahora.getDate()
+        ).padStart(
+          2,
+          "0"
+        );
+
+
+      document
+        .getElementById(
+          "fecha"
+        )
+        .value =
+          `${yyyy}-${mm}-${dd}`;
+
+    }
+
+
+    /* ======================================================
+       CARGAR DATOS
+       ====================================================== */
+
+    async function cargarDatos() {
+
+      mostrarLoading(
+        "Cargando funcionarios, motivos y devoluciones..."
+      );
+
+
+      try {
+
+        console.log(
+          "Iniciando getInitialData..."
+        );
+
+
+        const data =
+          await llamarAPI(
+            "getInitialData"
+          );
+
+
+        console.log(
+          "Datos recibidos:",
+          data
+        );
+
+
+        if (
+          !data ||
+          data.ok === false
+        ) {
+
+          throw new Error(
+            (
+              data &&
+              data.error
+            ) ||
+            "El servidor no devolvió información válida."
+          );
+
+        }
+
+
+        funcionarios =
+          Array.isArray(
+            data.funcionarios
+          )
+            ? data.funcionarios
+            : [];
+
+
+        motivos =
+          Array.isArray(
+            data.motivos
+          )
+            ? data.motivos
+            : [];
+
+
+        devoluciones =
+          Array.isArray(
+            data.devoluciones
+          )
+            ? data.devoluciones
+            : [];
+
+
+        console.log(
+          "Funcionarios:",
+          funcionarios
+        );
+
+
+        console.log(
+          "Motivos:",
+          motivos
+        );
+
+
+        console.log(
+          "Devoluciones:",
+          devoluciones
+        );
+
+
+        cargarFuncionarios();
+
+        cargarMotivos();
+
+        mostrarDevoluciones();
+
+
+        if (
+          funcionarios.length === 0
+        ) {
+
+          console.warn(
+            "La lista de funcionarios llegó vacía."
+          );
+
+        }
+
+
+        if (
+          motivos.length === 0
+        ) {
+
+          console.warn(
+            "La lista de motivos llegó vacía."
+          );
+
+        }
+
+
+        mostrarMensaje(
+          "Información cargada correctamente.",
+          "success"
+        );
+
+
+        setTimeout(
+          ocultarMensaje,
+          2500
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "ERROR cargarDatos:",
+          error
+        );
+
+
+        mostrarMensaje(
+          "No se pudo cargar la información. " +
+          error.message,
+          "error"
+        );
+
+
+        funcionario.innerHTML =
+          `
+            <option value="">
+              Error al cargar funcionarios
+            </option>
+          `;
+
+
+      } finally {
+
+        ocultarLoading();
+
+      }
+
+    }
+
+
+    /* ======================================================
+       FUNCIONARIOS
+       ====================================================== */
+
+    function cargarFuncionarios() {
+
+      funcionario.innerHTML =
+        "";
+
+
+      const opcionInicial =
+        document.createElement(
+          "option"
+        );
+
+
+      opcionInicial.value =
+        "";
+
+
+      opcionInicial.textContent =
+        funcionarios.length > 0
+          ? "Seleccione funcionario"
+          : "No hay funcionarios disponibles";
+
+
+      funcionario.appendChild(
+        opcionInicial
+      );
+
+
+      funcionarios.forEach(
+        function(nombre) {
+
+          if (
+            nombre === null ||
+            nombre === undefined ||
+            String(nombre).trim() === ""
+          ) {
+
+            return;
+
+          }
+
+
+          const option =
+            document.createElement(
+              "option"
+            );
+
+
+          option.value =
+            String(nombre);
+
+
+          option.textContent =
+            String(nombre);
+
+
+          funcionario.appendChild(
+            option
+          );
+
+        }
       );
 
     }
-  );
-
-}
 
 
+    /* ======================================================
+       CARGAR MOTIVOS
+       ====================================================== */
 
-/* ======================================================
-   MOSTRAR DETALLE
-   ====================================================== */
+    function cargarMotivos() {
 
-async function mostrarDetalle(id) {
-
-  modalDetalle.classList.add(
-    "show"
-  );
-
-
-  contenidoDetalle.innerHTML =
-    "Cargando detalle...";
+      const selects =
+        detalles.querySelectorAll(
+          ".motivo"
+        );
 
 
-  try {
+      selects.forEach(
+        function(select) {
 
-    const data =
-      await llamarAPI(
-        "getDetalleDevolucion",
-        { id: id }
+          const valorActual =
+            select.value;
+
+
+          select.innerHTML =
+            "";
+
+
+          const opcionInicial =
+            document.createElement(
+              "option"
+            );
+
+
+          opcionInicial.value =
+            "";
+
+
+          opcionInicial.textContent =
+            motivos.length > 0
+              ? "Seleccione motivo"
+              : "No hay motivos disponibles";
+
+
+          select.appendChild(
+            opcionInicial
+          );
+
+
+          motivos.forEach(
+            function(motivo) {
+
+              if (
+                motivo === null ||
+                motivo === undefined ||
+                String(motivo).trim() === ""
+              ) {
+
+                return;
+
+              }
+
+
+              const option =
+                document.createElement(
+                  "option"
+                );
+
+
+              option.value =
+                String(motivo);
+
+
+              option.textContent =
+                String(motivo);
+
+
+              select.appendChild(
+                option
+              );
+
+            }
+          );
+
+
+          if (
+            valorActual
+          ) {
+
+            select.value =
+              valorActual;
+
+          }
+
+        }
       );
 
-    if (!data || data.ok === false) {
-      throw new Error(
-        (data && data.error) ||
-        "No se pudo consultar el detalle."
-      );
     }
 
 
-    if (data.error) {
+    /* ======================================================
+       AGREGAR DETALLE
+       ====================================================== */
 
-      throw new Error(
-        data.error
-      );
+    function agregarDetalle() {
 
-    }
-
-
-    const lista =
-      data.detalles || [];
-
-
-    let html = `
-
-      <div
-        style="
-          margin-bottom:15px;
-          font-weight:600;
-        "
-      >
-        Consecutivo:
-        ${escapeHtml(id)}
-      </div>
-
-    `;
+      const div =
+        document.createElement(
+          "div"
+        );
 
 
-    if (
-      lista.length === 0
-    ) {
+      div.className =
+        "detalle-item";
 
-      html += `
 
-        <div class="empty">
-          No hay detalles registrados.
+      div.innerHTML = `
+
+        <button
+          type="button"
+          class="detalle-remove"
+          title="Eliminar motivo"
+        >
+          ×
+        </button>
+
+
+        <div class="detalle-grid">
+
+
+          <div class="form-group">
+
+            <label>
+              Motivo
+            </label>
+
+            <select
+              class="motivo"
+            >
+
+              <option value="">
+                ${
+                  motivos.length > 0
+                    ? "Seleccione motivo"
+                    : "Cargando motivos..."
+                }
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Observación
+            </label>
+
+            <textarea
+              class="observacion"
+              placeholder="Ingrese observación"
+            ></textarea>
+
+          </div>
+
+
         </div>
 
       `;
 
-    } else {
 
-      html += `
-
-        <div class="table-wrapper">
-
-          <table>
-
-            <thead>
-
-              <tr>
-
-                <th>
-                  N.º
-                </th>
-
-                <th>
-                  Motivo
-                </th>
-
-                <th>
-                  Observación
-                </th>
-
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-      `;
+      const select =
+        div.querySelector(
+          ".motivo"
+        );
 
 
-      lista.forEach(
-        function(det) {
+      motivos.forEach(
+        function(motivo) {
+
+          if (
+            motivo === null ||
+            motivo === undefined ||
+            String(motivo).trim() === ""
+          ) {
+
+            return;
+
+          }
+
+
+          const option =
+            document.createElement(
+              "option"
+            );
+
+
+          option.value =
+            String(motivo);
+
+
+          option.textContent =
+            String(motivo);
+
+
+          select.appendChild(
+            option
+          );
+
+        }
+      );
+
+
+      div
+        .querySelector(
+          ".detalle-remove"
+        )
+        .addEventListener(
+          "click",
+          function() {
+
+            div.remove();
+
+
+            if (
+              detalles.children.length === 0
+            ) {
+
+              agregarDetalle();
+
+            }
+
+          }
+        );
+
+
+      detalles.appendChild(
+        div
+      );
+
+    }
+
+
+    /* ======================================================
+       OBTENER DETALLES
+       ====================================================== */
+
+    function obtenerDetalles() {
+
+      const elementos =
+        detalles.querySelectorAll(
+          ".detalle-item"
+        );
+
+
+      const resultado =
+        [];
+
+
+      elementos.forEach(
+        function(item) {
+
+          const motivo =
+            item
+              .querySelector(
+                ".motivo"
+              )
+              .value;
+
+
+          const observacion =
+            item
+              .querySelector(
+                ".observacion"
+              )
+              .value
+              .trim();
+
+
+          if (
+            motivo ||
+            observacion
+          ) {
+
+            resultado.push({
+
+              motivo:
+                motivo,
+
+              observacion:
+                observacion
+
+            });
+
+          }
+
+        }
+      );
+
+
+      return resultado;
+
+    }
+
+
+    /* ======================================================
+       GUARDAR
+       ====================================================== */
+
+    async function guardar() {
+
+      const funcionarioValor =
+        funcionario.value;
+
+
+      const placa =
+        document
+          .getElementById(
+            "placa"
+          )
+          .value
+          .trim()
+          .toUpperCase();
+
+
+      const documento =
+        document
+          .getElementById(
+            "documento"
+          )
+          .value
+          .trim();
+
+
+      const ciudadano =
+        document
+          .getElementById(
+            "ciudadano"
+          )
+          .value
+          .trim()
+          .toUpperCase();
+
+
+      const fecha =
+        document
+          .getElementById(
+            "fecha"
+          )
+          .value;
+
+
+      const detalle =
+        obtenerDetalles();
+
+
+      if (!funcionarioValor) {
+
+        mostrarMensaje(
+          "Seleccione el funcionario.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      if (!placa) {
+
+        mostrarMensaje(
+          "Ingrese la placa.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      if (!documento) {
+
+        mostrarMensaje(
+          "Ingrese el documento.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      if (!ciudadano) {
+
+        mostrarMensaje(
+          "Ingrese el nombre del ciudadano.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      if (!fecha) {
+
+        mostrarMensaje(
+          "Seleccione la fecha.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      if (
+        detalle.length === 0
+      ) {
+
+        mostrarMensaje(
+          "Agregue al menos un motivo de devolución.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      for (
+        let i = 0;
+        i < detalle.length;
+        i++
+      ) {
+
+        if (
+          !detalle[i].motivo
+        ) {
+
+          mostrarMensaje(
+            "Seleccione el motivo de cada detalle.",
+            "error"
+          );
+
+          return;
+
+        }
+
+      }
+
+
+      const master = {
+
+        funcionario:
+          funcionarioValor,
+
+        placa:
+          placa,
+
+        documento:
+          documento,
+
+        ciudadano:
+          ciudadano,
+
+        fecha:
+          fecha
+
+      };
+
+
+      mostrarLoading(
+        "Guardando devolución..."
+      );
+
+
+      try {
+
+        const data =
+          await llamarAPI(
+            "guardarDevolucion",
+            {
+
+              data:
+                JSON.stringify({
+                  master:
+                    master,
+
+                  detalles:
+                    detalle
+                })
+
+            }
+          );
+
+
+        if (
+          !data ||
+          data.ok === false
+        ) {
+
+          throw new Error(
+            (
+              data &&
+              data.error
+            ) ||
+            "Error de comunicación con Apps Script."
+          );
+
+        }
+
+
+        if (
+          data.error
+        ) {
+
+          throw new Error(
+            data.error
+          );
+
+        }
+
+
+        const id =
+          data.id;
+
+
+        document
+          .getElementById(
+            "consecutivo"
+          )
+          .value =
+            id || "";
+
+
+        mostrarMensaje(
+          "Devolución guardada correctamente. " +
+          "Consecutivo: " +
+          id,
+          "success"
+        );
+
+
+        await cargarDatos();
+
+
+        const generar =
+          confirm(
+            "La devolución fue guardada correctamente.\n\n" +
+            "Consecutivo: " +
+            id +
+            "\n\n" +
+            "¿Desea generar el PDF?"
+          );
+
+
+        if (
+          generar
+        ) {
+
+          await generarPDF(
+            id
+          );
+
+        }
+
+
+      } catch (error) {
+
+        console.error(
+          "ERROR guardar:",
+          error
+        );
+
+
+        mostrarMensaje(
+          "Error al guardar: " +
+          error.message,
+          "error"
+        );
+
+
+      } finally {
+
+        ocultarLoading();
+
+      }
+
+    }
+
+
+    /* ======================================================
+       GENERAR PDF
+       ====================================================== */
+
+    async function generarPDF(id) {
+
+      if (!id) {
+
+        mostrarMensaje(
+          "No se recibió el consecutivo.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      mostrarLoading(
+        "Generando PDF..."
+      );
+
+
+      try {
+
+        const data =
+          await llamarAPI(
+            "generarPDF",
+            {
+              id:
+                id
+            }
+          );
+
+
+        if (
+          !data ||
+          data.ok === false
+        ) {
+
+          throw new Error(
+            (
+              data &&
+              data.error
+            ) ||
+            "No fue posible generar el PDF."
+          );
+
+        }
+
+
+        if (
+          data.error
+        ) {
+
+          throw new Error(
+            data.error
+          );
+
+        }
+
+
+        if (
+          !data.base64 ||
+          !data.filename
+        ) {
+
+          throw new Error(
+            "La respuesta no contiene el PDF."
+          );
+
+        }
+
+
+        descargarBase64(
+          data.base64,
+          data.filename,
+          "application/pdf"
+        );
+
+
+        mostrarMensaje(
+          "PDF generado correctamente.",
+          "success"
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "ERROR generar PDF:",
+          error
+        );
+
+
+        mostrarMensaje(
+          "Error al generar PDF: " +
+          error.message,
+          "error"
+        );
+
+
+      } finally {
+
+        ocultarLoading();
+
+      }
+
+    }
+
+
+    /* ======================================================
+       DESCARGAR BASE64
+       ====================================================== */
+
+    function descargarBase64(
+      base64,
+      filename,
+      mime
+    ) {
+
+      try {
+
+        const byteCharacters =
+          atob(base64);
+
+
+        const byteNumbers =
+          new Array(
+            byteCharacters.length
+          );
+
+
+        for (
+          let i = 0;
+          i < byteCharacters.length;
+          i++
+        ) {
+
+          byteNumbers[i] =
+            byteCharacters.charCodeAt(
+              i
+            );
+
+        }
+
+
+        const byteArray =
+          new Uint8Array(
+            byteNumbers
+          );
+
+
+        const blob =
+          new Blob(
+            [byteArray],
+            {
+              type:
+                mime
+            }
+          );
+
+
+        const url =
+          URL.createObjectURL(
+            blob
+          );
+
+
+        const a =
+          document.createElement(
+            "a"
+          );
+
+
+        a.href =
+          url;
+
+
+        a.download =
+          filename;
+
+
+        document.body.appendChild(
+          a
+        );
+
+
+        a.click();
+
+
+        a.remove();
+
+
+        setTimeout(
+          function() {
+
+            URL.revokeObjectURL(
+              url
+            );
+
+          },
+          1000
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "Error descargando archivo:",
+          error
+        );
+
+
+        mostrarMensaje(
+          "No fue posible descargar el PDF.",
+          "error"
+        );
+
+      }
+
+    }
+
+
+    /* ======================================================
+       MOSTRAR DEVOLUCIONES
+       ====================================================== */
+
+    function mostrarDevoluciones() {
+
+      tablaDevoluciones.innerHTML =
+        "";
+
+
+      if (
+        !devoluciones ||
+        devoluciones.length === 0
+      ) {
+
+        tablaDevoluciones.innerHTML = `
+
+          <tr>
+
+            <td
+              colspan="7"
+              class="empty"
+            >
+              No existen devoluciones registradas.
+            </td>
+
+          </tr>
+
+        `;
+
+        return;
+
+      }
+
+
+      devoluciones.forEach(
+        function(dev) {
+
+          const tr =
+            document.createElement(
+              "tr"
+            );
+
+
+          tr.innerHTML = `
+
+            <td>
+              ${escapeHtml(
+                dev.consecutivo
+              )}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                dev.fecha
+              )}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                dev.funcionario
+              )}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                dev.placa
+              )}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                dev.documento
+              )}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                dev.ciudadano
+              )}
+            </td>
+
+            <td>
+
+              <button
+                class="action-button"
+                type="button"
+              >
+                Ver / PDF
+              </button>
+
+            </td>
+
+          `;
+
+
+          tr
+            .querySelector(
+              ".action-button"
+            )
+            .addEventListener(
+              "click",
+              function() {
+
+                mostrarDetalle(
+                  dev.consecutivo
+                );
+
+              }
+            );
+
+
+          tablaDevoluciones.appendChild(
+            tr
+          );
+
+        }
+      );
+
+    }
+
+
+    /* ======================================================
+       MOSTRAR DETALLE
+       ====================================================== */
+
+    async function mostrarDetalle(id) {
+
+      modalDetalle.classList.add(
+        "show"
+      );
+
+
+      contenidoDetalle.innerHTML =
+        "Cargando detalle...";
+
+
+      try {
+
+        const data =
+          await llamarAPI(
+            "getDetalleDevolucion",
+            {
+              id:
+                id
+            }
+          );
+
+
+        if (
+          !data ||
+          data.ok === false
+        ) {
+
+          throw new Error(
+            (
+              data &&
+              data.error
+            ) ||
+            "No se pudo consultar el detalle."
+          );
+
+        }
+
+
+        if (
+          data.error
+        ) {
+
+          throw new Error(
+            data.error
+          );
+
+        }
+
+
+        const lista =
+          data.detalles || [];
+
+
+        let html = `
+
+          <div
+            style="
+              margin-bottom:15px;
+              font-weight:600;
+            "
+          >
+            Consecutivo:
+            ${escapeHtml(id)}
+          </div>
+
+        `;
+
+
+        if (
+          lista.length === 0
+        ) {
 
           html += `
 
-            <tr>
+            <div class="empty">
+              No hay detalles registrados.
+            </div>
 
-              <td>
-                ${escapeHtml(det.nro)}
-              </td>
+          `;
 
-              <td>
-                ${escapeHtml(det.motivo)}
-              </td>
+        } else {
 
-              <td>
-                ${escapeHtml(det.observacion)}
-              </td>
+          html += `
 
-            </tr>
+            <div class="table-wrapper">
+
+              <table>
+
+                <thead>
+
+                  <tr>
+
+                    <th>
+                      N.º
+                    </th>
+
+                    <th>
+                      Motivo
+                    </th>
+
+                    <th>
+                      Observación
+                    </th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody>
+
+          `;
+
+
+          lista.forEach(
+            function(det) {
+
+              html += `
+
+                <tr>
+
+                  <td>
+                    ${escapeHtml(
+                      det.nro
+                    )}
+                  </td>
+
+                  <td>
+                    ${escapeHtml(
+                      det.motivo
+                    )}
+                  </td>
+
+                  <td>
+                    ${escapeHtml(
+                      det.observacion
+                    )}
+                  </td>
+
+                </tr>
+
+              `;
+
+            }
+          );
+
+
+          html += `
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+
+            <div
+              style="
+                margin-top:18px;
+                display:flex;
+                justify-content:flex-end;
+              "
+            >
+
+              <button
+                type="button"
+                class="btn-success"
+                id="btnPDFModal"
+              >
+                Generar PDF
+              </button>
+
+            </div>
 
           `;
 
         }
-      );
 
 
-      html += `
-
-            </tbody>
-
-          </table>
-
-        </div>
+        contenidoDetalle.innerHTML =
+          html;
 
 
-        <div
-          style="
-            margin-top:18px;
-            display:flex;
-            justify-content:flex-end;
-          "
-        >
-
-          <button
-            type="button"
-            class="btn-success"
-            id="btnPDFModal"
-          >
-            Generar PDF
-          </button>
-
-        </div>
-
-      `;
-
-    }
+        const btnPDF =
+          document.getElementById(
+            "btnPDFModal"
+          );
 
 
-    contenidoDetalle.innerHTML =
-      html;
+        if (
+          btnPDF
+        ) {
 
+          btnPDF.addEventListener(
+            "click",
+            function() {
 
-    const btnPDF =
-      document.getElementById(
-        "btnPDFModal"
-      );
+              generarPDF(
+                id
+              );
 
-
-    if (btnPDF) {
-
-      btnPDF.addEventListener(
-        "click",
-        function() {
-
-          generarPDF(id);
+            }
+          );
 
         }
+
+
+      } catch (error) {
+
+        console.error(
+          "ERROR detalle:",
+          error
+        );
+
+
+        contenidoDetalle.innerHTML = `
+
+          <div class="message error show">
+
+            ${escapeHtml(
+              error.message
+            )}
+
+          </div>
+
+        `;
+
+      }
+
+    }
+
+
+    /* ======================================================
+       CERRAR MODAL
+       ====================================================== */
+
+    function cerrarModal() {
+
+      modalDetalle.classList.remove(
+        "show"
       );
 
     }
 
 
-  } catch (error) {
+    /* ======================================================
+       CERRAR MODAL AL HACER CLIC AFUERA
+       ====================================================== */
 
-    contenidoDetalle.innerHTML = `
+    modalDetalle.addEventListener(
+      "click",
+      function(event) {
 
-      <div class="message error show">
+        if (
+          event.target ===
+          modalDetalle
+        ) {
 
-        ${escapeHtml(
-          error.message
-        )}
+          cerrarModal();
 
-      </div>
+        }
 
-    `;
-
-  }
-
-}
-
-
-
-/* ======================================================
-   CERRAR MODAL
-   ====================================================== */
-
-function cerrarModal() {
-
-  modalDetalle.classList.remove(
-    "show"
-  );
-
-}
-
-
-
-/* ======================================================
-   LIMPIAR FORMULARIO
-   ====================================================== */
-
-function limpiarFormulario() {
-
-  document
-    .getElementById("consecutivo")
-    .value = "";
-
-
-  document
-    .getElementById("placa")
-    .value = "";
-
-
-  document
-    .getElementById("documento")
-    .value = "";
-
-
-  document
-    .getElementById("ciudadano")
-    .value = "";
-
-
-  funcionario.value =
-    "";
-
-
-  establecerFecha();
-
-
-  detalles.innerHTML =
-    "";
-
-
-  agregarDetalle();
-
-
-  ocultarMensaje();
-
-}
-
-
-
-/* ======================================================
-   MENSAJES
-   ====================================================== */
-
-function mostrarMensaje(
-  texto,
-  tipo
-) {
-
-  message.textContent =
-    texto;
-
-
-  message.className =
-    "message show " +
-    tipo;
-
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
-
-}
-
-
-function ocultarMensaje() {
-
-  message.className =
-    "message";
-
-}
-
-
-
-/* ======================================================
-   LOADING
-   ====================================================== */
-
-function mostrarLoading(
-  texto
-) {
-
-  loadingText.textContent =
-    texto ||
-    "Procesando...";
-
-
-  loading.classList.add(
-    "show"
-  );
-
-}
-
-
-function ocultarLoading() {
-
-  loading.classList.remove(
-    "show"
-  );
-
-}
-
-
-
-/* ======================================================
-   SEGURIDAD HTML
-   ====================================================== */
-
-function escapeHtml(
-  valor
-) {
-
-  if (
-    valor === null ||
-    valor === undefined
-  ) {
-
-    return "";
-
-  }
-
-
-  return String(valor)
-
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-
-    .replace(
-      /</g,
-      "&lt;"
-    )
-
-    .replace(
-      />/g,
-      "&gt;"
-    )
-
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-
-    .replace(
-      /'/g,
-      "&#039;"
+      }
     );
 
-}
 
-</script>
+    /* ======================================================
+       LIMPIAR FORMULARIO
+       ====================================================== */
+
+    function limpiarFormulario() {
+
+      document
+        .getElementById(
+          "consecutivo"
+        )
+        .value =
+          "";
+
+
+      document
+        .getElementById(
+          "placa"
+        )
+        .value =
+          "";
+
+
+      document
+        .getElementById(
+          "documento"
+        )
+        .value =
+          "";
+
+
+      document
+        .getElementById(
+          "ciudadano"
+        )
+        .value =
+          "";
+
+
+      funcionario.value =
+        "";
+
+
+      establecerFecha();
+
+
+      detalles.innerHTML =
+        "";
+
+
+      agregarDetalle();
+
+
+      ocultarMensaje();
+
+    }
+
+
+    /* ======================================================
+       MENSAJES
+       ====================================================== */
+
+    function mostrarMensaje(
+      texto,
+      tipo
+    ) {
+
+      message.textContent =
+        texto;
+
+
+      message.className =
+        "message show " +
+        tipo;
+
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+
+    }
+
+
+    function ocultarMensaje() {
+
+      message.className =
+        "message";
+
+    }
+
+
+    /* ======================================================
+       LOADING
+       ====================================================== */
+
+    function mostrarLoading(
+      texto
+    ) {
+
+      loadingText.textContent =
+        texto ||
+        "Procesando...";
+
+
+      loading.classList.add(
+        "show"
+      );
+
+    }
+
+
+    function ocultarLoading() {
+
+      loading.classList.remove(
+        "show"
+      );
+
+    }
+
+
+    /* ======================================================
+       SEGURIDAD HTML
+       ====================================================== */
+
+    function escapeHtml(
+      valor
+    ) {
+
+      if (
+        valor === null ||
+        valor === undefined
+      ) {
+
+        return "";
+
+      }
+
+
+      return String(valor)
+
+        .replace(
+          /&/g,
+          "&amp;"
+        )
+
+        .replace(
+          /</g,
+          "&lt;"
+        )
+
+        .replace(
+          />/g,
+          "&gt;"
+        )
+
+        .replace(
+          /"/g,
+          "&quot;"
+        )
+
+        .replace(
+          /'/g,
+          "&#039;"
+        );
+
+    }
+
+
+  </script>
 
 </body>
+
 </html>
+```
