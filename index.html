@@ -1417,6 +1417,7 @@ async function cargarDatos() {
 
 
     cargarFuncionarios();
+    cargarMotivos();
 
     mostrarDevoluciones();
 
@@ -1472,6 +1473,43 @@ function cargarFuncionarios() {
 
     }
   );
+
+}
+
+
+/* ======================================================
+   CARGAR MOTIVOS EN LOS MENÚS DESPLEGABLES
+   ====================================================== */
+
+function cargarMotivos() {
+
+  const selects =
+    detalles.querySelectorAll(".motivo");
+
+  selects.forEach(function(select) {
+
+    const valorActual = select.value;
+
+    select.innerHTML =
+      '<option value="">Seleccione motivo</option>';
+
+    motivos.forEach(function(motivo) {
+
+      const option =
+        document.createElement("option");
+
+      option.value = motivo;
+      option.textContent = motivo;
+
+      select.appendChild(option);
+
+    });
+
+    if (valorActual) {
+      select.value = valorActual;
+    }
+
+  });
 
 }
 
