@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DEVOLUCIÓN DE TRÁMITES</title>
+  
+  <!-- Librerías para generar el PDF localmente de forma rápida y profesional -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #333; padding: 20px; }
@@ -19,11 +24,19 @@
     .form-group label { font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: #555; }
     .form-group label .req { color: #d32f2f; }
     .form-group input, .form-group select, .form-group textarea {
-      padding: 9px 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 0.9rem; transition: border-color 0.2s;
+      padding: 9px 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 0.9rem; transition: all 0.2s;
     }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #1a237e; }
-    .btn { padding: 10px 18px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
-    .btn:hover { opacity: 0.85; }
+    
+    /* NUEVO: Estilo para campos inválidos */
+    .invalid { border-color: #d32f2f !important; background-color: #ffebee !important; }
+    
+    .btn { padding: 10px 18px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: opacity 0.2s; }
+    .btn:hover:not(:disabled) { opacity: 0.85; }
+    
+    /* NUEVO: Estilo para botones deshabilitados */
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
     .btn-primary { background: #1a237e; color: #fff; }
     .btn-success { background: #2e7d32; color: #fff; }
     .btn-secondary { background: #78909c; color: #fff; }
@@ -195,35 +208,143 @@ function renderDetalles() {
 
 function quitarMotivo(i) { detallesFormulario.splice(i, 1); renderDetalles(); }
 
+// NUEVO: Generador de PDF Local con jsPDF
+function generarPDFLocal(consecutivo, fecha, funcionario, placa, documento, ciudadano, detalles) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Encabezado
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text("DEVOLUCIÓN DE TRÁMITES", 105, 15, { align: 'center' });
+    
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text("Secretaría de Movilidad - La Ceja del Tambo", 105, 22, { align: 'center' });
+
+    // Línea divisoria
+    doc.setLineWidth(0.5);
+    doc.line(14, 26, 196, 26);
+
+    // Datos Generales
+    let y = 35;
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.text(`Consecutivo:`, 14, y);
+    doc.text(`Fecha:`, 130, y);
+    
+    doc.setFont(undefined, 'normal');
+    doc.text(`${consecutivo || 'N/A'}`, 42, y);
+    doc.text(`${fecha}`, 145, y);
+
+    y += 8;
+    doc.setFont(undefined, 'bold');
+    doc.text(`Funcionario:`, 14, y);
+    doc.setFont(undefined, 'normal');
+    doc.text(`${funcionario}`, 45, y);
+
+    y += 8;
+    doc.setFont(undefined, 'bold');
+    doc.text(`Placa:`, 14, y);
+    doc.text(`Documento:`, 130, y);
+    doc.setFont(undefined, 'normal');
+    doc.text(`${placa}`, 30, y);
+    doc.text(`${documento || 'N/A'}`, 155, y);
+
+    y += 8;
+    doc.setFont(undefined, 'bold');
+    doc.text(`Ciudadano:`, 14, y);
+    doc.setFont(undefined, 'normal');
+    doc.text(`${ciudadano}`, 40, y);
+
+    // Tabla de detalles
+    doc.autoTable({
+        startY: y + 10,
+        head: [['N°', 'Motivo', 'Observación']],
+        body: detalles.map((d, i) => [i + 1, d.motivo, d.observacion || '-']),
+        headStyles: { fillColor: [26, 35, 126], textColor: 255, fontStyle: 'bold' },
+        styles: { fontSize: 10, cellPadding: 3 },
+        columnStyles: {
+            0: { cellWidth: 15 },
+            1: { cellWidth: 70 },
+            2: { cellWidth: 'auto' }
+        }
+    });
+
+    // Pie de página
+    const pageCount = doc.internal.getNumberOfPages();
+    for(let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(100);
+        doc.text(`Página ${i} de ${pageCount}`, 105, 290, { align: 'center' });
+        doc.text(`Generado el: ${new Date().toLocaleString('es-CO')}`, 14, 290);
+    }
+
+    doc.save(`Devolucion_${placa}_${consecutivo || fecha}.pdf`);
+}
+
 function guardarDevolucion(generarPDF = false) {
+  // 1. Validación visual de campos obligatorios
+  let valid = true;
+  const camposReq = ['inpFecha', 'selFuncionario', 'inpPlaca', 'inpCiudadano'];
+  camposReq.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el.value.trim()) {
+      el.classList.add('invalid');
+      valid = false;
+    } else {
+      el.classList.remove('invalid');
+    }
+  });
+  
+  if (!valid) { 
+      mostrarEstado("error", "Por favor complete los campos obligatorios marcados en rojo."); 
+      return; 
+  }
+  if (detallesFormulario.length === 0) { 
+      mostrarEstado("error", "Agregue al menos un motivo a la lista."); 
+      return; 
+  }
+
   const fecha = document.getElementById("inpFecha").value;
   const funcionario = document.getElementById("selFuncionario").value;
   const placa = document.getElementById("inpPlaca").value.trim().toUpperCase();
   const documento = document.getElementById("inpDocumento").value.trim();
   const ciudadano = document.getElementById("inpCiudadano").value.trim();
   
-  if (!fecha || !funcionario || !placa || !ciudadano) { mostrarEstado("error", "Complete los campos obligatorios."); return; }
-  if (detallesFormulario.length === 0) { mostrarEstado("error", "Agregue al menos un motivo."); return; }
-
   const datos = { fecha, funcionario, placa, documento, ciudadano, detalles: detallesFormulario };
-  mostrarEstado("info", '<span class="spinner"></span> Guardando' + (generarPDF ? ' y generando PDF plantilla...' : '...'));
+
+  // 2. Deshabilitar botones para evitar clics dobles
+  const botones = document.querySelectorAll('.acciones .btn');
+  botones.forEach(btn => btn.disabled = true);
+
+  mostrarEstado("info", '<span class="spinner"></span> Guardando' + (generarPDF ? ' y preparando PDF...' : '...'));
   
   ejecutarPeticion({ action: "guardarDevolucion", datos: JSON.stringify(datos) })
     .then(res => {
       if(res.ok) {
-        mostrarEstado("ok", "✅ Guardado! Consecutivo: " + res.consecutivo);
-        if (generarPDF && res.pdfUrl) {
-          window.open(res.pdfUrl, "_blank");
+        mostrarEstado("ok", "✅ Guardado exitosamente! Consecutivo: " + res.consecutivo);
+        
+        if (generarPDF) {
+          // 3. Generación de PDF instantánea en el navegador
+          generarPDFLocal(res.consecutivo, fecha, funcionario, placa, documento, ciudadano, detallesFormulario);
+          mostrarEstado("ok", "✅ Guardado y PDF descargado! Consecutivo: " + res.consecutivo);
         }
+        
         limpiarFormulario();
         cargarDatosIniciales();
       } else { 
-        mostrarEstado("error", "Error: " + res.error); 
+        mostrarEstado("error", "Error al guardar: " + res.error); 
       }
     })
     .catch(err => { 
-      mostrarEstado("error", "Error de red al guardar."); 
+      mostrarEstado("error", "Error de red al guardar los datos."); 
       console.error(err);
+    })
+    .finally(() => {
+      // 4. Reactivar botones al terminar
+      botones.forEach(btn => btn.disabled = false);
     });
 }
 
@@ -244,6 +365,9 @@ function limpiarFormulario() {
   document.getElementById("inpCiudadano").value = "";
   detallesFormulario = []; 
   renderDetalles();
+  
+  // Limpiar validaciones visuales
+  document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
 }
 
 function mostrarEstado(tipo, html) {
@@ -254,6 +378,15 @@ function mostrarEstado(tipo, html) {
 
 document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("inpFecha").value = new Date().toISOString().split("T")[0];
+  
+  // Quitar validación roja cuando el usuario empieza a escribir
+  const camposReq = ['inpFecha', 'selFuncionario', 'inpPlaca', 'inpCiudadano'];
+  camposReq.forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', () => el.classList.remove('invalid'));
+    el.addEventListener('change', () => el.classList.remove('invalid'));
+  });
+  
   cargarDatosIniciales();
 });
 </script>
