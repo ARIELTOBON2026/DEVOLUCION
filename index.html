@@ -26,7 +26,6 @@
     .btn { padding: 10px 18px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: opacity 0.2s; }
     .btn:hover:not(:disabled) { opacity: 0.85; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-primary { background: #1a237e; color: #fff; }
     .btn-success { background: #2e7d32; color: #fff; }
     .btn-secondary { background: #78909c; color: #fff; }
     .btn-danger { background: #c62828; color: #fff; }
@@ -41,7 +40,6 @@
     .estado-msg.info { background: #e3f2fd; color: #1565c0; display: block; }
     .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #ccc; border-top-color: #1a237e; border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 6px; vertical-align: middle; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .devolucion-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
   </style>
 </head>
 <body>
@@ -107,11 +105,6 @@
     </div>
     <div id="msgEstado" class="estado-msg"></div>
   </div>
-
-  <div class="card">
-    <h2>Últimas devoluciones</h2>
-    <div id="listaDevoluciones">Cargando...</div>
-  </div>
 </div>
 
 <script>
@@ -119,14 +112,12 @@ const URL_BACKEND = "https://script.google.com/macros/s/AKfycbxieUrtd6rVF-5KY2t0
 
 let listaFuncionarios = [];
 let listaMotivos = [];
-let listaDevoluciones = [];
 let detallesFormulario = [];
 
 async function ejecutarPeticion(params) {
   const url = new URL(URL_BACKEND);
   params._nocache = Date.now();
   Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
-
   const response = await fetch(url.toString(), { method: "GET", redirect: "follow" });
   if (!response.ok) throw new Error("Error en el servidor: " + response.statusText);
   return await response.json();
@@ -139,10 +130,8 @@ function cargarDatosIniciales() {
       if (data && data.ok) {
         listaFuncionarios = data.funcionarios || [];
         listaMotivos = data.motivos || [];
-        listaDevoluciones = data.devoluciones || [];
         llenarSelectFuncionarios();
         llenarDatalistMotivos();
-        renderDevoluciones();
         mostrarEstado("ok", "✅ Conectado. Datos cargados correctamente.");
       } else {
         mostrarEstado("error", "❌ Error al cargar datos: " + (data.error || "Respuesta no válida"));
@@ -195,17 +184,12 @@ function renderDetalles() {
 function quitarMotivo(i) { detallesFormulario.splice(i, 1); renderDetalles(); }
 
 function guardarDevolucion() {
-  // Validación visual
   let valid = true;
   const camposReq = ['inpFecha', 'selFuncionario', 'inpPlaca', 'inpCiudadano'];
   camposReq.forEach(id => {
     const el = document.getElementById(id);
-    if (!el.value.trim()) {
-      el.classList.add('invalid');
-      valid = false;
-    } else {
-      el.classList.remove('invalid');
-    }
+    if (!el.value.trim()) { el.classList.add('invalid'); valid = false; }
+    else { el.classList.remove('invalid'); }
   });
 
   if (!valid) {
@@ -217,15 +201,15 @@ function guardarDevolucion() {
     return;
   }
 
-  const fecha = document.getElementById("inpFecha").value;
-  const funcionario = document.getElementById("selFuncionario").value;
-  const placa = document.getElementById("inpPlaca").value.trim().toUpperCase();
-  const documento = document.getElementById("inpDocumento").value.trim();
-  const ciudadano = document.getElementById("inpCiudadano").value.trim();
+  const datos = {
+    fecha: document.getElementById("inpFecha").value,
+    funcionario: document.getElementById("selFuncionario").value,
+    placa: document.getElementById("inpPlaca").value.trim().toUpperCase(),
+    documento: document.getElementById("inpDocumento").value.trim(),
+    ciudadano: document.getElementById("inpCiudadano").value.trim(),
+    detalles: detallesFormulario
+  };
 
-  const datos = { fecha, funcionario, placa, documento, ciudadano, detalles: detallesFormulario };
-
-  // Bloquear botones
   const botones = document.querySelectorAll('.acciones .btn');
   botones.forEach(btn => btn.disabled = true);
 
@@ -235,21 +219,15 @@ function guardarDevolucion() {
     .then(res => {
       if (res.ok) {
         mostrarEstado("ok", "✅ Guardado y PDF generado! Consecutivo: " + res.consecutivo);
-
-        // Abrir el PDF en una nueva pestaña (desde la plantilla oficial)
-        if (res.pdfUrl) {
-          window.open(res.pdfUrl, "_blank");
-        }
-        // Opcional: descarga automática
+        if (res.pdfUrl) window.open(res.pdfUrl, "_blank");
         if (res.pdfDownloadUrl) {
           const a = document.createElement("a");
           a.href = res.pdfDownloadUrl;
-          a.download = `Devolucion_${res.consecutivo}_${placa}.pdf`;
+          a.download = `Devolucion_${res.consecutivo}_${datos.placa}.pdf`;
           document.body.appendChild(a);
           a.click();
           a.remove();
         }
-
         limpiarFormulario();
         cargarDatosIniciales();
       } else {
@@ -263,14 +241,6 @@ function guardarDevolucion() {
     .finally(() => {
       botones.forEach(btn => btn.disabled = false);
     });
-}
-
-function renderDevoluciones() {
-  const cont = document.getElementById("listaDevoluciones");
-  if (listaDevoluciones.length === 0) { cont.innerHTML = "No hay devoluciones."; return; }
-  cont.innerHTML = listaDevoluciones.slice(-10).reverse().map(d =>
-    `<div class="devolucion-item"><span>#${d.consecutivo} - ${d.fecha} | ${d.ciudadano} | ${d.placa}</span></div>`
-  ).join("");
 }
 
 function limpiarFormulario() {
