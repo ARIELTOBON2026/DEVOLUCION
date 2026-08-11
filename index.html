@@ -4,11 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DEVOLUCIÓN DE TRÁMITES</title>
-  
-  <!-- Librerías para generar el PDF localmente -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #333; padding: 20px; }
@@ -107,8 +102,7 @@
   <div class="card">
     <h2>Acciones</h2>
     <div class="acciones">
-      <button class="btn btn-primary" onclick="guardarDevolucion(false)">💾 Guardar</button>
-      <button class="btn btn-success" onclick="guardarDevolucion(true)">📄 Guardar y Generar PDF</button>
+      <button class="btn btn-success" onclick="guardarDevolucion()">📄 Guardar y Generar PDF</button>
       <button class="btn btn-secondary" onclick="limpiarFormulario()">🧹 Limpiar</button>
     </div>
     <div id="msgEstado" class="estado-msg"></div>
@@ -140,7 +134,6 @@ async function ejecutarPeticion(params) {
 
 function cargarDatosIniciales() {
   mostrarEstado("info", '<span class="spinner"></span> Conectando con el servidor...');
-  
   ejecutarPeticion({ action: "getInitialData" })
     .then(data => {
       if (data && data.ok) {
@@ -185,7 +178,6 @@ function agregarMotivo() {
   const motivo = document.getElementById("inpMotivo").value.trim();
   const obs = document.getElementById("inpObservacionMotivo").value.trim();
   if (!motivo) { mostrarEstado("error", "Seleccione o escriba un motivo."); return; }
-  
   detallesFormulario.push({ motivo, observacion: obs });
   renderDetalles();
   document.getElementById("inpMotivo").value = "";
@@ -202,132 +194,8 @@ function renderDetalles() {
 
 function quitarMotivo(i) { detallesFormulario.splice(i, 1); renderDetalles(); }
 
-function formatearFecha(iso) {
-  if (!iso) return "";
-  const p = iso.split("-");
-  return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : iso;
-}
-
-// =====================================================================
-// GENERACIÓN DE PDF - REPLICA EXACTA DE LA PLANTILLA OFICIAL:
-// https://docs.google.com/document/d/1Knnv5Uas66UC5Wsx4ir2JAFjbhROVZoKH9mw0N10RyM
-// =====================================================================
-function generarPDFLocal(consecutivo, fecha, funcionario, placa, documento, ciudadano, detalles) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit: "mm", format: "letter" }); // Formato Carta
-
-  const pageW = doc.internal.pageSize.getWidth();
-  const pageH = doc.internal.pageSize.getHeight();
-  const margin = 18;
-  const rightX = pageW - margin;
-  let y = 22;
-
-  // Salto de página automático si no hay espacio
-  function asegurarEspacio(mm) {
-    if (y + mm > pageH - 15) { doc.addPage(); y = 20; }
-  }
-
-  // Etiqueta a la izquierda y valor a la derecha (como en la plantilla)
-  function lineaEtiquetaValor(etiqueta, valor) {
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    doc.text(etiqueta, margin, y);
-    const disponible = rightX - (margin + doc.getTextWidth(etiqueta)) - 6;
-    if (doc.getTextWidth(valor) <= disponible) {
-      doc.text(valor, rightX, y, { align: "right" });
-    } else {
-      const lineas = doc.splitTextToSize(valor, pageW - margin * 2 - 8);
-      y += 6;
-      doc.text(lineas, margin + 6, y);
-      y += (lineas.length - 1) * 5.5;
-    }
-    y += 8;
-  }
-
-  // ---------- TÍTULO: DEVOLUCIÓN DE TRÁMITE N° {{CONSECUTIVO}} ----------
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(13);
-  doc.text("DEVOLUCIÓN DE TRÁMITE N° " + (consecutivo || "______"), pageW / 2, y, { align: "center" });
-  y += 10;
-
-  // ---------- DATOS: {{FECHA}} {{PLACA}} {{DOCUMENTO}} {{CIUDADANO}} ----------
-  lineaEtiquetaValor("Fecha:", formatearFecha(fecha));
-  lineaEtiquetaValor("Placa del Vehículo:", placa);
-  lineaEtiquetaValor("Documento del Propietario/Mandatario:", documento || "__________");
-  lineaEtiquetaValor("Nombre del Propietario/Mandatario:", ciudadano);
-
-  y += 2;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  doc.text("Detalle de Motivos de Devolución:", margin, y);
-  y += 3;
-
-  // ---------- {{TABLA}}: Tabla de motivos ----------
-  doc.autoTable({
-    startY: y,
-    head: [["N°", "MOTIVO", "OBSERVACIÓN"]],
-    body: detalles.map((d, i) => [i + 1, d.motivo, d.observacion || "-"]),
-    theme: "grid",
-    headStyles: { fillColor: [26, 35, 126], textColor: 255, fontStyle: "bold", halign: "center" },
-    styles: { fontSize: 10, cellPadding: 2.5, textColor: [0, 0, 0] },
-    columnStyles: {
-      0: { cellWidth: 12, halign: "center" },
-      1: { cellWidth: 80 },
-      2: { cellWidth: "auto" }
-    },
-    margin: { left: margin, right: margin }
-  });
-  y = doc.lastAutoTable.finalY + 8;
-
-  // ---------- "Tener en cuenta:" (textos exactos de la plantilla) ----------
-  const notas = [
-    "Estar a paz y salvo de multas",
-    "La firma deben coincidir con la registrada en RUNT",
-    "Documentos originales sin tachones ni enmendaduras, huellas e improntas legibles.",
-    "El impuesto debe cargar pago en la página de impuesto vehicular de la gobernación",
-    "El vehículo debe contar con SOAT y revisión tecnicomecánica vigente."
-  ];
-  asegurarEspacio(55);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  doc.text("Tener en cuenta:", margin, y);
-  y += 6;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  notas.forEach(n => {
-    const lineas = doc.splitTextToSize("-  " + n, pageW - margin * 2);
-    doc.text(lineas, margin, y);
-    y += lineas.length * 5.2 + 1.5;
-  });
-
-  // ---------- BLOQUE DE FIRMAS ----------
-  asegurarEspacio(32);
-  y += 12;
-  const colW = (pageW - margin * 2) / 2;
-  const cx1 = margin + colW / 2;
-  const cx2 = margin + colW * 1.5;
-  const lineW = 70;
-
-  doc.setDrawColor(0);
-  doc.setLineWidth(0.4);
-  doc.line(cx1 - lineW / 2, y, cx1 + lineW / 2, y);
-  doc.line(cx2 - lineW / 2, y, cx2 + lineW / 2, y);
-  y += 5;
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.text("ARIEL AUGUSTO TOBON MEJIA", cx1, y, { align: "center" });
-  doc.text((funcionario || "").toUpperCase(), cx2, y, { align: "center" });
-  y += 4.5;
-  doc.setFont("helvetica", "normal");
-  doc.text("Técnico Operativo - Secretaría de Movilidad", cx1, y, { align: "center" });
-  doc.text("QUIPUX", cx2, y, { align: "center" });
-
-  doc.save(`Devolucion_Tramite_${consecutivo || "sinnumero"}_${placa}.pdf`);
-}
-
-function guardarDevolucion(generarPDF = false) {
-  // 1. Validación visual de campos obligatorios
+function guardarDevolucion() {
+  // Validación visual
   let valid = true;
   const camposReq = ['inpFecha', 'selFuncionario', 'inpPlaca', 'inpCiudadano'];
   camposReq.forEach(id => {
@@ -339,14 +207,14 @@ function guardarDevolucion(generarPDF = false) {
       el.classList.remove('invalid');
     }
   });
-  
-  if (!valid) { 
-      mostrarEstado("error", "Por favor complete los campos obligatorios marcados en rojo."); 
-      return; 
+
+  if (!valid) {
+    mostrarEstado("error", "Por favor complete los campos obligatorios marcados en rojo.");
+    return;
   }
-  if (detallesFormulario.length === 0) { 
-      mostrarEstado("error", "Agregue al menos un motivo a la lista."); 
-      return; 
+  if (detallesFormulario.length === 0) {
+    mostrarEstado("error", "Agregue al menos un motivo a la lista.");
+    return;
   }
 
   const fecha = document.getElementById("inpFecha").value;
@@ -354,35 +222,42 @@ function guardarDevolucion(generarPDF = false) {
   const placa = document.getElementById("inpPlaca").value.trim().toUpperCase();
   const documento = document.getElementById("inpDocumento").value.trim();
   const ciudadano = document.getElementById("inpCiudadano").value.trim();
-  
+
   const datos = { fecha, funcionario, placa, documento, ciudadano, detalles: detallesFormulario };
 
-  // 2. Deshabilitar botones para evitar clics dobles
+  // Bloquear botones
   const botones = document.querySelectorAll('.acciones .btn');
   botones.forEach(btn => btn.disabled = true);
 
-  mostrarEstado("info", '<span class="spinner"></span> Guardando' + (generarPDF ? ' y generando PDF con plantilla oficial...' : '...'));
-  
+  mostrarEstado("info", '<span class="spinner"></span> Guardando y generando PDF oficial...');
+
   ejecutarPeticion({ action: "guardarDevolucion", datos: JSON.stringify(datos) })
     .then(res => {
-      if(res.ok) {
-        if (generarPDF) {
-          // 3. Generación instantánea del PDF con la plantilla oficial
-          generarPDFLocal(res.consecutivo, fecha, funcionario, placa, documento, ciudadano, detallesFormulario);
-          mostrarEstado("ok", "✅ Guardado y PDF generado con la plantilla oficial! Consecutivo: " + res.consecutivo);
-          // Si el backend también genera PDF en Drive, descomente la siguiente línea:
-          // if (res.pdfUrl) window.open(res.pdfUrl, "_blank");
-        } else {
-          mostrarEstado("ok", "✅ Guardado exitosamente! Consecutivo: " + res.consecutivo);
+      if (res.ok) {
+        mostrarEstado("ok", "✅ Guardado y PDF generado! Consecutivo: " + res.consecutivo);
+
+        // Abrir el PDF en una nueva pestaña (desde la plantilla oficial)
+        if (res.pdfUrl) {
+          window.open(res.pdfUrl, "_blank");
         }
+        // Opcional: descarga automática
+        if (res.pdfDownloadUrl) {
+          const a = document.createElement("a");
+          a.href = res.pdfDownloadUrl;
+          a.download = `Devolucion_${res.consecutivo}_${placa}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        }
+
         limpiarFormulario();
         cargarDatosIniciales();
-      } else { 
-        mostrarEstado("error", "Error al guardar: " + res.error); 
+      } else {
+        mostrarEstado("error", "Error al guardar: " + res.error);
       }
     })
-    .catch(err => { 
-      mostrarEstado("error", "Error de red al guardar los datos."); 
+    .catch(err => {
+      mostrarEstado("error", "Error de red al guardar los datos.");
       console.error(err);
     })
     .finally(() => {
@@ -393,7 +268,7 @@ function guardarDevolucion(generarPDF = false) {
 function renderDevoluciones() {
   const cont = document.getElementById("listaDevoluciones");
   if (listaDevoluciones.length === 0) { cont.innerHTML = "No hay devoluciones."; return; }
-  cont.innerHTML = listaDevoluciones.slice(-10).reverse().map(d => 
+  cont.innerHTML = listaDevoluciones.slice(-10).reverse().map(d =>
     `<div class="devolucion-item"><span>#${d.consecutivo} - ${d.fecha} | ${d.ciudadano} | ${d.placa}</span></div>`
   ).join("");
 }
@@ -405,27 +280,25 @@ function limpiarFormulario() {
   document.getElementById("inpPlaca").value = "";
   document.getElementById("inpDocumento").value = "";
   document.getElementById("inpCiudadano").value = "";
-  detallesFormulario = []; 
+  detallesFormulario = [];
   renderDetalles();
   document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
 }
 
 function mostrarEstado(tipo, html) {
   const el = document.getElementById("msgEstado");
-  el.className = "estado-msg " + tipo; 
+  el.className = "estado-msg " + tipo;
   el.innerHTML = html;
 }
 
 document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("inpFecha").value = new Date().toISOString().split("T")[0];
-  
   const camposReq = ['inpFecha', 'selFuncionario', 'inpPlaca', 'inpCiudadano'];
   camposReq.forEach(id => {
     const el = document.getElementById(id);
     el.addEventListener('input', () => el.classList.remove('invalid'));
     el.addEventListener('change', () => el.classList.remove('invalid'));
   });
-  
   cargarDatosIniciales();
 });
 </script>
