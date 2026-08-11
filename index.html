@@ -26,11 +26,11 @@
     th { background-color: #0f522b; color: white; }
     
     /* Botones */
-    .btn-container { display: flex; gap: 10px; margin-top: 15px; }
+    .btn-container { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
     .btn { padding: 10px 18px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; }
     .btn-save { background-color: #198754; }
+    .btn-save-pdf { background-color: #0d6efd; }
     .btn-clear { background-color: #6c757d; }
-    .btn-pdf { background-color: #0d6efd; }
     .btn-delete { background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
     
     .status-msg { margin-top: 15px; padding: 10px; border-radius: 4px; display: none; }
@@ -92,9 +92,9 @@
   <!-- BOTONERA DE ACCIONES -->
   <div class="card">
     <div class="btn-container">
-      <button class="btn btn-save" onclick="guardarDevolucion()">Guardar devolución</button>
+      <button class="btn btn-save" onclick="guardarDevolucion(false)">Guardar Devolución</button>
+      <button class="btn btn-save-pdf" onclick="guardarDevolucion(true)">Guardar y Exportar PDF</button>
       <button class="btn btn-clear" onclick="limpiarFormulario()">Limpiar</button>
-      <button class="btn btn-pdf" id="btnGenerarPDF" onclick="generarPDF()" disabled>Generar PDF</button>
     </div>
     <div id="mensajeStatus" class="status-msg"></div>
   </div>
@@ -104,7 +104,6 @@
     
     let listaMotivosBase = [];
     let motivosAgregados = [];
-    let consecutivoGuardado = null; // Guarda el ID devuelto tras registrar la devolución
 
     // Petición genérica JSONP
     function requestJSONP(action, params = {}) {
@@ -206,8 +205,8 @@
       renderizarTablaMotivos();
     }
 
-    // GUARDAR DEVOLUCIÓN
-    async function guardarDevolucion() {
+    // FUNCIÓN PARA GUARDAR (Y OPCIONALMENTE GENERAR PDF)
+    async function guardarDevolucion(exportarPDF = false) {
       const funcionario = document.getElementById('funcionario').value;
       const placa = document.getElementById('placa').value.trim();
       const documento = document.getElementById('documento').value.trim();
@@ -226,40 +225,38 @@
       mostrarMensaje("Guardando devolución...");
 
       try {
-        const res = await requestJSONP('guardarDevolucion', { data: JSON.stringify(payload) });
-        if (res.ok) {
-          consecutivoGuardado = res.id;
-          mostrarMensaje(`Devolución guardada con exito. Consecutivo N° ${res.id}`, false);
-          document.getElementById('btnGenerarPDF').disabled = false; // Habilitar botón PDF
-        } else {
-          throw new Error(res.error || "No se pudo guardar la devolución.");
+        // 1. Guardar Registro
+        const resGuardar = await requestJSONP('guardarDevolucion', { data: JSON.stringify(payload) });
+        
+        if (!resGuardar.ok) {
+          throw new Error(resGuardar.error || "No se pudo guardar la devolución.");
         }
-      } catch (e) {
-        mostrarMensaje(e.message, true);
-      }
-    }
 
-    // GENERAR PDF
-    async function generarPDF() {
-      if (!consecutivoGuardado) {
-        mostrarMensaje("Primero debe guardar la devolución para generar el PDF.", true);
-        return;
-      }
+        const consecutivo = resGuardar.id;
 
-      mostrarMensaje("Generando archivo PDF, por favor espere...");
+        // 2. Si solo se requiere guardar
+        if (!exportarPDF) {
+          mostrarMensaje(`Devolución guardada con éxito. Consecutivo N° ${consecutivo}`, false);
+          return;
+        }
 
-      try {
-        const res = await requestJSONP('generarPDF', { id: consecutivoGuardado });
-        if (res.ok && res.base64) {
-          // Descarga directa del Blob Base64
+        // 3. Si requiere exportar PDF tras guardar
+        mostrarMensaje(`Guardado correcto (N° ${consecutivo}). Generando PDF, por favor espere...`);
+
+        const resPDF = await requestJSONP('generarPDF', { id: consecutivo });
+
+        if (resPDF.ok && resPDF.base64) {
+          // Descarga automática en navegador
           const link = document.createElement('a');
-          link.href = 'data:application/pdf;base64,' + res.base64;
-          link.download = res.filename || `Devolucion_${consecutivoGuardado}.pdf`;
+          link.href = 'data:application/pdf;base64,' + resPDF.base64;
+          link.download = resPDF.filename || `Devolucion_${consecutivo}.pdf`;
           link.click();
-          mostrarMensaje("PDF generado y descargado correctamente.", false);
+
+          mostrarMensaje(`Devolución N° ${consecutivo} guardada y PDF descargado correctamente.`, false);
         } else {
-          throw new Error(res.error || "Error al procesar el PDF.");
+          throw new Error(resPDF.error || "La devolución se guardó, pero falló la generación del PDF.");
         }
+
       } catch (e) {
         mostrarMensaje(e.message, true);
       }
@@ -272,8 +269,6 @@
       document.getElementById('documento').value = '';
       document.getElementById('ciudadano').value = '';
       motivosAgregados = [];
-      consecutivoGuardado = null;
-      document.getElementById('btnGenerarPDF').disabled = true;
       renderizarTablaMotivos();
       ocultarMensaje();
     }
