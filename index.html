@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DEVOLUCIÓN DE TRÁMITES</title>
   
-  <!-- Librerías para generar el PDF localmente de forma rápida y profesional -->
+  <!-- Librerías para generar el PDF localmente -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
@@ -27,16 +27,10 @@
       padding: 9px 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 0.9rem; transition: all 0.2s;
     }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #1a237e; }
-    
-    /* NUEVO: Estilo para campos inválidos */
     .invalid { border-color: #d32f2f !important; background-color: #ffebee !important; }
-    
     .btn { padding: 10px 18px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: opacity 0.2s; }
     .btn:hover:not(:disabled) { opacity: 0.85; }
-    
-    /* NUEVO: Estilo para botones deshabilitados */
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    
     .btn-primary { background: #1a237e; color: #fff; }
     .btn-success { background: #2e7d32; color: #fff; }
     .btn-secondary { background: #78909c; color: #fff; }
@@ -208,80 +202,128 @@ function renderDetalles() {
 
 function quitarMotivo(i) { detallesFormulario.splice(i, 1); renderDetalles(); }
 
-// NUEVO: Generador de PDF Local con jsPDF
+function formatearFecha(iso) {
+  if (!iso) return "";
+  const p = iso.split("-");
+  return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : iso;
+}
+
+// =====================================================================
+// GENERACIÓN DE PDF - REPLICA EXACTA DE LA PLANTILLA OFICIAL:
+// https://docs.google.com/document/d/1Knnv5Uas66UC5Wsx4ir2JAFjbhROVZoKH9mw0N10RyM
+// =====================================================================
 function generarPDFLocal(consecutivo, fecha, funcionario, placa, documento, ciudadano, detalles) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: "mm", format: "letter" }); // Formato Carta
 
-    // Encabezado
-    doc.setFontSize(16);
-    doc.setFont(undefined, 'bold');
-    doc.text("DEVOLUCIÓN DE TRÁMITES", 105, 15, { align: 'center' });
-    
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    doc.text("Secretaría de Movilidad - La Ceja del Tambo", 105, 22, { align: 'center' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 18;
+  const rightX = pageW - margin;
+  let y = 22;
 
-    // Línea divisoria
-    doc.setLineWidth(0.5);
-    doc.line(14, 26, 196, 26);
+  // Salto de página automático si no hay espacio
+  function asegurarEspacio(mm) {
+    if (y + mm > pageH - 15) { doc.addPage(); y = 20; }
+  }
 
-    // Datos Generales
-    let y = 35;
+  // Etiqueta a la izquierda y valor a la derecha (como en la plantilla)
+  function lineaEtiquetaValor(etiqueta, valor) {
+    doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
-    doc.text(`Consecutivo:`, 14, y);
-    doc.text(`Fecha:`, 130, y);
-    
-    doc.setFont(undefined, 'normal');
-    doc.text(`${consecutivo || 'N/A'}`, 42, y);
-    doc.text(`${fecha}`, 145, y);
-
-    y += 8;
-    doc.setFont(undefined, 'bold');
-    doc.text(`Funcionario:`, 14, y);
-    doc.setFont(undefined, 'normal');
-    doc.text(`${funcionario}`, 45, y);
-
-    y += 8;
-    doc.setFont(undefined, 'bold');
-    doc.text(`Placa:`, 14, y);
-    doc.text(`Documento:`, 130, y);
-    doc.setFont(undefined, 'normal');
-    doc.text(`${placa}`, 30, y);
-    doc.text(`${documento || 'N/A'}`, 155, y);
-
-    y += 8;
-    doc.setFont(undefined, 'bold');
-    doc.text(`Ciudadano:`, 14, y);
-    doc.setFont(undefined, 'normal');
-    doc.text(`${ciudadano}`, 40, y);
-
-    // Tabla de detalles
-    doc.autoTable({
-        startY: y + 10,
-        head: [['N°', 'Motivo', 'Observación']],
-        body: detalles.map((d, i) => [i + 1, d.motivo, d.observacion || '-']),
-        headStyles: { fillColor: [26, 35, 126], textColor: 255, fontStyle: 'bold' },
-        styles: { fontSize: 10, cellPadding: 3 },
-        columnStyles: {
-            0: { cellWidth: 15 },
-            1: { cellWidth: 70 },
-            2: { cellWidth: 'auto' }
-        }
-    });
-
-    // Pie de página
-    const pageCount = doc.internal.getNumberOfPages();
-    for(let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(100);
-        doc.text(`Página ${i} de ${pageCount}`, 105, 290, { align: 'center' });
-        doc.text(`Generado el: ${new Date().toLocaleString('es-CO')}`, 14, 290);
+    doc.text(etiqueta, margin, y);
+    const disponible = rightX - (margin + doc.getTextWidth(etiqueta)) - 6;
+    if (doc.getTextWidth(valor) <= disponible) {
+      doc.text(valor, rightX, y, { align: "right" });
+    } else {
+      const lineas = doc.splitTextToSize(valor, pageW - margin * 2 - 8);
+      y += 6;
+      doc.text(lineas, margin + 6, y);
+      y += (lineas.length - 1) * 5.5;
     }
+    y += 8;
+  }
 
-    doc.save(`Devolucion_${placa}_${consecutivo || fecha}.pdf`);
+  // ---------- TÍTULO: DEVOLUCIÓN DE TRÁMITE N° {{CONSECUTIVO}} ----------
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.text("DEVOLUCIÓN DE TRÁMITE N° " + (consecutivo || "______"), pageW / 2, y, { align: "center" });
+  y += 10;
+
+  // ---------- DATOS: {{FECHA}} {{PLACA}} {{DOCUMENTO}} {{CIUDADANO}} ----------
+  lineaEtiquetaValor("Fecha:", formatearFecha(fecha));
+  lineaEtiquetaValor("Placa del Vehículo:", placa);
+  lineaEtiquetaValor("Documento del Propietario/Mandatario:", documento || "__________");
+  lineaEtiquetaValor("Nombre del Propietario/Mandatario:", ciudadano);
+
+  y += 2;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.text("Detalle de Motivos de Devolución:", margin, y);
+  y += 3;
+
+  // ---------- {{TABLA}}: Tabla de motivos ----------
+  doc.autoTable({
+    startY: y,
+    head: [["N°", "MOTIVO", "OBSERVACIÓN"]],
+    body: detalles.map((d, i) => [i + 1, d.motivo, d.observacion || "-"]),
+    theme: "grid",
+    headStyles: { fillColor: [26, 35, 126], textColor: 255, fontStyle: "bold", halign: "center" },
+    styles: { fontSize: 10, cellPadding: 2.5, textColor: [0, 0, 0] },
+    columnStyles: {
+      0: { cellWidth: 12, halign: "center" },
+      1: { cellWidth: 80 },
+      2: { cellWidth: "auto" }
+    },
+    margin: { left: margin, right: margin }
+  });
+  y = doc.lastAutoTable.finalY + 8;
+
+  // ---------- "Tener en cuenta:" (textos exactos de la plantilla) ----------
+  const notas = [
+    "Estar a paz y salvo de multas",
+    "La firma deben coincidir con la registrada en RUNT",
+    "Documentos originales sin tachones ni enmendaduras, huellas e improntas legibles.",
+    "El impuesto debe cargar pago en la página de impuesto vehicular de la gobernación",
+    "El vehículo debe contar con SOAT y revisión tecnicomecánica vigente."
+  ];
+  asegurarEspacio(55);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.text("Tener en cuenta:", margin, y);
+  y += 6;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  notas.forEach(n => {
+    const lineas = doc.splitTextToSize("-  " + n, pageW - margin * 2);
+    doc.text(lineas, margin, y);
+    y += lineas.length * 5.2 + 1.5;
+  });
+
+  // ---------- BLOQUE DE FIRMAS ----------
+  asegurarEspacio(32);
+  y += 12;
+  const colW = (pageW - margin * 2) / 2;
+  const cx1 = margin + colW / 2;
+  const cx2 = margin + colW * 1.5;
+  const lineW = 70;
+
+  doc.setDrawColor(0);
+  doc.setLineWidth(0.4);
+  doc.line(cx1 - lineW / 2, y, cx1 + lineW / 2, y);
+  doc.line(cx2 - lineW / 2, y, cx2 + lineW / 2, y);
+  y += 5;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.text("ARIEL AUGUSTO TOBON MEJIA", cx1, y, { align: "center" });
+  doc.text((funcionario || "").toUpperCase(), cx2, y, { align: "center" });
+  y += 4.5;
+  doc.setFont("helvetica", "normal");
+  doc.text("Técnico Operativo - Secretaría de Movilidad", cx1, y, { align: "center" });
+  doc.text("QUIPUX", cx2, y, { align: "center" });
+
+  doc.save(`Devolucion_Tramite_${consecutivo || "sinnumero"}_${placa}.pdf`);
 }
 
 function guardarDevolucion(generarPDF = false) {
@@ -319,19 +361,20 @@ function guardarDevolucion(generarPDF = false) {
   const botones = document.querySelectorAll('.acciones .btn');
   botones.forEach(btn => btn.disabled = true);
 
-  mostrarEstado("info", '<span class="spinner"></span> Guardando' + (generarPDF ? ' y preparando PDF...' : '...'));
+  mostrarEstado("info", '<span class="spinner"></span> Guardando' + (generarPDF ? ' y generando PDF con plantilla oficial...' : '...'));
   
   ejecutarPeticion({ action: "guardarDevolucion", datos: JSON.stringify(datos) })
     .then(res => {
       if(res.ok) {
-        mostrarEstado("ok", "✅ Guardado exitosamente! Consecutivo: " + res.consecutivo);
-        
         if (generarPDF) {
-          // 3. Generación de PDF instantánea en el navegador
+          // 3. Generación instantánea del PDF con la plantilla oficial
           generarPDFLocal(res.consecutivo, fecha, funcionario, placa, documento, ciudadano, detallesFormulario);
-          mostrarEstado("ok", "✅ Guardado y PDF descargado! Consecutivo: " + res.consecutivo);
+          mostrarEstado("ok", "✅ Guardado y PDF generado con la plantilla oficial! Consecutivo: " + res.consecutivo);
+          // Si el backend también genera PDF en Drive, descomente la siguiente línea:
+          // if (res.pdfUrl) window.open(res.pdfUrl, "_blank");
+        } else {
+          mostrarEstado("ok", "✅ Guardado exitosamente! Consecutivo: " + res.consecutivo);
         }
-        
         limpiarFormulario();
         cargarDatosIniciales();
       } else { 
@@ -343,7 +386,6 @@ function guardarDevolucion(generarPDF = false) {
       console.error(err);
     })
     .finally(() => {
-      // 4. Reactivar botones al terminar
       botones.forEach(btn => btn.disabled = false);
     });
 }
@@ -365,8 +407,6 @@ function limpiarFormulario() {
   document.getElementById("inpCiudadano").value = "";
   detallesFormulario = []; 
   renderDetalles();
-  
-  // Limpiar validaciones visuales
   document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
 }
 
@@ -379,7 +419,6 @@ function mostrarEstado(tipo, html) {
 document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("inpFecha").value = new Date().toISOString().split("T")[0];
   
-  // Quitar validación roja cuando el usuario empieza a escribir
   const camposReq = ['inpFecha', 'selFuncionario', 'inpPlaca', 'inpCiudadano'];
   camposReq.forEach(id => {
     const el = document.getElementById(id);
