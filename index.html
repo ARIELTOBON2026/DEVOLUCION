@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DEVOLUCIÓN DE TRÁMITES</title>
-  <!-- Librería para generación de PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #333; padding: 20px; }
@@ -45,7 +43,7 @@
   </style>
 </head>
 <body>
-<div class="container" id="contenidoPDF">
+<div class="container">
   <header>
     <h1>DEVOLUCIÓN DE TRÁMITES</h1>
     <p>Secretaría de Movilidad - La Ceja del Tambo</p>
@@ -66,7 +64,6 @@
         <label>Placa <span class="req">*</span></label>
         <input type="text" id="inpPlaca" placeholder="ABC123">
       </div>
-      <!-- Documento y Ciudadano juntos en la misma fila -->
       <div class="form-group">
         <label>Documento</label>
         <input type="text" id="inpDocumento" placeholder="C.C. / NIT">
@@ -209,14 +206,14 @@ function guardarDevolucion(generarPDF = false) {
   if (detallesFormulario.length === 0) { mostrarEstado("error", "Agregue al menos un motivo."); return; }
 
   const datos = { fecha, funcionario, placa, documento, ciudadano, detalles: detallesFormulario };
-  mostrarEstado("info", '<span class="spinner"></span> Guardando...');
+  mostrarEstado("info", '<span class="spinner"></span> Guardando' + (generarPDF ? ' y generando PDF plantilla...' : '...'));
   
   ejecutarPeticion({ action: "guardarDevolucion", datos: JSON.stringify(datos) })
     .then(res => {
       if(res.ok) {
         mostrarEstado("ok", "✅ Guardado! Consecutivo: " + res.consecutivo);
-        if (generarPDF) {
-          descargarPDF(res.consecutivo, placa);
+        if (generarPDF && res.pdfUrl) {
+          window.open(res.pdfUrl, "_blank");
         }
         limpiarFormulario();
         cargarDatosIniciales();
@@ -228,18 +225,6 @@ function guardarDevolucion(generarPDF = false) {
       mostrarEstado("error", "Error de red al guardar."); 
       console.error(err);
     });
-}
-
-function descargarPDF(consecutivo, placa) {
-  const elemento = document.getElementById("contenidoPDF");
-  const opciones = {
-    margin:       10,
-    filename:     `Devolucion_${consecutivo}_${placa}.pdf`,
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2 },
-    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-  html2pdf().set(opciones).from(elemento).save();
 }
 
 function renderDevoluciones() {
