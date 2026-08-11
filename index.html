@@ -2,6 +2,7 @@
 <html lang="es">
 
 <head>
+
   <meta charset="UTF-8">
 
   <meta name="viewport"
@@ -12,6 +13,7 @@
 
   <title>DEVOLUCIÓN DE TRÁMITES</title>
 
+
   <style>
 
     * {
@@ -20,11 +22,17 @@
       padding: 0;
     }
 
+
     body {
       font-family: Arial, Helvetica, sans-serif;
       background: #f2f4f7;
       color: #222;
     }
+
+
+    /* =====================================================
+       ENCABEZADO
+       ===================================================== */
 
     .header {
       background: #ffffff;
@@ -35,11 +43,13 @@
       justify-content: space-between;
     }
 
+
     .header-left {
       display: flex;
       align-items: center;
       gap: 15px;
     }
+
 
     .logo {
       width: 65px;
@@ -47,11 +57,13 @@
       object-fit: contain;
     }
 
+
     .titulo {
       color: #1b5e20;
       font-size: 23px;
       font-weight: bold;
     }
+
 
     .subtitulo {
       color: #555;
@@ -59,19 +71,30 @@
       margin-top: 4px;
     }
 
+
+    /* =====================================================
+       CONTENEDOR
+       ===================================================== */
+
     .container {
       width: 95%;
       max-width: 1250px;
       margin: 25px auto;
     }
 
+
+    /* =====================================================
+       TARJETAS
+       ===================================================== */
+
     .card {
       background: white;
       border-radius: 10px;
       padding: 25px;
       margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.12);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
     }
+
 
     .card-title {
       font-size: 19px;
@@ -82,20 +105,28 @@
       padding-bottom: 10px;
     }
 
+
+    /* =====================================================
+       GRID
+       ===================================================== */
+
     .grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 18px;
     }
 
+
     .campo {
       display: flex;
       flex-direction: column;
     }
 
+
     .campo.full {
       grid-column: 1 / -1;
     }
+
 
     label {
       font-weight: bold;
@@ -103,6 +134,7 @@
       color: #444;
       font-size: 14px;
     }
+
 
     input,
     select,
@@ -116,17 +148,24 @@
       background: #fff;
     }
 
+
     input:focus,
     select:focus,
     textarea:focus {
       border-color: #1b5e20;
-      box-shadow: 0 0 0 2px rgba(27,94,32,.12);
+      box-shadow: 0 0 0 2px rgba(27, 94, 32, .12);
     }
+
 
     textarea {
       min-height: 100px;
       resize: vertical;
     }
+
+
+    /* =====================================================
+       BOTONES
+       ===================================================== */
 
     .botones {
       display: flex;
@@ -134,6 +173,7 @@
       flex-wrap: wrap;
       margin-top: 20px;
     }
+
 
     button {
       border: none;
@@ -145,48 +185,57 @@
       transition: .2s;
     }
 
+
+    button:hover {
+      opacity: .9;
+    }
+
+
     .btn-primary {
       background: #1b5e20;
       color: white;
     }
 
+
     .btn-primary:hover {
       background: #124416;
     }
+
 
     .btn-secondary {
       background: #757575;
       color: white;
     }
 
+
     .btn-secondary:hover {
       background: #555;
     }
 
-    .btn-danger {
-      background: #c62828;
-      color: white;
-    }
-
-    .btn-danger:hover {
-      background: #8e1b1b;
-    }
 
     .btn-pdf {
       background: #1565c0;
       color: white;
     }
 
+
     .btn-pdf:hover {
       background: #0d47a1;
     }
+
+
+    /* =====================================================
+       DETALLES
+       ===================================================== */
 
     .detalle-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 15px;
+      gap: 15px;
     }
+
 
     .detalle {
       border: 1px solid #ddd;
@@ -196,6 +245,7 @@
       background: #fafafa;
     }
 
+
     .detalle-grid {
       display: grid;
       grid-template-columns: 1fr 2fr 2fr 1fr;
@@ -203,11 +253,22 @@
       align-items: end;
     }
 
+
     .btn-eliminar {
       background: #c62828;
       color: white;
       width: 100%;
     }
+
+
+    .btn-eliminar:hover {
+      background: #8e1b1b;
+    }
+
+
+    /* =====================================================
+       ESTADOS
+       ===================================================== */
 
     .estado {
       margin-top: 15px;
@@ -217,12 +278,14 @@
       font-weight: bold;
     }
 
+
     .estado.ok {
       display: block;
       background: #e8f5e9;
       color: #1b5e20;
       border: 1px solid #a5d6a7;
     }
+
 
     .estado.error {
       display: block;
@@ -231,12 +294,18 @@
       border: 1px solid #ef9a9a;
     }
 
+
     .estado.info {
       display: block;
       background: #e3f2fd;
       color: #0d47a1;
       border: 1px solid #90caf9;
     }
+
+
+    /* =====================================================
+       CARGANDO
+       ===================================================== */
 
     .loading {
       display: none;
@@ -246,6 +315,11 @@
       font-weight: bold;
     }
 
+
+    /* =====================================================
+       PIE
+       ===================================================== */
+
     .footer {
       text-align: center;
       color: #666;
@@ -253,19 +327,27 @@
       padding: 25px;
     }
 
+
+    /* =====================================================
+       RESPONSIVE
+       ===================================================== */
+
     @media (max-width: 800px) {
 
       .grid {
         grid-template-columns: 1fr;
       }
 
+
       .campo.full {
         grid-column: auto;
       }
 
+
       .detalle-grid {
         grid-template-columns: 1fr;
       }
+
 
       .header {
         flex-direction: column;
@@ -273,13 +355,21 @@
         text-align: center;
       }
 
+
+      .detalle-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
     }
 
   </style>
+
 </head>
 
 
 <body>
+
 
   <!-- =====================================================
        ENCABEZADO
@@ -289,22 +379,19 @@
 
     <div class="header-left">
 
-      <!--
-        Si tienes logo institucional,
-        coloca logo.png en el mismo repositorio
-      -->
-
       <img
         class="logo"
         src="logo.png"
         alt="Secretaría de Movilidad"
         onerror="this.style.display='none';">
 
+
       <div>
 
         <div class="titulo">
           SISTEMA MAESTRO - DETALLE DE DEVOLUCIONES
         </div>
+
 
         <div class="subtitulo">
           Secretaría de Movilidad - La Ceja del Tambo
@@ -317,8 +404,9 @@
   </header>
 
 
+
   <!-- =====================================================
-       CONTENIDO PRINCIPAL
+       CONTENIDO
        ===================================================== -->
 
   <main class="container">
@@ -334,6 +422,7 @@
         Datos de la devolución
       </div>
 
+
       <div class="grid">
 
 
@@ -344,6 +433,7 @@
           <label for="funcionario">
             Funcionario
           </label>
+
 
           <select id="funcionario">
 
@@ -356,6 +446,7 @@
         </div>
 
 
+
         <!-- PLACA -->
 
         <div class="campo">
@@ -364,14 +455,17 @@
             Placa
           </label>
 
+
           <input
             type="text"
             id="placa"
             maxlength="10"
             placeholder="Ingrese la placa"
-            oninput="this.value=this.value.toUpperCase();">
+            autocomplete="off"
+            oninput="this.value = this.value.toUpperCase();">
 
         </div>
+
 
 
         <!-- DOCUMENTO -->
@@ -382,12 +476,15 @@
             Documento
           </label>
 
+
           <input
             type="text"
             id="documento"
-            placeholder="Número de documento">
+            placeholder="Número de documento"
+            autocomplete="off">
 
         </div>
+
 
 
         <!-- CIUDADANO -->
@@ -398,12 +495,15 @@
             Ciudadano
           </label>
 
+
           <input
             type="text"
             id="ciudadano"
-            placeholder="Nombre del ciudadano">
+            placeholder="Nombre del ciudadano"
+            autocomplete="off">
 
         </div>
+
 
 
         <!-- OBSERVACIÓN -->
@@ -413,6 +513,7 @@
           <label for="observacion">
             Observación
           </label>
+
 
           <textarea
             id="observacion"
@@ -433,12 +534,19 @@
 
     <section class="card">
 
+
       <div class="detalle-header">
 
-        <div class="card-title"
-             style="margin:0; border:0; padding:0;">
+
+        <div
+          class="card-title"
+          style="margin:0; border:0; padding:0;">
+
           Detalle de la devolución
+
         </div>
+
+
 
         <button
           type="button"
@@ -449,14 +557,17 @@
 
         </button>
 
+
       </div>
+
 
 
       <div id="contenedorDetalles">
 
-        <!-- Los detalles se agregan aquí -->
+        <!-- Los detalles se crean mediante JavaScript -->
 
       </div>
+
 
     </section>
 
@@ -468,7 +579,9 @@
 
     <section class="card">
 
+
       <div class="botones">
+
 
         <button
           type="button"
@@ -478,6 +591,7 @@
           Guardar devolución
 
         </button>
+
 
 
         <button
@@ -490,6 +604,7 @@
         </button>
 
 
+
         <button
           type="button"
           class="btn-pdf"
@@ -499,25 +614,33 @@
 
         </button>
 
+
       </div>
 
 
-      <div id="loading"
-           class="loading">
+
+      <div
+        id="loading"
+        class="loading">
 
         Procesando solicitud...
 
       </div>
 
 
-      <div id="estado"
-           class="estado">
+
+      <div
+        id="estado"
+        class="estado">
+
       </div>
+
 
     </section>
 
 
   </main>
+
 
 
   <!-- =====================================================
@@ -536,806 +659,1411 @@
 
 
 
-<script>
+  <!-- =====================================================
+       JAVASCRIPT
+       ===================================================== -->
 
-/* =========================================================
-   CONFIGURACIÓN
-   ========================================================= */
-
-/*
- * IMPORTANTE:
- *
- * AQUÍ debes colocar la URL /exec de tu Google Apps Script.
- */
-
-const API_URL =
-  "https://script.google.com/macros/s/AKfycbxzoWB9fbZiPNmFplnu9xMK3cJJMr0a4nMkbmEeyD1q2tIS57kSYpvj_doN7tEN8u5QtA/exec";
+  <script>
 
 
-let contadorDetalles = 0;
+    /* =====================================================
+       CONFIGURACIÓN
+       ===================================================== */
+
+    const API_URL =
+      "https://script.google.com/macros/s/AKfycbxzoWB9fbZiPNmFplnu9xMK3cJJMr0a4nMkbmEeyD1q2tIS57kSYpvj_doN7tEN8u5QtA/exec";
 
 
-/* =========================================================
-   INICIO
-   ========================================================= */
+    let listaMotivos = [];
 
-document.addEventListener(
-  "DOMContentLoaded",
-  function () {
-
-    cargarDatosIniciales();
-
-    agregarDetalle();
-
-  }
-);
+    let contadorDetalles = 0;
 
 
-/* =========================================================
-   JSONP
-   ========================================================= */
 
-function llamarAPI(action, parametros = {}) {
+    /* =====================================================
+       INICIO
+       ===================================================== */
 
-  return new Promise(function(resolve, reject) {
+    document.addEventListener(
+      "DOMContentLoaded",
+      function () {
 
-    const callback =
-      "callback_" +
-      Date.now() +
-      "_" +
-      Math.floor(Math.random() * 100000);
+        console.log(
+          "Sistema iniciado."
+        );
 
 
-    window[callback] = function(data) {
+        cargarDatosIniciales();
+
+      }
+    );
+
+
+
+    /* =====================================================
+       LLAMADA A GOOGLE APPS SCRIPT
+       MEDIANTE JSONP
+       ===================================================== */
+
+    function llamarAPI(
+      action,
+      parametros = {}
+    ) {
+
+      return new Promise(
+        function (resolve, reject) {
+
+
+          const callback =
+            "callback_" +
+            Date.now() +
+            "_" +
+            Math.floor(
+              Math.random() * 1000000
+            );
+
+
+          const script =
+            document.createElement(
+              "script"
+            );
+
+
+          let finalizado = false;
+
+
+
+          /* -----------------------------------------------
+             TIEMPO MÁXIMO DE ESPERA
+             ----------------------------------------------- */
+
+          const temporizador =
+            setTimeout(
+              function () {
+
+
+                if (finalizado) {
+                  return;
+                }
+
+
+                finalizado = true;
+
+
+                delete window[
+                  callback
+                ];
+
+
+                if (
+                  script.parentNode
+                ) {
+
+                  script.parentNode
+                    .removeChild(
+                      script
+                    );
+
+                }
+
+
+                reject(
+                  new Error(
+                    "Tiempo de espera agotado al conectar con Google Apps Script."
+                  )
+                );
+
+
+              },
+              20000
+            );
+
+
+
+          /* -----------------------------------------------
+             CALLBACK
+             ----------------------------------------------- */
+
+          window[
+            callback
+          ] =
+            function (data) {
+
+
+              if (finalizado) {
+                return;
+              }
+
+
+              finalizado = true;
+
+
+              clearTimeout(
+                temporizador
+              );
+
+
+              delete window[
+                callback
+              ];
+
+
+              if (
+                script.parentNode
+              ) {
+
+                script.parentNode
+                  .removeChild(
+                    script
+                  );
+
+              }
+
+
+              console.log(
+                "Respuesta de Apps Script:",
+                data
+              );
+
+
+              resolve(
+                data
+              );
+
+
+            };
+
+
+
+          /* -----------------------------------------------
+             URL
+             ----------------------------------------------- */
+
+          const url =
+            new URL(
+              API_URL
+            );
+
+
+          url.searchParams.set(
+            "action",
+            action
+          );
+
+
+          url.searchParams.set(
+            "callback",
+            callback
+          );
+
+
+
+          Object.keys(
+            parametros
+          ).forEach(
+            function (key) {
+
+
+              url.searchParams.set(
+                key,
+                parametros[key]
+              );
+
+
+            }
+          );
+
+
+
+          console.log(
+            "Consultando:",
+            url.toString()
+          );
+
+
+
+          script.src =
+            url.toString();
+
+
+
+          /* -----------------------------------------------
+             ERROR
+             ----------------------------------------------- */
+
+          script.onerror =
+            function () {
+
+
+              if (finalizado) {
+                return;
+              }
+
+
+              finalizado = true;
+
+
+              clearTimeout(
+                temporizador
+              );
+
+
+              delete window[
+                callback
+              ];
+
+
+              if (
+                script.parentNode
+              ) {
+
+                script.parentNode
+                  .removeChild(
+                    script
+                  );
+
+              }
+
+
+              reject(
+                new Error(
+                  "No fue posible conectar con Google Apps Script."
+                )
+              );
+
+
+            };
+
+
+
+          document.body.appendChild(
+            script
+          );
+
+
+        }
+      );
+
+    }
+
+
+
+    /* =====================================================
+       CARGAR DATOS INICIALES
+       ===================================================== */
+
+    async function cargarDatosIniciales() {
+
+
+      mostrarEstado(
+        "Cargando funcionarios y motivos...",
+        "info"
+      );
+
 
       try {
 
-        resolve(data);
 
-      } finally {
-
-        delete window[callback];
-
-        if (script && script.parentNode) {
-          script.parentNode.removeChild(script);
-        }
-
-      }
-
-    };
-
-
-    const script =
-      document.createElement("script");
-
-
-    const query =
-      new URLSearchParams();
-
-
-    query.append(
-      "action",
-      action
-    );
-
-
-    query.append(
-      "callback",
-      callback
-    );
-
-
-    Object.keys(parametros).forEach(
-      function(key) {
-
-        query.append(
-          key,
-          parametros[key]
+        console.log(
+          "Solicitando getInitialData..."
         );
 
-      }
-    );
+
+        const resultado =
+          await llamarAPI(
+            "getInitialData"
+          );
 
 
-    script.src =
-      API_URL +
-      "?" +
-      query.toString();
+        console.log(
+          "Resultado getInitialData:",
+          resultado
+        );
 
 
-    script.onerror =
-      function() {
 
-        delete window[callback];
+        if (!resultado) {
 
-        if (script.parentNode) {
-          script.parentNode.removeChild(script);
+          throw new Error(
+            "Google Apps Script no devolvió información."
+          );
+
         }
 
-        reject(
-          new Error(
-            "No fue posible conectar con Google Apps Script."
+
+
+        if (
+          resultado.ok !== true
+        ) {
+
+          throw new Error(
+            resultado.error ||
+            "Google Apps Script devolvió un error."
+          );
+
+        }
+
+
+
+        /* -----------------------------------------------
+           FUNCIONARIOS
+           ----------------------------------------------- */
+
+        cargarFuncionarios(
+          Array.isArray(
+            resultado.funcionarios
           )
+            ? resultado.funcionarios
+            : []
         );
 
-      };
 
 
-    document.body.appendChild(script);
+        /* -----------------------------------------------
+           MOTIVOS
+           ----------------------------------------------- */
 
-  });
-
-}
-
-
-/* =========================================================
-   DATOS INICIALES
-   ========================================================= */
-
-async function cargarDatosIniciales() {
-
-  mostrarEstado(
-    "Cargando información...",
-    "info"
-  );
+        cargarMotivos(
+          Array.isArray(
+            resultado.motivos
+          )
+            ? resultado.motivos
+            : []
+        );
 
 
-  try {
 
-    const resultado =
-      await llamarAPI(
-        "getInitialData"
-      );
+        /* -----------------------------------------------
+           CREAR PRIMER DETALLE
+           DESPUÉS DE CARGAR MOTIVOS
+           ----------------------------------------------- */
+
+        agregarDetalle();
 
 
-    if (!resultado.ok) {
 
-      throw new Error(
-        resultado.error ||
-        "No fue posible obtener los datos."
-      );
+        /* -----------------------------------------------
+           MENSAJE
+           ----------------------------------------------- */
+
+        const cantidadFuncionarios =
+          Array.isArray(
+            resultado.funcionarios
+          )
+            ? resultado.funcionarios.length
+            : 0;
+
+
+        const cantidadMotivos =
+          Array.isArray(
+            resultado.motivos
+          )
+            ? resultado.motivos.length
+            : 0;
+
+
+        console.log(
+          "Funcionarios:",
+          cantidadFuncionarios
+        );
+
+
+        console.log(
+          "Motivos:",
+          cantidadMotivos
+        );
+
+
+
+        if (
+          cantidadFuncionarios === 0 &&
+          cantidadMotivos === 0
+        ) {
+
+          mostrarEstado(
+            "La conexión funciona, pero no se recibieron funcionarios ni motivos.",
+            "error"
+          );
+
+        }
+        else {
+
+          mostrarEstado(
+            "Información cargada correctamente.",
+            "ok"
+          );
+
+
+          setTimeout(
+            ocultarEstado,
+            3000
+          );
+
+        }
+
+
+      }
+      catch (error) {
+
+
+        console.error(
+          "ERROR CARGANDO DATOS:",
+          error
+        );
+
+
+        mostrarEstado(
+          "Error al cargar información: " +
+          error.message,
+          "error"
+        );
+
+
+      }
 
     }
 
 
-    cargarFuncionarios(
-      resultado.funcionarios || []
-    );
+
+    /* =====================================================
+       FUNCIONARIOS
+       ===================================================== */
+
+    function cargarFuncionarios(
+      lista
+    ) {
 
 
-    cargarMotivos(
-      resultado.motivos || []
-    );
+      const select =
+        document.getElementById(
+          "funcionario"
+        );
 
 
-    ocultarEstado();
+      if (!select) {
+
+        console.error(
+          "No existe #funcionario"
+        );
+
+        return;
+
+      }
 
 
-  } catch(error) {
 
-    mostrarEstado(
-      error.message,
-      "error"
-    );
-
-  }
-
-}
+      select.innerHTML =
+        "";
 
 
-/* =========================================================
-   FUNCIONARIOS
-   ========================================================= */
 
-function cargarFuncionarios(lista) {
-
-  const select =
-    document.getElementById(
-      "funcionario"
-    );
+      const opcionInicial =
+        document.createElement(
+          "option"
+        );
 
 
-  select.innerHTML =
-    '<option value="">Seleccione funcionario</option>';
+      opcionInicial.value =
+        "";
 
 
-  lista.forEach(
-    function(funcionario) {
-
-      const option =
-        document.createElement("option");
-
-
-      option.value =
-        funcionario;
-
-
-      option.textContent =
-        funcionario;
+      opcionInicial.textContent =
+        lista.length > 0
+          ? "Seleccione funcionario"
+          : "No hay funcionarios";
 
 
       select.appendChild(
-        option
+        opcionInicial
       );
 
+
+
+      lista.forEach(
+        function (funcionario) {
+
+
+          if (
+            funcionario === null ||
+            funcionario === undefined
+          ) {
+
+            return;
+
+          }
+
+
+          const texto =
+            String(
+              funcionario
+            ).trim();
+
+
+          if (!texto) {
+
+            return;
+
+          }
+
+
+
+          const option =
+            document.createElement(
+              "option"
+            );
+
+
+          option.value =
+            texto;
+
+
+          option.textContent =
+            texto;
+
+
+          select.appendChild(
+            option
+          );
+
+
+        }
+      );
+
+
+
+      console.log(
+        "Funcionarios cargados:",
+        lista.length
+      );
+
+
     }
-  );
-
-}
 
 
-/* =========================================================
-   MOTIVOS
-   ========================================================= */
 
-let listaMotivos = [];
+    /* =====================================================
+       MOTIVOS
+       ===================================================== */
 
-
-function cargarMotivos(lista) {
-
-  listaMotivos =
-    lista || [];
-
-}
+    function cargarMotivos(
+      lista
+    ) {
 
 
-/* =========================================================
-   AGREGAR DETALLE
-   ========================================================= */
-
-function agregarDetalle() {
-
-  contadorDetalles++;
+      listaMotivos =
+        Array.isArray(lista)
+          ? lista
+          : [];
 
 
-  const contenedor =
-    document.getElementById(
-      "contenedorDetalles"
-    );
 
+      console.log(
+        "Motivos cargados:",
+        listaMotivos
+      );
 
-  const div =
-    document.createElement("div");
-
-
-  div.className =
-    "detalle";
-
-
-  div.id =
-    "detalle_" +
-    contadorDetalles;
-
-
-  let opciones =
-    '<option value="">Seleccione motivo</option>';
-
-
-  listaMotivos.forEach(
-    function(motivo) {
-
-      opciones +=
-        `<option value="${escapeHtml(motivo)}">
-          ${escapeHtml(motivo)}
-        </option>`;
 
     }
-  );
 
 
-  div.innerHTML = `
 
-    <div class="detalle-grid">
+    /* =====================================================
+       AGREGAR DETALLE
+       ===================================================== */
 
-      <div class="campo">
-
-        <label>
-          No.
-        </label>
-
-        <input
-          type="text"
-          value="${contadorDetalles}"
-          readonly>
-
-      </div>
+    function agregarDetalle() {
 
 
-      <div class="campo">
-
-        <label>
-          Motivo
-        </label>
-
-        <select class="motivo">
-
-          ${opciones}
-
-        </select>
-
-      </div>
+      contadorDetalles++;
 
 
-      <div class="campo">
-
-        <label>
-          Observación
-        </label>
-
-        <input
-          type="text"
-          class="detalleObservacion"
-          placeholder="Detalle de la devolución">
-
-      </div>
+      const contenedor =
+        document.getElementById(
+          "contenedorDetalles"
+        );
 
 
-      <div class="campo">
+      if (!contenedor) {
 
-        <label>
-          Acción
-        </label>
+        console.error(
+          "No existe #contenedorDetalles"
+        );
 
-        <button
-          type="button"
-          class="btn-eliminar"
-          onclick="eliminarDetalle(${contadorDetalles})">
+        return;
 
-          Eliminar
-
-        </button>
-
-      </div>
-
-    </div>
-
-  `;
+      }
 
 
-  contenedor.appendChild(
-    div
-  );
 
-}
-
-
-/* =========================================================
-   ELIMINAR DETALLE
-   ========================================================= */
-
-function eliminarDetalle(id) {
-
-  const elemento =
-    document.getElementById(
-      "detalle_" + id
-    );
+      const div =
+        document.createElement(
+          "div"
+        );
 
 
-  if (elemento) {
-
-    elemento.remove();
-
-  }
-
-}
+      div.className =
+        "detalle";
 
 
-/* =========================================================
-   OBTENER DETALLES
-   ========================================================= */
-
-function obtenerDetalles() {
-
-  const elementos =
-    document.querySelectorAll(
-      "#contenedorDetalles .detalle"
-    );
+      div.id =
+        "detalle_" +
+        contadorDetalles;
 
 
-  const detalles = [];
+
+      /* -----------------------------------------------
+         OPCIONES DE MOTIVOS
+         ----------------------------------------------- */
+
+      let opciones =
+        '<option value="">Seleccione motivo</option>';
 
 
-  elementos.forEach(
-    function(elemento) {
 
-      const motivo =
-        elemento
-          .querySelector(".motivo")
-          .value;
+      listaMotivos.forEach(
+        function (motivo) {
 
 
-      const observacion =
-        elemento
-          .querySelector(".detalleObservacion")
-          .value
-          .trim();
+          if (
+            motivo === null ||
+            motivo === undefined
+          ) {
+
+            return;
+
+          }
 
 
-      if (motivo || observacion) {
+          const texto =
+            String(
+              motivo
+            ).trim();
 
-        detalles.push({
 
-          motivo:
-            motivo,
+          if (!texto) {
 
-          observacion:
+            return;
+
+          }
+
+
+
+          opciones +=
+            '<option value="' +
+            escapeHtml(
+              texto
+            ) +
+            '">' +
+            escapeHtml(
+              texto
+            ) +
+            '</option>';
+
+
+        }
+      );
+
+
+
+      /* -----------------------------------------------
+         HTML DEL DETALLE
+         ----------------------------------------------- */
+
+      div.innerHTML = `
+
+        <div class="detalle-grid">
+
+
+          <div class="campo">
+
+            <label>
+              No.
+            </label>
+
+
+            <input
+              type="text"
+              value="${contadorDetalles}"
+              readonly>
+
+          </div>
+
+
+
+          <div class="campo">
+
+            <label>
+              Motivo
+            </label>
+
+
+            <select class="motivo">
+
+              ${opciones}
+
+            </select>
+
+          </div>
+
+
+
+          <div class="campo">
+
+            <label>
+              Observación
+            </label>
+
+
+            <input
+              type="text"
+              class="detalleObservacion"
+              placeholder="Detalle de la devolución">
+
+          </div>
+
+
+
+          <div class="campo">
+
+            <label>
+              Acción
+            </label>
+
+
+            <button
+              type="button"
+              class="btn-eliminar"
+              onclick="eliminarDetalle(${contadorDetalles})">
+
+              Eliminar
+
+            </button>
+
+          </div>
+
+
+        </div>
+
+      `;
+
+
+
+      contenedor.appendChild(
+        div
+      );
+
+
+
+      console.log(
+        "Detalle agregado:",
+        contadorDetalles
+      );
+
+
+    }
+
+
+
+    /* =====================================================
+       ELIMINAR DETALLE
+       ===================================================== */
+
+    function eliminarDetalle(
+      id
+    ) {
+
+
+      const elemento =
+        document.getElementById(
+          "detalle_" + id
+        );
+
+
+      if (elemento) {
+
+        elemento.remove();
+
+      }
+
+
+    }
+
+
+
+    /* =====================================================
+       OBTENER DETALLES
+       ===================================================== */
+
+    function obtenerDetalles() {
+
+
+      const elementos =
+        document.querySelectorAll(
+          "#contenedorDetalles .detalle"
+        );
+
+
+      const detalles =
+        [];
+
+
+      elementos.forEach(
+        function (elemento) {
+
+
+          const motivo =
+            elemento
+              .querySelector(
+                ".motivo"
+              )
+              .value;
+
+
+          const observacion =
+            elemento
+              .querySelector(
+                ".detalleObservacion"
+              )
+              .value
+              .trim();
+
+
+
+          if (
+            motivo ||
             observacion
+          ) {
 
-        });
+
+            detalles.push({
+
+              motivo:
+                motivo,
+
+              observacion:
+                observacion
+
+            });
+
+
+          }
+
+
+        }
+      );
+
+
+      return detalles;
+
+    }
+
+
+
+    /* =====================================================
+       GUARDAR DEVOLUCIÓN
+       ===================================================== */
+
+    async function guardarDevolucion() {
+
+
+      try {
+
+
+        const funcionario =
+          document
+            .getElementById(
+              "funcionario"
+            )
+            .value
+            .trim();
+
+
+        const placa =
+          document
+            .getElementById(
+              "placa"
+            )
+            .value
+            .trim()
+            .toUpperCase();
+
+
+        const documento =
+          document
+            .getElementById(
+              "documento"
+            )
+            .value
+            .trim();
+
+
+        const ciudadano =
+          document
+            .getElementById(
+              "ciudadano"
+            )
+            .value
+            .trim();
+
+
+        const observacion =
+          document
+            .getElementById(
+              "observacion"
+            )
+            .value
+            .trim();
+
+
+        const detalles =
+          obtenerDetalles();
+
+
+
+        /* VALIDACIONES */
+
+        if (!funcionario) {
+
+          throw new Error(
+            "Debe seleccionar el funcionario."
+          );
+
+        }
+
+
+        if (!documento) {
+
+          throw new Error(
+            "Debe ingresar el documento."
+          );
+
+        }
+
+
+        if (!ciudadano) {
+
+          throw new Error(
+            "Debe ingresar el ciudadano."
+          );
+
+        }
+
+
+        if (
+          detalles.length === 0
+        ) {
+
+          throw new Error(
+            "Debe agregar al menos un detalle."
+          );
+
+        }
+
+
+
+        mostrarLoading(
+          true
+        );
+
+
+
+        const resultado =
+          await llamarAPI(
+            "guardarDevolucion",
+            {
+
+              data:
+                JSON.stringify({
+
+                  master: {
+
+                    funcionario:
+                      funcionario,
+
+                    placa:
+                      placa,
+
+                    documento:
+                      documento,
+
+                    ciudadano:
+                      ciudadano,
+
+                    observacion:
+                      observacion
+
+                  },
+
+
+                  detalles:
+                    detalles
+
+                })
+
+            }
+          );
+
+
+
+        if (
+          !resultado.ok
+        ) {
+
+          throw new Error(
+            resultado.error ||
+            "No fue posible guardar."
+          );
+
+        }
+
+
+
+        mostrarEstado(
+          "Devolución guardada correctamente. Consecutivo: " +
+          (
+            resultado.id ||
+            ""
+          ),
+          "ok"
+        );
+
+
+      }
+      catch (error) {
+
+
+        console.error(
+          "ERROR GUARDANDO:",
+          error
+        );
+
+
+        mostrarEstado(
+          error.message,
+          "error"
+        );
+
+
+      }
+      finally {
+
+
+        mostrarLoading(
+          false
+        );
+
 
       }
 
     }
-  );
 
 
-  return detalles;
 
-}
+    /* =====================================================
+       GENERAR PDF
+       ===================================================== */
 
-
-/* =========================================================
-   GUARDAR DEVOLUCIÓN
-   ========================================================= */
-
-async function guardarDevolucion() {
-
-  try {
-
-    const funcionario =
-      document
-        .getElementById("funcionario")
-        .value
-        .trim();
+    async function generarPDF() {
 
 
-    const placa =
-      document
-        .getElementById("placa")
-        .value
-        .trim()
-        .toUpperCase();
+      const id =
+        prompt(
+          "Ingrese el consecutivo de la devolución:"
+        );
 
 
-    const documento =
-      document
-        .getElementById("documento")
-        .value
-        .trim();
+      if (!id) {
+
+        return;
+
+      }
 
 
-    const ciudadano =
-      document
-        .getElementById("ciudadano")
-        .value
-        .trim();
+
+      try {
 
 
-    const observacion =
-      document
-        .getElementById("observacion")
-        .value
-        .trim();
+        mostrarLoading(
+          true
+        );
 
 
-    const detalles =
-      obtenerDetalles();
+        const resultado =
+          await llamarAPI(
+            "generarPDF",
+            {
+              id: id
+            }
+          );
 
 
-    if (!funcionario) {
 
-      throw new Error(
-        "Debe seleccionar el funcionario."
-      );
+        if (
+          !resultado.ok
+        ) {
 
-    }
-
-
-    if (!documento) {
-
-      throw new Error(
-        "Debe ingresar el documento."
-      );
-
-    }
-
-
-    if (!ciudadano) {
-
-      throw new Error(
-        "Debe ingresar el ciudadano."
-      );
-
-    }
-
-
-    if (detalles.length === 0) {
-
-      throw new Error(
-        "Debe agregar al menos un detalle."
-      );
-
-    }
-
-
-    const master = {
-
-      funcionario:
-        funcionario,
-
-      placa:
-        placa,
-
-      documento:
-        documento,
-
-      ciudadano:
-        ciudadano,
-
-      observacion:
-        observacion
-
-    };
-
-
-    mostrarLoading(true);
-
-
-    const resultado =
-      await llamarAPI(
-        "guardarDevolucion",
-        {
-
-          data:
-            JSON.stringify({
-
-              master:
-                master,
-
-              detalles:
-                detalles
-
-            })
+          throw new Error(
+            resultado.error ||
+            "No fue posible generar el PDF."
+          );
 
         }
-      );
 
 
-    if (!resultado.ok) {
 
-      throw new Error(
-        resultado.error ||
-        "No fue posible guardar."
-      );
+        if (
+          resultado.url
+        ) {
 
-    }
+          window.open(
+            resultado.url,
+            "_blank"
+          );
 
-
-    mostrarEstado(
-      "Devolución guardada correctamente. Consecutivo: " +
-      (resultado.id || ""),
-      "ok"
-    );
-
-
-  } catch(error) {
-
-    mostrarEstado(
-      error.message,
-      "error"
-    );
-
-  } finally {
-
-    mostrarLoading(false);
-
-  }
-
-}
-
-
-/* =========================================================
-   GENERAR PDF
-   ========================================================= */
-
-async function generarPDF() {
-
-  const id =
-    prompt(
-      "Ingrese el consecutivo de la devolución:"
-    );
-
-
-  if (!id) {
-
-    return;
-
-  }
-
-
-  try {
-
-    mostrarLoading(true);
-
-
-    const resultado =
-      await llamarAPI(
-        "generarPDF",
-        {
-          id: id
         }
-      );
 
 
-    if (!resultado.ok) {
 
-      throw new Error(
-        resultado.error ||
-        "No fue posible generar el PDF."
-      );
+        mostrarEstado(
+          "PDF generado correctamente.",
+          "ok"
+        );
+
+
+      }
+      catch (error) {
+
+
+        console.error(
+          "ERROR PDF:",
+          error
+        );
+
+
+        mostrarEstado(
+          error.message,
+          "error"
+        );
+
+
+      }
+      finally {
+
+
+        mostrarLoading(
+          false
+        );
+
+
+      }
 
     }
 
 
-    if (resultado.url) {
 
-      window.open(
-        resultado.url,
-        "_blank"
-      );
+    /* =====================================================
+       LIMPIAR FORMULARIO
+       ===================================================== */
+
+    function limpiarFormulario() {
+
+
+      document
+        .getElementById(
+          "funcionario"
+        )
+        .value =
+        "";
+
+
+      document
+        .getElementById(
+          "placa"
+        )
+        .value =
+        "";
+
+
+      document
+        .getElementById(
+          "documento"
+        )
+        .value =
+        "";
+
+
+      document
+        .getElementById(
+          "ciudadano"
+        )
+        .value =
+        "";
+
+
+      document
+        .getElementById(
+          "observacion"
+        )
+        .value =
+        "";
+
+
+      document
+        .getElementById(
+          "contenedorDetalles"
+        )
+        .innerHTML =
+        "";
+
+
+      contadorDetalles =
+        0;
+
+
+      agregarDetalle();
+
+
+      ocultarEstado();
 
     }
 
 
-    mostrarEstado(
-      "PDF generado correctamente.",
-      "ok"
-    );
+
+    /* =====================================================
+       MOSTRAR ESTADO
+       ===================================================== */
+
+    function mostrarEstado(
+      mensaje,
+      tipo
+    ) {
 
 
-  } catch(error) {
-
-    mostrarEstado(
-      error.message,
-      "error"
-    );
-
-  } finally {
-
-    mostrarLoading(false);
-
-  }
-
-}
+      const estado =
+        document.getElementById(
+          "estado"
+        );
 
 
-/* =========================================================
-   LIMPIAR
-   ========================================================= */
-
-function limpiarFormulario() {
-
-  document
-    .getElementById("funcionario")
-    .value = "";
+      if (!estado) {
+        return;
+      }
 
 
-  document
-    .getElementById("placa")
-    .value = "";
+      estado.textContent =
+        mensaje;
 
 
-  document
-    .getElementById("documento")
-    .value = "";
+      estado.className =
+        "estado " +
+        tipo;
+
+    }
 
 
-  document
-    .getElementById("ciudadano")
-    .value = "";
+
+    /* =====================================================
+       OCULTAR ESTADO
+       ===================================================== */
+
+    function ocultarEstado() {
 
 
-  document
-    .getElementById("observacion")
-    .value = "";
+      const estado =
+        document.getElementById(
+          "estado"
+        );
 
 
-  document
-    .getElementById(
-      "contenedorDetalles"
-    )
-    .innerHTML = "";
+      if (!estado) {
+        return;
+      }
 
 
-  contadorDetalles = 0;
+      estado.className =
+        "estado";
 
 
-  agregarDetalle();
+      estado.textContent =
+        "";
+
+    }
 
 
-  ocultarEstado();
 
-}
+    /* =====================================================
+       LOADING
+       ===================================================== */
 
-
-/* =========================================================
-   ESTADO
-   ========================================================= */
-
-function mostrarEstado(
-  mensaje,
-  tipo
-) {
-
-  const estado =
-    document.getElementById(
-      "estado"
-    );
-
-
-  estado.textContent =
-    mensaje;
-
-
-  estado.className =
-    "estado " +
-    tipo;
-
-}
-
-
-function ocultarEstado() {
-
-  const estado =
-    document.getElementById(
-      "estado"
-    );
-
-
-  estado.className =
-    "estado";
-
-
-  estado.textContent =
-    "";
-
-}
-
-
-/* =========================================================
-   LOADING
-   ========================================================= */
-
-function mostrarLoading(
-  mostrar
-) {
-
-  document
-    .getElementById("loading")
-    .style.display =
+    function mostrarLoading(
       mostrar
-        ? "block"
-        : "none";
-
-}
+    ) {
 
 
-/* =========================================================
-   SEGURIDAD HTML
-   ========================================================= */
+      const loading =
+        document.getElementById(
+          "loading"
+        );
 
-function escapeHtml(texto) {
 
-  return String(texto)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+      if (!loading) {
+        return;
+      }
 
-}
 
-</script>
+      loading.style.display =
+        mostrar
+          ? "block"
+          : "none";
+
+    }
+
+
+
+    /* =====================================================
+       ESCAPAR HTML
+       ===================================================== */
+
+    function escapeHtml(
+      texto
+    ) {
+
+
+      return String(
+        texto
+      )
+
+        .replace(
+          /&/g,
+          "&amp;"
+        )
+
+        .replace(
+          /</g,
+          "&lt;"
+        )
+
+        .replace(
+          />/g,
+          "&gt;"
+        )
+
+        .replace(
+          /"/g,
+          "&quot;"
+        )
+
+        .replace(
+          /'/g,
+          "&#039;"
+        );
+
+
+    }
+
+
+  </script>
+
 
 </body>
 
