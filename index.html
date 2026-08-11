@@ -1056,6 +1056,8 @@
 const API_URL =
   "https://script.google.com/macros/s/AKfycbx147Sc2alN8xIWIuf9WZ41R0HyeNghObMtYScxNAltAnsRJN_0pRKrveOm2mT609ydYg/exec";
 
+const JSONP_TIMEOUT = 20000;
+
 
 /* =========================================================
    VARIABLES
@@ -1086,6 +1088,8 @@ function requestJSONP(action, params = {}) {
 
 
     let terminado = false;
+    let script = null;
+    let timer = null;
 
 
     function finalizar() {
@@ -1148,7 +1152,7 @@ function requestJSONP(action, params = {}) {
     );
 
 
-    const script =
+    script =
       document.createElement("script");
 
 
@@ -1156,7 +1160,7 @@ function requestJSONP(action, params = {}) {
 
 
     script.src =
-      API_URL + query;
+      API_URL + query + "&_=" + Date.now();
 
 
     script.async = true;
@@ -1197,7 +1201,7 @@ function requestJSONP(action, params = {}) {
           );
 
         },
-        15000
+        JSONP_TIMEOUT
       );
 
   });
