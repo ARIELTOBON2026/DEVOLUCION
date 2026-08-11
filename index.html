@@ -1,2538 +1,1788 @@
-<!DOCTYPE html>
-
-<html lang="es">
-
-<head>
-
-  <meta charset="UTF-8">
-
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1.0"
-
->
-
-<meta
-name="description"
-content="Sistema Maestro-Detalle de Devoluciones - Secretaría de Movilidad"
-
->
-
-<meta
-name="api-mode"
-content="JSONP - GitHub Pages"
-
->
-
-  <title>
-    Sistema Maestro-Detalle de Devoluciones
-  </title>
-
-  <style>
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(
-        135deg,
-        #f4f7fb 0%,
-        #e9eef5 100%
-      );
-      color: #1f2937;
-      min-height: 100vh;
-    }
-
-    /* =====================================================
-       ENCABEZADO
-       ===================================================== */
-
-    .header {
-      background: #ffffff;
-      border-bottom: 1px solid #d9dee7;
-      padding: 18px 25px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.08);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .logo {
-      width: 62px;
-      height: 62px;
-      object-fit: contain;
-      border-radius: 8px;
-    }
-
-    .header-title h1 {
-      font-size: 21px;
-      color: #17365d;
-      margin-bottom: 5px;
-    }
-
-    .header-title p {
-      font-size: 13px;
-      color: #6b7280;
-    }
-
-    .status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: #374151;
-    }
-
-    .status-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #16a34a;
-      box-shadow: 0 0 0 4px rgba(22,163,74,.12);
-    }
-
-    /* =====================================================
-       CONTENEDOR
-       ===================================================== */
-
-    .container {
-      width: 96%;
-      max-width: 1450px;
-      margin: 25px auto;
-      display: grid;
-      grid-template-columns:
-        minmax(0, 1fr)
-        minmax(350px, 500px);
-      gap: 22px;
-    }
-
-    .card {
-      background: #ffffff;
-      border-radius: 12px;
-      border: 1px solid #dce2ea;
-      box-shadow: 0 5px 18px rgba(15,23,42,.07);
-      padding: 22px;
-    }
-
-    .card-title {
-      font-size: 18px;
-      color: #17365d;
-      margin-bottom: 20px;
-      padding-bottom: 12px;
-      border-bottom: 2px solid #edf1f6;
-    }
-
-    /* =====================================================
-       FORMULARIO
-       ===================================================== */
-
-    .form-grid {
-      display: grid;
-      grid-template-columns:
-        repeat(2, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .form-group.full {
-      grid-column: 1 / -1;
-    }
-
-    label {
-      font-weight: 600;
-      font-size: 13px;
-      color: #374151;
-    }
-
-    input,
-    select,
-    textarea {
-      width: 100%;
-      border: 1px solid #cbd5e1;
-      border-radius: 7px;
-      padding: 11px 12px;
-      font-size: 14px;
-      font-family: inherit;
-      background: #fff;
-      outline: none;
-      transition:
-        border-color .2s,
-        box-shadow .2s;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-      border-color: #2563eb;
-      box-shadow:
-        0 0 0 3px rgba(37,99,235,.10);
-    }
-
-    input[readonly] {
-      background: #f3f4f6;
-      color: #4b5563;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-
-    /* =====================================================
-       DETALLE
-       ===================================================== */
-
-    .detalle-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-
-    .detalle-header h3 {
-      font-size: 16px;
-      color: #17365d;
-    }
-
-    .detalle-item {
-      border: 1px solid #dbe2ea;
-      border-radius: 9px;
-      padding: 15px;
-      margin-bottom: 12px;
-      background: #f8fafc;
-      position: relative;
-    }
-
-    .detalle-grid {
-      display: grid;
-      grid-template-columns:
-        minmax(0, 1fr)
-        minmax(0, 1fr);
-      gap: 12px;
-    }
-
-    .detalle-remove {
-      position: absolute;
-      top: 9px;
-      right: 9px;
-      border: none;
-      background: #fee2e2;
-      color: #b91c1c;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 15px;
-    }
-
-    .detalle-remove:hover {
-      background: #fecaca;
-    }
-
-    /* =====================================================
-       BOTONES
-       ===================================================== */
-
-    .buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 22px;
-    }
-
-    button {
-      border: none;
-      border-radius: 7px;
-      padding: 11px 18px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition:
-        transform .1s,
-        opacity .2s,
-        background .2s;
-    }
-
-    button:active {
-      transform: scale(.98);
-    }
-
-    button:disabled {
-      opacity: .55;
-      cursor: not-allowed;
-    }
-
-    .btn-primary {
-      background: #17365d;
-      color: #fff;
-    }
-
-    .btn-primary:hover {
-      background: #0f2947;
-    }
-
-    .btn-secondary {
-      background: #64748b;
-      color: #fff;
-    }
-
-    .btn-success {
-      background: #15803d;
-      color: #fff;
-    }
-
-    .btn-danger {
-      background: #b91c1c;
-      color: #fff;
-    }
-
-    .btn-add {
-      background: #2563eb;
-      color: #fff;
-      padding: 8px 13px;
-      font-size: 13px;
-    }
-
-    /* =====================================================
-       TABLA
-       ===================================================== */
-
-    .table-wrapper {
-      width: 100%;
-      overflow-x: auto;
-      border: 1px solid #dbe2ea;
-      border-radius: 8px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-
-    th {
-      background: #17365d;
-      color: #fff;
-      padding: 11px 9px;
-      text-align: left;
-      white-space: nowrap;
-    }
-
-    td {
-      padding: 10px 9px;
-      border-bottom: 1px solid #e5e7eb;
-      vertical-align: middle;
-    }
-
-    tr:hover td {
-      background: #f8fafc;
-    }
-
-    .empty {
-      text-align: center;
-      color: #6b7280;
-      padding: 30px 10px;
-    }
-
-    .action-button {
-      padding: 7px 10px;
-      font-size: 12px;
-      background: #2563eb;
-      color: white;
-    }
-
-    /* =====================================================
-       MENSAJES
-       ===================================================== */
-
-    .message {
-      display: none;
-      padding: 12px 15px;
-      border-radius: 8px;
-      margin-bottom: 18px;
-      font-size: 14px;
-    }
-
-    .message.show {
-      display: block;
-    }
-
-    .message.success {
-      background: #dcfce7;
-      border: 1px solid #86efac;
-      color: #166534;
-    }
-
-    .message.error {
-      background: #fee2e2;
-      border: 1px solid #fca5a5;
-      color: #991b1b;
-    }
-
-    .message.info {
-      background: #dbeafe;
-      border: 1px solid #93c5fd;
-      color: #1e40af;
-    }
-
-    /* =====================================================
-       LOADING
-       ===================================================== */
-
-    .loading {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(15,23,42,.45);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .loading.show {
-      display: flex;
-    }
-
-    .loading-box {
-      background: #fff;
-      padding: 28px 35px;
-      border-radius: 12px;
-      text-align: center;
-      box-shadow:
-        0 15px 40px rgba(0,0,0,.25);
-    }
-
-    .spinner {
-      width: 38px;
-      height: 38px;
-      border: 4px solid #e5e7eb;
-      border-top-color: #17365d;
-      border-radius: 50%;
-      animation: spin .8s linear infinite;
-      margin: 0 auto 15px;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* =====================================================
-       MODAL
-       ===================================================== */
-
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(15,23,42,.55);
-      z-index: 900;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .modal.show {
-      display: flex;
-    }
-
-    .modal-content {
-      width: 100%;
-      max-width: 900px;
-      max-height: 90vh;
-      overflow-y: auto;
-      background: #fff;
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow:
-        0 20px 50px rgba(0,0,0,.25);
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 18px;
-    }
-
-    .modal-close {
-      background: #f1f5f9;
-      color: #374151;
-      width: 34px;
-      height: 34px;
-      padding: 0;
-      border-radius: 50%;
-    }
-
-    /* =====================================================
-       FOOTER
-       ===================================================== */
-
-    footer {
-      text-align: center;
-      color: #6b7280;
-      font-size: 12px;
-      padding: 20px;
-      margin-top: 10px;
-    }
-
-    /* =====================================================
-       RESPONSIVE
-       ===================================================== */
-
-    @media (max-width: 1000px) {
-
-      .container {
-        grid-template-columns: 1fr;
-      }
-
-    }
-
-    @media (max-width: 700px) {
-
-      .header {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .form-grid,
-      .detalle-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .form-group.full {
-        grid-column: auto;
-      }
-
-      .container {
-        width: 94%;
-        margin-top: 15px;
-      }
-
-    }
-
-  </style>
-
-</head>
-
-<body>
-
-  <!-- ===================================================
-       ENCABEZADO
-       =================================================== -->
-
-  <header class="header">
-
-```
-<div class="header-left">
-
-  <img
-    class="logo"
-    src="logo.png"
-    alt="Secretaría de Movilidad"
-    onerror="this.style.display='none';"
-  >
-
-  <div class="header-title">
-
-    <h1>
-      SISTEMA MAESTRO-DETALLE DE DEVOLUCIONES
-    </h1>
-
-    <p>
-      Secretaría de Movilidad
-      — La Ceja del Tambo
-    </p>
-
-  </div>
-
-</div>
-
-<div class="status">
-
-  <span class="status-dot"></span>
-
-  Sistema disponible
-
-</div>
-```
-
-  </header>
-
-  <!-- ===================================================
-       CONTENIDO
-       =================================================== -->
-
-  <main class="container">
-
-```
-<!-- =================================================
-     FORMULARIO
-     ================================================= -->
-
-<section class="card">
-
-  <div class="card-title">
-    Registrar devolución
-  </div>
-
-  <div
-    id="message"
-    class="message"
-  ></div>
-
-  <div class="form-grid">
-
-    <div class="form-group">
-
-      <label for="consecutivo">
-        Consecutivo
-      </label>
-
-      <input
-        id="consecutivo"
-        type="text"
-        readonly
-        placeholder="Automático"
-      >
-
-    </div>
-
-    <div class="form-group">
-
-      <label for="fecha">
-        Fecha
-      </label>
-
-      <input
-        id="fecha"
-        type="date"
-      >
-
-    </div>
-
-    <div class="form-group">
-
-      <label for="funcionario">
-        Funcionario
-      </label>
-
-      <select id="funcionario">
-
-        <option value="">
-          Cargando funcionarios...
-        </option>
-
-      </select>
-
-    </div>
-
-    <div class="form-group">
-
-      <label for="placa">
-        Placa
-      </label>
-
-      <input
-        id="placa"
-        type="text"
-        maxlength="10"
-        autocomplete="off"
-        placeholder="Ej. ABC123"
-      >
-
-    </div>
-
-    <div class="form-group">
-
-      <label for="documento">
-        Documento
-      </label>
-
-      <input
-        id="documento"
-        type="text"
-        inputmode="numeric"
-        autocomplete="off"
-        placeholder="Número de documento"
-      >
-
-    </div>
-
-    <div class="form-group">
-
-      <label for="ciudadano">
-        Ciudadano
-      </label>
-
-      <input
-        id="ciudadano"
-        type="text"
-        autocomplete="off"
-        placeholder="Nombre completo"
-      >
-
-    </div>
-
-  </div>
-
-
-  <!-- =================================================
-       DETALLES
-       ================================================= -->
-
-  <div
-    class="detalle-header"
-    style="margin-top:25px;"
-  >
-
-    <h3>
-      Detalle de devolución
-    </h3>
-
-    <button
-      type="button"
-      class="btn-add"
-      id="btnAgregarDetalle"
-    >
-      + Agregar motivo
-    </button>
-
-  </div>
-
-  <div id="detalles"></div>
-
-
-  <!-- =================================================
-       BOTONES
-       ================================================= -->
-
-  <div class="buttons">
-
-    <button
-      type="button"
-      class="btn-primary"
-      id="btnGuardar"
-    >
-      Guardar devolución
-    </button>
-
-    <button
-      type="button"
-      class="btn-secondary"
-      id="btnLimpiar"
-    >
-      Limpiar
-    </button>
-
-  </div>
-
-</section>
-
-
-<!-- =================================================
-     DEVOLUCIONES REGISTRADAS
-     ================================================= -->
-
-<section class="card">
-
-  <div class="card-title">
-    Devoluciones registradas
-  </div>
-
-  <div class="table-wrapper">
-
-    <table>
-
-      <thead>
-
-        <tr>
-
-          <th>N.º</th>
-          <th>Fecha</th>
-          <th>Funcionario</th>
-          <th>Placa</th>
-          <th>Documento</th>
-          <th>Ciudadano</th>
-          <th>Acción</th>
-
-        </tr>
-
-      </thead>
-
-      <tbody id="tablaDevoluciones">
-
-        <tr>
-
-          <td
-            colspan="7"
-            class="empty"
-          >
-            Cargando información...
-          </td>
-
-        </tr>
-
-      </tbody>
-
-    </table>
-
-  </div>
-
-</section>
-```
-
-  </main>
-
-  <!-- ===================================================
-       MODAL DETALLE
-       =================================================== -->
-
-  <div
-    class="modal"
-    id="modalDetalle"
-  >
-
-```
-<div class="modal-content">
-
-  <div class="modal-header">
-
-    <h2>
-      Detalle de devolución
-    </h2>
-
-    <button
-      type="button"
-      class="modal-close"
-      id="btnCerrarModal"
-    >
-      ×
-    </button>
-
-  </div>
-
-  <div id="contenidoDetalle">
-    Cargando...
-  </div>
-
-</div>
-```
-
-  </div>
-
-  <!-- ===================================================
-       LOADING
-       =================================================== -->
-
-  <div
-    class="loading"
-    id="loading"
-  >
-
-```
-<div class="loading-box">
-
-  <div class="spinner"></div>
-
-  <div id="loadingText">
-    Procesando...
-  </div>
-
-</div>
-```
-
-  </div>
-
-  <!-- ===================================================
-       PIE
-       =================================================== -->
-
-  <footer>
-
-```
-Secretaría de Movilidad
-— La Ceja del Tambo
-```
-
-  </footer>
-
-<script>
-
-/* ======================================================
-   CONFIGURACIÓN DE LA API
-   ====================================================== */
-
-/*
- * IMPORTANTE:
+/************************************************************
+ * SISTEMA MAESTRO - DETALLE DE DEVOLUCIONES
+ * SECRETARÍA DE MOVILIDAD - LA CEJA DEL TAMBO
  *
- * NO colocar la URL como enlace Markdown.
+ * Compatible con:
+ * - Google Sheets
+ * - Google Docs
+ * - Google Drive
+ * - GitHub Pages
  *
- * CORRECTO:
+ * Comunicación:
+ * - JSONP
+ * - Sin fetch()
+ * - Sin problemas de CORS
+ ************************************************************/
+
+
+/************************************************************
+ * CONFIGURACIÓN
+ ************************************************************/
+
+const SPREADSHEET_ID =
+  "1e6sCQi0g3jlhIkU1OVCjqoQ7CorT854X48t_nst_U84";
+
+const TEMPLATE_DOC_ID =
+  "1Knnv5Uas66UC5Wsx4ir2JAFjbhROVZoKH9mw0N10RyM";
+
+
+/************************************************************
+ * HOJAS
+ ************************************************************/
+
+const HOJA_FUNCIONARIOS =
+  "FUNCIONARIOS";
+
+const HOJA_MOTIVOS =
+  "MOTIVOS";
+
+const HOJA_DEVOLUCIONES =
+  "DEVOLUCIONES";
+
+const HOJA_DETALLES =
+  "DEVOLUCIONES_DETALLES";
+
+
+/************************************************************
+ * DO GET
  *
- * const API_URL =
- * "https://script.google.com/macros/s/ID/exec";
- */
+ * Todas las solicitudes provenientes de GitHub Pages
+ * llegan por aquí.
+ *
+ * Ejemplos:
+ *
+ * ?action=ping&callback=prueba
+ *
+ * ?action=getInitialData&callback=prueba
+ *
+ * ?action=getDetalleDevolucion&id=1&callback=prueba
+ *
+ * ?action=guardarDevolucion&data=...&callback=prueba
+ *
+ * ?action=generarPDF&id=1&callback=prueba
+ ************************************************************/
 
-const API_URL =
-  "https://script.google.com/macros/s/AKfycbxzoWB9fbZiPNmFplnu9xMK3cJJMr0a4nMkbmEeyD1q2tIS57kSYpvj_doN7tEN8u5QtA/exec";
+function doGet(e) {
 
+  try {
 
-/* ======================================================
-   VARIABLES
-   ====================================================== */
+    e = e || {};
 
-let funcionarios = [];
-let motivos = [];
-let devoluciones = [];
+    const params =
+      e.parameter || {};
 
+    const action =
+      String(
+        params.action || "getInitialData"
+      ).trim();
 
-/* ======================================================
-   API JSONP
-   ====================================================== */
-
-function llamarAPI(action, parametros = {}) {
-
-  return new Promise(function(resolve, reject) {
-
-    const callbackName =
-      "callback_" +
-      Date.now() +
-      "_" +
-      Math.floor(Math.random() * 100000);
-
-    const script =
-      document.createElement("script");
-
-    const query =
-      new URLSearchParams();
-
-    query.append(
-      "action",
-      action
-    );
-
-    query.append(
-      "callback",
-      callbackName
-    );
+    const callback =
+      String(
+        params.callback || ""
+      ).trim();
 
 
-    Object.keys(parametros).forEach(
-      function(key) {
-
-        query.append(
-          key,
-          parametros[key]
-        );
-
-      }
-    );
+    let resultado;
 
 
-    let terminado = false;
+    /******************************************************
+     * PING
+     ******************************************************/
 
+    if (action === "ping") {
 
-    const timeout =
-      setTimeout(
-        function() {
+      resultado = {
 
-          if (terminado) {
-            return;
-          }
+        ok: true,
 
-          terminado = true;
+        mensaje:
+          "API de Devoluciones funcionando correctamente.",
 
-          limpiar();
-
-          reject(
-            new Error(
-              "Tiempo de espera agotado al comunicarse con Google Apps Script."
-            )
-          );
-
-        },
-        30000
-      );
-
-
-    window[callbackName] =
-      function(data) {
-
-        if (terminado) {
-          return;
-        }
-
-        terminado = true;
-
-        clearTimeout(timeout);
-
-        limpiar();
-
-        resolve(data);
-
-      };
-
-
-    script.onerror =
-      function() {
-
-        if (terminado) {
-          return;
-        }
-
-        terminado = true;
-
-        clearTimeout(timeout);
-
-        limpiar();
-
-        reject(
-          new Error(
-            "No fue posible conectarse con Google Apps Script."
+        fecha:
+          Utilities.formatDate(
+            new Date(),
+            Session.getScriptTimeZone(),
+            "yyyy-MM-dd HH:mm:ss"
           )
-        );
 
       };
 
+    }
 
-    function limpiar() {
+
+    /******************************************************
+     * DATOS INICIALES
+     ******************************************************/
+
+    else if (
+      action === "getInitialData"
+    ) {
+
+      resultado =
+        getInitialData();
+
+    }
+
+
+    /******************************************************
+     * DETALLE
+     ******************************************************/
+
+    else if (
+      action === "getDetalleDevolucion"
+    ) {
+
+      const id =
+        params.id || "";
+
+      resultado =
+        getDetalleDevolucion(id);
+
+    }
+
+
+    /******************************************************
+     * GUARDAR DEVOLUCIÓN
+     ******************************************************/
+
+    else if (
+      action === "guardarDevolucion"
+    ) {
+
+      const data =
+        params.data || "";
+
+
+      if (!data) {
+
+        throw new Error(
+          "No se recibieron los datos de la devolución."
+        );
+
+      }
+
+
+      let objeto;
+
 
       try {
-        delete window[callbackName];
-      } catch (e) {}
 
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
+        objeto =
+          JSON.parse(data);
+
+      } catch (error) {
+
+        throw new Error(
+          "Los datos recibidos no tienen un formato JSON válido."
+        );
+
       }
+
+
+      if (
+        !objeto ||
+        typeof objeto !== "object"
+      ) {
+
+        throw new Error(
+          "Los datos recibidos no son válidos."
+        );
+
+      }
+
+
+      if (
+        !objeto.master
+      ) {
+
+        throw new Error(
+          "No se recibieron los datos maestros."
+        );
+
+      }
+
+
+      const id =
+        guardarDevolucion(
+          objeto.master,
+          objeto.detalles || []
+        );
+
+
+      resultado = {
+
+        ok: true,
+
+        id: id,
+
+        mensaje:
+          "Devolución guardada correctamente."
+
+      };
 
     }
 
 
-    const separador =
-      API_URL.indexOf("?") >= 0
-        ? "&"
-        : "?";
+    /******************************************************
+     * GENERAR PDF
+     ******************************************************/
+
+    else if (
+      action === "generarPDF"
+    ) {
+
+      const id =
+        params.id || "";
 
 
-    script.src =
-      API_URL +
-      separador +
-      query.toString();
+      if (!id) {
+
+        throw new Error(
+          "No se recibió el consecutivo."
+        );
+
+      }
 
 
-    document.body.appendChild(script);
+      resultado =
+        generarPDF(id);
 
-  });
-
-}
-
-
-/* ======================================================
-   ELEMENTOS
-   ====================================================== */
-
-const message =
-  document.getElementById("message");
-
-const loading =
-  document.getElementById("loading");
-
-const loadingText =
-  document.getElementById("loadingText");
-
-const funcionario =
-  document.getElementById("funcionario");
-
-const detalles =
-  document.getElementById("detalles");
-
-const tablaDevoluciones =
-  document.getElementById("tablaDevoluciones");
-
-const modalDetalle =
-  document.getElementById("modalDetalle");
-
-const contenidoDetalle =
-  document.getElementById("contenidoDetalle");
+    }
 
 
-/* ======================================================
-   INICIALIZACIÓN
-   ====================================================== */
+    /******************************************************
+     * ACCIÓN NO RECONOCIDA
+     ******************************************************/
 
-document.addEventListener(
-  "DOMContentLoaded",
-  function() {
+    else {
 
-    establecerFecha();
+      throw new Error(
+        "Acción no reconocida: " +
+        action
+      );
 
-    configurarEventos();
+    }
 
-    agregarDetalle();
 
-    cargarDatos();
+    /******************************************************
+     * RESPUESTA
+     ******************************************************/
+
+    return respuestaJSONP(
+      resultado,
+      callback
+    );
+
+
+  } catch (error) {
+
+    const respuesta = {
+
+      ok: false,
+
+      error:
+        error &&
+        error.message
+          ? error.message
+          : String(error)
+
+    };
+
+
+    const callback =
+      e &&
+      e.parameter &&
+      e.parameter.callback
+        ? e.parameter.callback
+        : "";
+
+
+    return respuestaJSONP(
+      respuesta,
+      callback
+    );
 
   }
-);
+
+}
 
 
-/* ======================================================
-   EVENTOS
-   ====================================================== */
+/************************************************************
+ * RESPUESTA JSONP
+ ************************************************************/
 
-function configurarEventos() {
+function respuestaJSONP(
+  datos,
+  callback
+) {
 
-  document
-    .getElementById("btnAgregarDetalle")
-    .addEventListener(
-      "click",
-      agregarDetalle
+  const json =
+    JSON.stringify(
+      datos
     );
 
 
-  document
-    .getElementById("btnGuardar")
-    .addEventListener(
-      "click",
-      guardar
+  /*
+   * Si no existe callback,
+   * devolvemos JSON normal.
+   */
+
+  if (!callback) {
+
+    return ContentService
+      .createTextOutput(json)
+      .setMimeType(
+        ContentService.MimeType.JSON
+      );
+
+  }
+
+
+  /*
+   * Validar callback.
+   *
+   * Ejemplos válidos:
+   *
+   * callback123
+   * miCallback
+   * app.callback
+   * window.miCallback
+   */
+
+  if (
+    !/^[a-zA-Z_$][0-9a-zA-Z_$]*(\.[a-zA-Z_$][0-9a-zA-Z_$]*)*$/.test(
+      callback
+    )
+  ) {
+
+    return ContentService
+      .createTextOutput(
+        JSON.stringify({
+          ok: false,
+          error:
+            "Callback inválido."
+        })
+      )
+      .setMimeType(
+        ContentService.MimeType.JSON
+      );
+
+  }
+
+
+  const salida =
+    callback +
+    "(" +
+    json +
+    ");";
+
+
+  return ContentService
+    .createTextOutput(
+      salida
+    )
+    .setMimeType(
+      ContentService.MimeType.JAVASCRIPT
+    );
+
+}
+
+
+/************************************************************
+ * OBTENER DATOS INICIALES
+ ************************************************************/
+
+function getInitialData() {
+
+  const ss =
+    SpreadsheetApp.openById(
+      SPREADSHEET_ID
     );
 
 
-  document
-    .getElementById("btnLimpiar")
-    .addEventListener(
-      "click",
-      limpiarFormulario
+  /**********************************************************
+   * FUNCIONARIOS
+   **********************************************************/
+
+  const sheetFunc =
+    ss.getSheetByName(
+      HOJA_FUNCIONARIOS
     );
 
 
-  document
-    .getElementById("btnCerrarModal")
-    .addEventListener(
-      "click",
-      cerrarModal
-    );
+  let funcionarios = [];
 
 
-  document
-    .getElementById("placa")
-    .addEventListener(
-      "input",
-      function() {
+  if (sheetFunc) {
 
-        this.value =
-          this.value
-            .toUpperCase()
-            .replace(/\s/g, "");
-
-      }
-    );
+    const lastRow =
+      sheetFunc.getLastRow();
 
 
-  document
-    .getElementById("ciudadano")
-    .addEventListener(
-      "input",
-      function() {
+    if (lastRow > 1) {
 
-        this.value =
-          this.value.toUpperCase();
+      funcionarios =
+        sheetFunc
+          .getRange(
+            2,
+            1,
+            lastRow - 1,
+            1
+          )
+          .getDisplayValues()
+          .flat()
+          .map(
+            function(valor) {
 
-      }
-    );
+              return String(
+                valor || ""
+              ).trim();
 
+            }
+          )
+          .filter(
+            function(valor) {
 
-  document
-    .getElementById("documento")
-    .addEventListener(
-      "input",
-      function() {
+              return valor !== "";
 
-        this.value =
-          this.value.replace(
-            /[^0-9]/g,
-            ""
+            }
           );
 
-      }
+    }
+
+  }
+
+
+  /**********************************************************
+   * MOTIVOS
+   **********************************************************/
+
+  const sheetMotivos =
+    ss.getSheetByName(
+      HOJA_MOTIVOS
     );
 
+
+  let motivos = [];
+
+
+  if (sheetMotivos) {
+
+    const lastRow =
+      sheetMotivos.getLastRow();
+
+
+    if (lastRow > 1) {
+
+      motivos =
+        sheetMotivos
+          .getRange(
+            2,
+            1,
+            lastRow - 1,
+            1
+          )
+          .getDisplayValues()
+          .flat()
+          .map(
+            function(valor) {
+
+              return String(
+                valor || ""
+              ).trim();
+
+            }
+          )
+          .filter(
+            function(valor) {
+
+              return valor !== "";
+
+            }
+          );
+
+    }
+
+  }
+
+
+  /**********************************************************
+   * DEVOLUCIONES
+   **********************************************************/
+
+  const sheetDev =
+    ss.getSheetByName(
+      HOJA_DEVOLUCIONES
+    );
+
+
+  let devoluciones = [];
+
+
+  if (sheetDev) {
+
+    const lastRow =
+      sheetDev.getLastRow();
+
+
+    const lastColumn =
+      Math.max(
+        sheetDev.getLastColumn(),
+        6
+      );
+
+
+    if (lastRow > 1) {
+
+      const data =
+        sheetDev
+          .getRange(
+            2,
+            1,
+            lastRow - 1,
+            lastColumn
+          )
+          .getDisplayValues();
+
+
+      devoluciones =
+        data
+          .map(
+            function(row) {
+
+              return {
+
+                consecutivo:
+                  row[0] || "",
+
+                fecha:
+                  row[1] || "",
+
+                funcionario:
+                  row[2] || "",
+
+                placa:
+                  row[3] || "",
+
+                documento:
+                  row[4] || "",
+
+                ciudadano:
+                  row[5] || ""
+
+              };
+
+            }
+          )
+          .reverse();
+
+    }
+
+  }
+
+
+  return {
+
+    ok: true,
+
+    funcionarios:
+      funcionarios,
+
+    motivos:
+      motivos,
+
+    devoluciones:
+      devoluciones
+
+  };
+
 }
 
 
-/* ======================================================
-   FECHA
-   ====================================================== */
+/************************************************************
+ * OBTENER DETALLE DE UNA DEVOLUCIÓN
+ ************************************************************/
 
-function establecerFecha() {
+function getDetalleDevolucion(
+  id
+) {
 
-  const ahora =
-    new Date();
-
-  const yyyy =
-    ahora.getFullYear();
-
-  const mm =
-    String(
-      ahora.getMonth() + 1
-    ).padStart(2, "0");
-
-  const dd =
-    String(
-      ahora.getDate()
-    ).padStart(2, "0");
+  const ss =
+    SpreadsheetApp.openById(
+      SPREADSHEET_ID
+    );
 
 
-  document
-    .getElementById("fecha")
-    .value =
-      yyyy + "-" + mm + "-" + dd;
+  const sheetDet =
+    ss.getSheetByName(
+      HOJA_DETALLES
+    );
+
+
+  if (!sheetDet) {
+
+    throw new Error(
+      "No existe la hoja " +
+      HOJA_DETALLES +
+      "."
+    );
+
+  }
+
+
+  const lastRow =
+    sheetDet.getLastRow();
+
+
+  if (lastRow <= 1) {
+
+    return {
+
+      ok: true,
+
+      detalles: []
+
+    };
+
+  }
+
+
+  const lastColumn =
+    Math.max(
+      sheetDet.getLastColumn(),
+      4
+    );
+
+
+  const data =
+    sheetDet
+      .getRange(
+        2,
+        1,
+        lastRow - 1,
+        lastColumn
+      )
+      .getDisplayValues();
+
+
+  const detalles =
+    data
+      .filter(
+        function(row) {
+
+          return (
+            String(
+              row[1] || ""
+            ).trim()
+            ===
+            String(
+              id
+            ).trim()
+          );
+
+        }
+      )
+      .map(
+        function(row) {
+
+          return {
+
+            nro:
+              row[0] || "",
+
+            id:
+              row[1] || "",
+
+            motivo:
+              row[2] || "",
+
+            observacion:
+              row[3] || ""
+
+          };
+
+        }
+      );
+
+
+  return {
+
+    ok: true,
+
+    detalles:
+      detalles
+
+  };
 
 }
 
 
-/* ======================================================
-   CARGAR DATOS
-   ====================================================== */
+/************************************************************
+ * GUARDAR DEVOLUCIÓN
+ *
+ * MAESTRO:
+ *
+ * A = Consecutivo
+ * B = Fecha
+ * C = Funcionario
+ * D = Placa
+ * E = Documento
+ * F = Ciudadano
+ *
+ *
+ * DETALLES:
+ *
+ * A = Nro
+ * B = Consecutivo
+ * C = Motivo
+ * D = Observación
+ ************************************************************/
 
-async function cargarDatos() {
+function guardarDevolucion(
+  master,
+  detalles
+) {
 
-  mostrarLoading(
-    "Cargando funcionarios, motivos y devoluciones..."
+  const lock =
+    LockService.getScriptLock();
+
+
+  lock.waitLock(
+    30000
   );
 
 
   try {
 
-    const data =
-      await llamarAPI(
-        "getInitialData"
+    const ss =
+      SpreadsheetApp.openById(
+        SPREADSHEET_ID
       );
 
 
+    const sheetDev =
+      ss.getSheetByName(
+        HOJA_DEVOLUCIONES
+      );
+
+
+    const sheetDet =
+      ss.getSheetByName(
+        HOJA_DETALLES
+      );
+
+
+    if (!sheetDev) {
+
+      throw new Error(
+        "No existe la hoja " +
+        HOJA_DEVOLUCIONES +
+        "."
+      );
+
+    }
+
+
+    if (!sheetDet) {
+
+      throw new Error(
+        "No existe la hoja " +
+        HOJA_DETALLES +
+        "."
+      );
+
+    }
+
+
+    /******************************************************
+     * VALIDAR MAESTRO
+     ******************************************************/
+
     if (
-      !data ||
-      data.ok === false
+      !master ||
+      typeof master !== "object"
     ) {
 
       throw new Error(
-        data &&
-        data.error
-          ? data.error
-          : "No fue posible conectarse con el servidor."
+        "No se recibieron los datos maestros."
       );
 
     }
 
 
-    funcionarios =
-      Array.isArray(
-        data.funcionarios
+    const funcionario =
+      String(
+        master.funcionario || ""
+      ).trim();
+
+
+    const placa =
+      String(
+        master.placa || ""
       )
-        ? data.funcionarios
-        : [];
+        .trim()
+        .toUpperCase();
 
 
-    motivos =
-      Array.isArray(
-        data.motivos
+    const documento =
+      String(
+        master.documento || ""
+      ).trim();
+
+
+    const ciudadano =
+      String(
+        master.ciudadano || ""
       )
-        ? data.motivos
-        : [];
+        .trim()
+        .toUpperCase();
 
 
-    devoluciones =
-      Array.isArray(
-        data.devoluciones
-      )
-        ? data.devoluciones
-        : [];
+    if (!funcionario) {
 
-
-    cargarFuncionarios();
-
-    cargarMotivos();
-
-    mostrarDevoluciones();
-
-
-    if (
-      funcionarios.length === 0
-    ) {
-
-      console.warn(
-        "No se encontraron funcionarios."
+      throw new Error(
+        "Debe seleccionar un funcionario."
       );
 
     }
 
 
-    if (
-      motivos.length === 0
-    ) {
+    /*
+     * La placa se deja OPCIONAL,
+     * porque así está definida en el formulario.
+     */
 
-      console.warn(
-        "No se encontraron motivos."
+
+    if (!documento) {
+
+      throw new Error(
+        "Debe ingresar el documento."
       );
 
     }
 
 
-  } catch (error) {
+    if (!ciudadano) {
 
-    console.error(
-      "ERROR API:",
-      error
-    );
-
-
-    funcionario.innerHTML =
-      '<option value="">Error al cargar funcionarios</option>';
-
-
-    mostrarMensaje(
-      "No se pudo cargar la información. " +
-      error.message,
-      "error"
-    );
-
-
-  } finally {
-
-    ocultarLoading();
-
-  }
-
-}
-
-
-/* ======================================================
-   FUNCIONARIOS
-   ====================================================== */
-
-function cargarFuncionarios() {
-
-  funcionario.innerHTML =
-    "";
-
-
-  const inicial =
-    document.createElement(
-      "option"
-    );
-
-
-  inicial.value = "";
-
-  inicial.textContent =
-    funcionarios.length > 0
-      ? "Seleccione funcionario"
-      : "No hay funcionarios";
-
-
-  funcionario.appendChild(
-    inicial
-  );
-
-
-  funcionarios.forEach(
-    function(nombre) {
-
-      const option =
-        document.createElement(
-          "option"
-        );
-
-
-      option.value =
-        String(nombre);
-
-
-      option.textContent =
-        String(nombre);
-
-
-      funcionario.appendChild(
-        option
+      throw new Error(
+        "Debe ingresar el ciudadano."
       );
 
     }
-  );
-
-}
 
 
-/* ======================================================
-   MOTIVOS
-   ====================================================== */
+    /******************************************************
+     * CALCULAR CONSECUTIVO
+     ******************************************************/
 
-function cargarMotivos() {
-
-  const selects =
-    detalles.querySelectorAll(
-      ".motivo"
-    );
+    let maxId = 0;
 
 
-  selects.forEach(
-    function(select) {
-
-      const valorActual =
-        select.value;
+    const lastRowDev =
+      sheetDev.getLastRow();
 
 
-      select.innerHTML =
-        "";
+    if (lastRowDev > 1) {
+
+      const ids =
+        sheetDev
+          .getRange(
+            2,
+            1,
+            lastRowDev - 1,
+            1
+          )
+          .getDisplayValues();
 
 
-      const inicial =
-        document.createElement(
-          "option"
-        );
+      ids.forEach(
+        function(row) {
 
-
-      inicial.value = "";
-
-      inicial.textContent =
-        motivos.length > 0
-          ? "Seleccione motivo"
-          : "No hay motivos";
-
-
-      select.appendChild(
-        inicial
-      );
-
-
-      motivos.forEach(
-        function(motivo) {
-
-          const option =
-            document.createElement(
-              "option"
+          const numero =
+            parseInt(
+              String(
+                row[0] || ""
+              ).replace(
+                /[^0-9]/g,
+                ""
+              ),
+              10
             );
 
 
-          option.value =
-            String(motivo);
+          if (
+            !isNaN(numero) &&
+            numero > maxId
+          ) {
+
+            maxId =
+              numero;
+
+          }
+
+        }
+      );
+
+    }
 
 
-          option.textContent =
-            String(motivo);
+    const newId =
+      maxId + 1;
 
 
-          select.appendChild(
-            option
-          );
+    /******************************************************
+     * FECHA
+     ******************************************************/
+
+    let fecha =
+      master.fecha || "";
+
+
+    if (!fecha) {
+
+      fecha =
+        Utilities.formatDate(
+          new Date(),
+          Session.getScriptTimeZone(),
+          "dd/MM/yyyy"
+        );
+
+    }
+
+
+    /******************************************************
+     * GUARDAR MAESTRO
+     ******************************************************/
+
+    sheetDev.appendRow([
+
+      newId,
+
+      fecha,
+
+      funcionario,
+
+      placa,
+
+      documento,
+
+      ciudadano
+
+    ]);
+
+
+    /******************************************************
+     * GUARDAR DETALLES
+     ******************************************************/
+
+    if (
+      Array.isArray(detalles) &&
+      detalles.length > 0
+    ) {
+
+      let maxNro = 0;
+
+
+      const lastRowDet =
+        sheetDet.getLastRow();
+
+
+      if (lastRowDet > 1) {
+
+        const numeros =
+          sheetDet
+            .getRange(
+              2,
+              1,
+              lastRowDet - 1,
+              1
+            )
+            .getDisplayValues();
+
+
+        numeros.forEach(
+          function(row) {
+
+            const numero =
+              parseInt(
+                String(
+                  row[0] || ""
+                ).replace(
+                  /[^0-9]/g,
+                  ""
+                ),
+                10
+              );
+
+
+            if (
+              !isNaN(numero) &&
+              numero > maxNro
+            ) {
+
+              maxNro =
+                numero;
+
+            }
+
+          }
+        );
+
+      }
+
+
+      const rowsToAppend = [];
+
+
+      detalles.forEach(
+        function(item) {
+
+          if (!item) {
+            return;
+          }
+
+
+          const motivo =
+            String(
+              item.motivo || ""
+            ).trim();
+
+
+          const observacion =
+            String(
+              item.observacion || ""
+            ).trim();
+
+
+          if (!motivo) {
+            return;
+          }
+
+
+          maxNro++;
+
+
+          rowsToAppend.push([
+
+            maxNro,
+
+            newId,
+
+            motivo,
+
+            observacion
+
+          ]);
 
         }
       );
 
 
-      if (valorActual) {
-        select.value = valorActual;
+      if (
+        rowsToAppend.length > 0
+      ) {
+
+        sheetDet
+          .getRange(
+            sheetDet.getLastRow() + 1,
+            1,
+            rowsToAppend.length,
+            4
+          )
+          .setValues(
+            rowsToAppend
+          );
+
       }
 
     }
-  );
-
-}
 
 
-/* ======================================================
-   AGREGAR DETALLE
-   ====================================================== */
-
-function agregarDetalle() {
-
-  const div =
-    document.createElement(
-      "div"
-    );
+    SpreadsheetApp.flush();
 
 
-  div.className =
-    "detalle-item";
+    return newId;
 
 
-  div.innerHTML = `
+  } finally {
 
-    <button
-      type="button"
-      class="detalle-remove"
-      title="Eliminar"
-    >
-      ×
-    </button>
-
-    <div class="detalle-grid">
-
-      <div class="form-group">
-
-        <label>
-          Motivo
-        </label>
-
-        <select class="motivo">
-
-          <option value="">
-            Cargando motivos...
-          </option>
-
-        </select>
-
-      </div>
-
-      <div class="form-group">
-
-        <label>
-          Observación
-        </label>
-
-        <textarea
-          class="observacion"
-          placeholder="Ingrese observación"
-        ></textarea>
-
-```
-  </div>
-
-</div>
-```
-
-`;
-
-const select =
-div.querySelector(
-".motivo"
-);
-
-motivos.forEach(
-function(motivo) {
-
-```
-  const option =
-    document.createElement(
-      "option"
-    );
-
-
-  option.value =
-    String(motivo);
-
-
-  option.textContent =
-    String(motivo);
-
-
-  select.appendChild(
-    option
-  );
-
-}
-```
-
-);
-
-div
-.querySelector(
-".detalle-remove"
-)
-.addEventListener(
-"click",
-function() {
-
-```
-    div.remove();
-
-  }
-);
-```
-
-detalles.appendChild(
-div
-);
-
-}
-
-/* ======================================================
-OBTENER DETALLES
-====================================================== */
-
-function obtenerDetalles() {
-
-const elementos =
-detalles.querySelectorAll(
-".detalle-item"
-);
-
-const resultado = [];
-
-elementos.forEach(
-function(item) {
-
-```
-  const motivo =
-    item
-      .querySelector(".motivo")
-      .value
-      .trim();
-
-
-  const observacion =
-    item
-      .querySelector(".observacion")
-      .value
-      .trim();
-
-
-  if (
-    motivo ||
-    observacion
-  ) {
-
-    resultado.push({
-
-      motivo:
-        motivo,
-
-      observacion:
-        observacion
-
-    });
+    lock.releaseLock();
 
   }
 
 }
-```
 
-);
 
-return resultado;
+/************************************************************
+ * GENERAR PDF
+ *
+ * Utiliza:
+ * - Google Docs como plantilla
+ * - Google Drive
+ * - DocumentApp
+ ************************************************************/
 
-}
+function generarPDF(
+  consecutivoId
+) {
 
-/* ======================================================
-GUARDAR
-====================================================== */
+  let copia = null;
 
-async function guardar() {
+  let doc = null;
 
-const funcionarioValor =
-funcionario.value.trim();
 
-const placa =
-document
-.getElementById("placa")
-.value
-.trim()
-.toUpperCase();
+  try {
 
-const documento =
-document
-.getElementById("documento")
-.value
-.trim();
+    /******************************************************
+     * VALIDAR ID
+     ******************************************************/
 
-const ciudadano =
-document
-.getElementById("ciudadano")
-.value
-.trim()
-.toUpperCase();
+    if (
+      consecutivoId === null ||
+      consecutivoId === undefined ||
+      String(
+        consecutivoId
+      ).trim() === ""
+    ) {
 
-const fecha =
-document
-.getElementById("fecha")
-.value;
+      throw new Error(
+        "No se recibió el consecutivo."
+      );
 
-const detalle =
-obtenerDetalles();
-
-if (!funcionarioValor) {
-
-```
-mostrarMensaje(
-  "Seleccione el funcionario.",
-  "error"
-);
-
-return;
-```
-
-}
-
-if (!placa) {
-
-```
-mostrarMensaje(
-  "Ingrese la placa.",
-  "error"
-);
-
-return;
-```
-
-}
-
-if (!documento) {
-
-```
-mostrarMensaje(
-  "Ingrese el documento.",
-  "error"
-);
-
-return;
-```
-
-}
-
-if (!ciudadano) {
-
-```
-mostrarMensaje(
-  "Ingrese el nombre del ciudadano.",
-  "error"
-);
-
-return;
-```
-
-}
-
-if (!fecha) {
-
-```
-mostrarMensaje(
-  "Seleccione la fecha.",
-  "error"
-);
-
-return;
-```
-
-}
-
-if (detalle.length === 0) {
-
-```
-mostrarMensaje(
-  "Agregue al menos un motivo de devolución.",
-  "error"
-);
-
-return;
-```
-
-}
-
-const master = {
-
-```
-funcionario:
-  funcionarioValor,
-
-placa:
-  placa,
-
-documento:
-  documento,
-
-ciudadano:
-  ciudadano,
-
-fecha:
-  fecha
-```
-
-};
-
-mostrarLoading(
-"Guardando devolución..."
-);
-
-try {
-
-```
-const data =
-  await llamarAPI(
-    "guardarDevolucion",
-    {
-      data:
-        JSON.stringify({
-          master:
-            master,
-          detalles:
-            detalle
-        })
     }
-  );
 
 
-if (
-  !data ||
-  data.ok === false
-) {
+    /******************************************************
+     * ABRIR SPREADSHEET
+     ******************************************************/
 
-  throw new Error(
-    data &&
-    data.error
-      ? data.error
-      : "Error de comunicación con Apps Script."
-  );
-
-}
+    const ss =
+      SpreadsheetApp.openById(
+        SPREADSHEET_ID
+      );
 
 
-const id =
-  data.id;
+    const sheetDev =
+      ss.getSheetByName(
+        HOJA_DEVOLUCIONES
+      );
 
 
-document
-  .getElementById("consecutivo")
-  .value =
-    id;
+    if (!sheetDev) {
 
+      throw new Error(
+        "No existe la hoja " +
+        HOJA_DEVOLUCIONES +
+        "."
+      );
 
-mostrarMensaje(
-  "Devolución guardada correctamente. Consecutivo: " +
-  id,
-  "success"
-);
-
-
-await cargarDatos();
-
-
-const generar =
-  confirm(
-    "La devolución fue guardada correctamente.\n\n" +
-    "Consecutivo: " +
-    id +
-    "\n\n" +
-    "¿Desea generar el PDF?"
-  );
-
-
-if (generar) {
-
-  await generarPDF(
-    id
-  );
-
-}
-```
-
-} catch (error) {
-
-```
-console.error(
-  error
-);
-
-
-mostrarMensaje(
-  "Error al guardar: " +
-  error.message,
-  "error"
-);
-```
-
-} finally {
-
-```
-ocultarLoading();
-```
-
-}
-
-}
-
-/* ======================================================
-GENERAR PDF
-====================================================== */
-
-async function generarPDF(id) {
-
-if (!id) {
-
-```
-mostrarMensaje(
-  "No se recibió el consecutivo.",
-  "error"
-);
-
-return;
-```
-
-}
-
-mostrarLoading(
-"Generando PDF..."
-);
-
-try {
-
-```
-const data =
-  await llamarAPI(
-    "generarPDF",
-    {
-      id:
-        id
     }
-  );
 
 
-if (
-  !data ||
-  data.ok === false
-) {
+    /******************************************************
+     * BUSCAR MAESTRO
+     ******************************************************/
 
-  throw new Error(
-    data &&
-    data.error
-      ? data.error
-      : "No fue posible generar el PDF."
-  );
-
-}
+    const lastRow =
+      sheetDev.getLastRow();
 
 
-if (
-  !data.base64 ||
-  !data.filename
-) {
+    if (lastRow <= 1) {
 
-  throw new Error(
-    "La respuesta no contiene el PDF."
-  );
+      throw new Error(
+        "No existen devoluciones registradas."
+      );
 
-}
+    }
 
 
-descargarBase64(
-  data.base64,
-  data.filename,
-  "application/pdf"
-);
+    const lastColumn =
+      Math.max(
+        sheetDev.getLastColumn(),
+        6
+      );
 
 
-mostrarMensaje(
-  "PDF generado correctamente.",
-  "success"
-);
-```
-
-} catch (error) {
-
-```
-console.error(
-  error
-);
+    const datos =
+      sheetDev
+        .getRange(
+          2,
+          1,
+          lastRow - 1,
+          lastColumn
+        )
+        .getValues();
 
 
-mostrarMensaje(
-  "Error al generar PDF: " +
-  error.message,
-  "error"
-);
-```
+    let master = null;
 
-} finally {
 
-```
-ocultarLoading();
-```
+    for (
+      let i = 0;
+      i < datos.length;
+      i++
+    ) {
 
-}
+      if (
+        String(
+          datos[i][0]
+        ).trim()
+        ===
+        String(
+          consecutivoId
+        ).trim()
+      ) {
 
-}
+        let fecha =
+          datos[i][1];
 
-/* ======================================================
-DESCARGAR BASE64
-====================================================== */
 
-function descargarBase64(
-base64,
-filename,
-mime
-) {
+        if (
+          fecha instanceof Date
+        ) {
 
-const byteCharacters =
-atob(base64);
+          fecha =
+            Utilities.formatDate(
+              fecha,
+              Session.getScriptTimeZone(),
+              "dd/MM/yyyy"
+            );
 
-const byteNumbers =
-new Array(
-byteCharacters.length
-);
+        } else {
 
-for (
-let i = 0;
-i < byteCharacters.length;
-i++
-) {
+          fecha =
+            String(
+              fecha || ""
+            );
 
-```
-byteNumbers[i] =
-  byteCharacters.charCodeAt(i);
-```
+        }
 
-}
 
-const byteArray =
-new Uint8Array(
-byteNumbers
-);
+        master = {
 
-const blob =
-new Blob(
-[byteArray],
-{
-type:
-mime
-}
-);
+          id:
+            datos[i][0],
 
-const url =
-URL.createObjectURL(
-blob
-);
+          fecha:
+            fecha,
 
-const a =
-document.createElement(
-"a"
-);
+          funcionario:
+            datos[i][2],
 
-a.href =
-url;
+          placa:
+            datos[i][3],
 
-a.download =
-filename;
+          documento:
+            datos[i][4],
 
-document.body.appendChild(
-a
-);
+          ciudadano:
+            datos[i][5]
 
-a.click();
+        };
 
-a.remove();
 
-setTimeout(
-function() {
+        break;
 
-```
-  URL.revokeObjectURL(
-    url
-  );
+      }
 
-},
-1000
-```
+    }
 
-);
 
-}
+    if (!master) {
 
-/* ======================================================
-MOSTRAR DEVOLUCIONES
-====================================================== */
+      throw new Error(
+        "No existe la devolución con el número " +
+        consecutivoId +
+        "."
+      );
 
-function mostrarDevoluciones() {
+    }
 
-tablaDevoluciones.innerHTML =
-"";
 
-if (
-!devoluciones ||
-devoluciones.length === 0
-) {
+    /******************************************************
+     * OBTENER DETALLES
+     ******************************************************/
 
-```
-tablaDevoluciones.innerHTML = `
+    const respuestaDetalles =
+      getDetalleDevolucion(
+        consecutivoId
+      );
 
-  <tr>
 
-    <td
-      colspan="7"
-      class="empty"
-    >
-      No existen devoluciones registradas.
-    </td>
+    const detalles =
+      respuestaDetalles.detalles ||
+      [];
 
-  </tr>
 
-`;
+    /******************************************************
+     * OBTENER PLANTILLA
+     ******************************************************/
 
-return;
-```
+    const plantilla =
+      DriveApp.getFileById(
+        TEMPLATE_DOC_ID
+      );
 
-}
 
-devoluciones.forEach(
-function(dev) {
+    if (!plantilla) {
 
-```
-  const tr =
-    document.createElement(
-      "tr"
+      throw new Error(
+        "No se encontró la plantilla de Google Docs."
+      );
+
+    }
+
+
+    /******************************************************
+     * CREAR COPIA TEMPORAL
+     ******************************************************/
+
+    copia =
+      plantilla.makeCopy(
+        "DEVOLUCION_TEMP_" +
+        master.id
+      );
+
+
+    /******************************************************
+     * ABRIR DOCUMENTO
+     ******************************************************/
+
+    doc =
+      DocumentApp.openById(
+        copia.getId()
+      );
+
+
+    const body =
+      doc.getBody();
+
+
+    /******************************************************
+     * REEMPLAZAR MARCADORES
+     ******************************************************/
+
+    reemplazarTexto(
+      body,
+      "{{ID}}",
+      master.id
     );
 
 
-  tr.innerHTML = `
-
-    <td>
-      ${escapeHtml(dev.consecutivo)}
-    </td>
-
-    <td>
-      ${escapeHtml(dev.fecha)}
-    </td>
-
-    <td>
-      ${escapeHtml(dev.funcionario)}
-    </td>
-
-    <td>
-      ${escapeHtml(dev.placa)}
-    </td>
-
-    <td>
-      ${escapeHtml(dev.documento)}
-    </td>
-
-    <td>
-      ${escapeHtml(dev.ciudadano)}
-    </td>
-
-    <td>
-
-      <button
-        class="action-button"
-        type="button"
-      >
-        Ver / PDF
-      </button>
-
-    </td>
-
-  `;
+    reemplazarTexto(
+      body,
+      "{{FECHA}}",
+      master.fecha
+    );
 
 
-  tr
-    .querySelector(
-      ".action-button"
+    reemplazarTexto(
+      body,
+      "{{FUNCIONARIO}}",
+      master.funcionario
+    );
+
+
+    reemplazarTexto(
+      body,
+      "{{PLACA}}",
+      master.placa
+    );
+
+
+    reemplazarTexto(
+      body,
+      "{{CEDULA}}",
+      master.documento
+    );
+
+
+    reemplazarTexto(
+      body,
+      "{{CIUDADANO}}",
+      master.ciudadano
+    );
+
+
+    /******************************************************
+     * INSERTAR TABLA
+     ******************************************************/
+
+    const encontrado =
+      body.findText(
+        "\\{\\{TABLA\\}\\}"
+      );
+
+
+    if (encontrado) {
+
+      const elemento =
+        encontrado.getElement();
+
+
+      const parrafo =
+        elemento
+          .getParent()
+          .asParagraph();
+
+
+      const indice =
+        body.getChildIndex(
+          parrafo
+        );
+
+
+      const datosTabla = [
+
+        [
+          "MOTIVO",
+          "OBSERVACIÓN"
+        ]
+
+      ];
+
+
+      detalles.forEach(
+        function(det) {
+
+          datosTabla.push([
+
+            String(
+              det.motivo || ""
+            ),
+
+            String(
+              det.observacion || ""
+            )
+
+          ]);
+
+        }
+      );
+
+
+      if (
+        detalles.length === 0
+      ) {
+
+        datosTabla.push([
+
+          "Sin detalles registrados",
+
+          ""
+
+        ]);
+
+      }
+
+
+      body.insertTable(
+        indice,
+        datosTabla
+      );
+
+
+      parrafo.removeFromParent();
+
+    }
+
+
+    /******************************************************
+     * GUARDAR DOCUMENTO
+     ******************************************************/
+
+    doc.saveAndClose();
+
+    doc = null;
+
+
+    /*
+     * Dar tiempo a Drive.
+     */
+
+    Utilities.sleep(
+      1500
+    );
+
+
+    /******************************************************
+     * CONVERTIR A PDF
+     ******************************************************/
+
+    const pdf =
+      copia
+        .getBlob()
+        .getAs(
+          MimeType.PDF
+        );
+
+
+    const nombrePDF =
+      "Devolucion_" +
+      (
+        master.placa ||
+        "SIN_PLACA"
+      ) +
+      "_" +
+      master.id +
+      ".pdf";
+
+
+    pdf.setName(
+      nombrePDF
+    );
+
+
+    /******************************************************
+     * BASE64
+     ******************************************************/
+
+    return {
+
+      ok: true,
+
+      filename:
+        nombrePDF,
+
+      base64:
+        Utilities.base64Encode(
+          pdf.getBytes()
+        )
+
+    };
+
+
+  } catch (error) {
+
+    throw new Error(
+      "Error al generar el PDF: " +
+      (
+        error &&
+        error.message
+          ? error.message
+          : String(error)
+      )
+    );
+
+
+  } finally {
+
+
+    /******************************************************
+     * CERRAR DOCUMENTO
+     ******************************************************/
+
+    if (doc) {
+
+      try {
+
+        doc.saveAndClose();
+
+      } catch (e) {}
+
+    }
+
+
+    /******************************************************
+     * ELIMINAR COPIA TEMPORAL
+     ******************************************************/
+
+    if (copia) {
+
+      try {
+
+        copia.setTrashed(
+          true
+        );
+
+      } catch (e) {}
+
+    }
+
+  }
+
+}
+
+
+/************************************************************
+ * REEMPLAZAR TEXTO
+ ************************************************************/
+
+function reemplazarTexto(
+  body,
+  marcador,
+  valor
+) {
+
+  /*
+   * Escapar caracteres especiales
+   * para DocumentApp.replaceText().
+   */
+
+  const patron =
+    marcador.replace(
+      /[.*+?^${}()|[\]\\]/g,
+      "\\$&"
+    );
+
+
+  body.replaceText(
+    patron,
+    String(
+      valor === null ||
+      valor === undefined
+        ? ""
+        : valor
     )
-    .addEventListener(
-      "click",
-      function() {
+  );
 
-        mostrarDetalle(
-          dev.consecutivo
+}
+
+
+/************************************************************
+ * AUTORIZAR DRIVE
+ *
+ * Ejecutar manualmente UNA VEZ.
+ ************************************************************/
+
+function autorizarDrive() {
+
+  const carpeta =
+    DriveApp.getRootFolder();
+
+
+  Logger.log(
+    "Drive autorizado correctamente."
+  );
+
+
+  Logger.log(
+    "Carpeta raíz: " +
+    carpeta.getName()
+  );
+
+
+  return true;
+
+}
+
+
+/************************************************************
+ * AUTORIZAR DOCUMENTOS
+ *
+ * Ejecutar manualmente UNA VEZ.
+ ************************************************************/
+
+function autorizarDocumentos() {
+
+  const documento =
+    DocumentApp.openById(
+      TEMPLATE_DOC_ID
+    );
+
+
+  Logger.log(
+    "Documento autorizado: " +
+    documento.getName()
+  );
+
+
+  documento.saveAndClose();
+
+
+  return true;
+
+}
+
+
+/************************************************************
+ * PRUEBA DE SHEETS
+ ************************************************************/
+
+function probarSpreadsheet() {
+
+  const ss =
+    SpreadsheetApp.openById(
+      SPREADSHEET_ID
+    );
+
+
+  Logger.log(
+    "Spreadsheet: " +
+    ss.getName()
+  );
+
+
+  Logger.log(
+    "Hojas:"
+  );
+
+
+  ss.getSheets()
+    .forEach(
+      function(sheet) {
+
+        Logger.log(
+          sheet.getName()
         );
 
       }
     );
 
 
-  tablaDevoluciones.appendChild(
-    tr
-  );
-
-}
-```
-
-);
+  return true;
 
 }
 
-/* ======================================================
-MOSTRAR DETALLE
-====================================================== */
 
-async function mostrarDetalle(id) {
+/************************************************************
+ * PRUEBA DE DATOS
+ ************************************************************/
 
-modalDetalle.classList.add(
-"show"
-);
+function probarDatos() {
 
-contenidoDetalle.innerHTML =
-"Cargando detalle...";
+  const datos =
+    getInitialData();
 
-try {
 
-```
-const data =
-  await llamarAPI(
-    "getDetalleDevolucion",
-    {
-      id:
-        id
-    }
+  Logger.log(
+    JSON.stringify(
+      datos,
+      null,
+      2
+    )
   );
 
 
-if (
-  !data ||
-  data.ok === false
-) {
-
-  throw new Error(
-    data &&
-    data.error
-      ? data.error
-      : "No se pudo consultar el detalle."
-  );
+  return datos;
 
 }
 
 
-const lista =
-  data.detalles || [];
+/************************************************************
+ * PRUEBA COMPLETA DEL PDF
+ *
+ * Ejecutar manualmente cambiando el ID.
+ ************************************************************/
+
+function probarPDF() {
+
+  const id = 1;
+
+  const resultado =
+    generarPDF(id);
 
 
-let html = `
-
-  <div
-    style="
-      margin-bottom:15px;
-      font-weight:600;
-    "
-  >
-    Consecutivo:
-    ${escapeHtml(id)}
-  </div>
-
-`;
-
-
-if (
-  lista.length === 0
-) {
-
-  html += `
-
-    <div class="empty">
-      No hay detalles registrados.
-    </div>
-
-  `;
-
-} else {
-
-  html += `
-
-    <div class="table-wrapper">
-
-      <table>
-
-        <thead>
-
-          <tr>
-
-            <th>N.º</th>
-
-            <th>
-              Motivo
-            </th>
-
-            <th>
-              Observación
-            </th>
-
-          </tr>
-
-        </thead>
-
-        <tbody>
-
-  `;
-
-
-  lista.forEach(
-    function(det) {
-
-      html += `
-
-        <tr>
-
-          <td>
-            ${escapeHtml(det.nro)}
-          </td>
-
-          <td>
-            ${escapeHtml(det.motivo)}
-          </td>
-
-          <td>
-            ${escapeHtml(det.observacion)}
-          </td>
-
-        </tr>
-
-      `;
-
-    }
+  Logger.log(
+    "PDF generado:"
   );
 
 
-  html += `
-
-        </tbody>
-
-      </table>
-
-    </div>
-
-    <div
-      style="
-        margin-top:18px;
-        display:flex;
-        justify-content:flex-end;
-      "
-    >
-
-      <button
-        type="button"
-        class="btn-success"
-        id="btnPDFModal"
-      >
-        Generar PDF
-      </button>
-
-    </div>
-
-  `;
-
-}
-
-
-contenidoDetalle.innerHTML =
-  html;
-
-
-const btnPDF =
-  document.getElementById(
-    "btnPDFModal"
+  Logger.log(
+    resultado.filename
   );
 
 
-if (btnPDF) {
-
-  btnPDF.addEventListener(
-    "click",
-    function() {
-
-      generarPDF(
-        id
-      );
-
-    }
-  );
+  return resultado;
 
 }
-```
-
-} catch (error) {
-
-```
-contenidoDetalle.innerHTML = `
-
-  <div class="message error show">
-
-    ${escapeHtml(
-      error.message
-    )}
-
-  </div>
-
-`;
-```
-
-}
-
-}
-
-/* ======================================================
-CERRAR MODAL
-====================================================== */
-
-function cerrarModal() {
-
-modalDetalle.classList.remove(
-"show"
-);
-
-}
-
-/* ======================================================
-LIMPIAR
-====================================================== */
-
-function limpiarFormulario() {
-
-document
-.getElementById("consecutivo")
-.value = "";
-
-document
-.getElementById("placa")
-.value = "";
-
-document
-.getElementById("documento")
-.value = "";
-
-document
-.getElementById("ciudadano")
-.value = "";
-
-funcionario.value =
-"";
-
-establecerFecha();
-
-detalles.innerHTML =
-"";
-
-agregarDetalle();
-
-ocultarMensaje();
-
-}
-
-/* ======================================================
-MENSAJES
-====================================================== */
-
-function mostrarMensaje(
-texto,
-tipo
-) {
-
-message.textContent =
-texto;
-
-message.className =
-"message show " +
-tipo;
-
-window.scrollTo({
-top: 0,
-behavior: "smooth"
-});
-
-}
-
-function ocultarMensaje() {
-
-message.className =
-"message";
-
-}
-
-/* ======================================================
-LOADING
-====================================================== */
-
-function mostrarLoading(
-texto
-) {
-
-loadingText.textContent =
-texto ||
-"Procesando...";
-
-loading.classList.add(
-"show"
-);
-
-}
-
-function ocultarLoading() {
-
-loading.classList.remove(
-"show"
-);
-
-}
-
-/* ======================================================
-SEGURIDAD HTML
-====================================================== */
-
-function escapeHtml(
-valor
-) {
-
-if (
-valor === null ||
-valor === undefined
-) {
-
-```
-return "";
-```
-
-}
-
-return String(valor)
-
-```
-.replace(
-  /&/g,
-  "&amp;"
-)
-
-.replace(
-  /</g,
-  "&lt;"
-)
-
-.replace(
-  />/g,
-  "&gt;"
-)
-
-.replace(
-  /"/g,
-  "&quot;"
-)
-
-.replace(
-  /'/g,
-  "&#039;"
-);
-```
-
-}
-
-</script>
-
-</body>
-
-</html>
