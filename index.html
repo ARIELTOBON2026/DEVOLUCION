@@ -38,7 +38,7 @@
     .estado-msg.info { background: #e3f2fd; color: #1565c0; display: block; }
     .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #ccc; border-top-color: #1a237e; border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 6px; vertical-align: middle; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .devolucion-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
+    .devolucion-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-align: center; font-size: 0.85rem; }
     footer { text-align: center; font-size: 0.75rem; color: #999; margin-top: 30px; }
   </style>
 </head>
@@ -112,7 +112,6 @@
 </div>
 
 <script>
-// ⚠️ TU URL REAL YA ESTÁ CONFIGURADA AQUÍ
 const URL_BACKEND = "https://script.google.com/macros/s/AKfycby6Mh9vYdH5-XOGz-4MMOleKLnQ7AC-XolAZwUYInm83NM8o9MmH0AhknNW__7apz5TwQ/exec";
 
 let listaFuncionarios = [];
@@ -120,42 +119,46 @@ let listaMotivos = [];
 let listaDevoluciones = [];
 let detallesFormulario = [];
 
-function llamarJSONP(params, callbackExito, callbackError) {
-  const callbackName = "jsonpCallback_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
-  params.callback = callbackName;
-  const queryString = Object.keys(params).map(k => encodeURIComponent(k) + "=" + encodeURIComponent(params[k])).join("&");
-  const url = URL_BACKEND + "?" + queryString;
+// Reemplazo de JSONP por Fetch Estándar (Evita bloqueos de caché y extensiones)
+async function ejecutarPeticion(params) {
+  const url = new URL(URL_BACKEND);
+  // Prevenir caché agregando un timestamp único
+  params._nocache = Date.now();
+  Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
 
-  window[callbackName] = function(data) {
-    delete window[callbackName];
-    document.head.removeChild(script);
-    if (data && data.ok) { if (callbackExito) callbackExito(data); } 
-    else { if (callbackError) callbackError(data); }
-  };
+  const response = await fetch(url.toString(), {
+    method: "GET",
+    redirect: "follow"
+  });
 
-  const script = document.createElement("script");
-  script.src = url;
-  script.onerror = function() {
-    delete window[callbackName];
-    document.head.removeChild(script);
-    if (callbackError) callbackError({ ok: false, error: "Error de red o bloqueador de anuncios." });
-  };
-  document.head.appendChild(script);
+  if (!response.ok) {
+    throw new Error("Error en la respuesta del servidor: " + response.statusText);
+  }
+
+  return await response.json();
 }
 
 function cargarDatosIniciales() {
   mostrarEstado("info", '<span class="spinner"></span> Conectando con el servidor...');
-  llamarJSONP({ action: "getInitialData" }, function(data) {
-    listaFuncionarios = data.funcionarios || [];
-    listaMotivos = data.motivos || [];
-    listaDevoluciones = data.devoluciones || [];
-    llenarSelectFuncionarios();
-    llenarSelectMotivos();
-    renderDevoluciones();
-    mostrarEstado("ok", "✅ Conectado. Datos cargados correctamente.");
-  }, function(err) {
-    mostrarEstado("error", "❌ Error al cargar datos: " + (err.error || "Desconocido"));
-  });
+  
+  ejecutarPeticion({ action: "getInitialData" })
+    .then(data => {
+      if (data && data.ok) {
+        listaFuncionarios = data.funcionarios || [];
+        listaMotivos = data.motivos || [];
+        listaDevoluciones = data.devoluciones || [];
+        llenarSelectFuncionarios();
+        llenarSelectMotivos();
+        renderDevoluciones();
+        mostrarEstado("ok", "✅ Conectado. Datos cargados correctamente.");
+      } else {
+        mostrarEstado("error", "❌ Error al cargar datos: " + (data.error || "Respuesta no válida"));
+      }
+    })
+    .catch(err => {
+      mostrarEstado("error", "❌ Error de conexión: Comprueba si tienes un bloqueador de anuncios activo o limpia las cookies.");
+      console.error(err);
+    });
 }
 
 function llenarSelectFuncionarios() {
@@ -163,7 +166,8 @@ function llenarSelectFuncionarios() {
   sel.innerHTML = '<option value="">-- Seleccione --</option>';
   listaFuncionarios.forEach(f => {
     const opt = document.createElement("option");
-    opt.value = f.nombre; opt.textContent = f.nombre;
+    opt.value = f.nombre; 
+    opt.textContent = f.nombre;
     sel.appendChild(opt);
   });
 }
@@ -173,7 +177,8 @@ function llenarSelectMotivos() {
   sel.innerHTML = '<option value="">-- Seleccione --</option>';
   listaMotivos.forEach(m => {
     const opt = document.createElement("option");
-    opt.value = m.motivo; opt.textContent = m.motivo;
+    opt.value = m.motivo; 
+    opt.textContent = m.motivo;
     sel.appendChild(opt);
   });
 }
@@ -210,13 +215,20 @@ function guardarDevolucion() {
   const datos = { fecha, funcionario, placa, ciudadano, detalles: detallesFormulario };
   mostrarEstado("info", '<span class="spinner"></span> Guardando...');
   
-  llamarJSONP({ action: "guardarDevolucion", datos: JSON.stringify(datos) }, function(res) {
-    if(res.ok) {
-      mostrarEstado("ok", "✅ Guardado! Consecutivo: " + res.consecutivo);
-      limpiarFormulario();
-      cargarDatosIniciales();
-    } else { mostrarEstado("error", "Error: " + res.error); }
-  }, function(err) { mostrarEstado("error", "Error de red."); });
+  ejecutarPeticion({ action: "guardarDevolucion", datos: JSON.stringify(datos) })
+    .then(res => {
+      if(res.ok) {
+        mostrarEstado("ok", "✅ Guardado! Consecutivo: " + res.consecutivo);
+        limpiarFormulario();
+        cargarDatosIniciales();
+      } else { 
+        mostrarEstado("error", "Error: " + res.error); 
+      }
+    })
+    .catch(err => { 
+      mostrarEstado("error", "Error de red al guardar."); 
+      console.error(err);
+    });
 }
 
 function renderDevoluciones() {
@@ -233,12 +245,14 @@ function limpiarFormulario() {
   document.getElementById("inpPlaca").value = "";
   document.getElementById("inpDocumento").value = "";
   document.getElementById("inpCiudadano").value = "";
-  detallesFormulario = []; renderDetalles();
+  detallesFormulario = []; 
+  renderDetalles();
 }
 
 function mostrarEstado(tipo, html) {
   const el = document.getElementById("msgEstado");
-  el.className = "estado-msg " + tipo; el.innerHTML = html;
+  el.className = "estado-msg " + tipo; 
+  el.innerHTML = html;
 }
 
 document.addEventListener("DOMContentLoaded", function() {
