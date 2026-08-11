@@ -1,2237 +1,1031 @@
-/**
- * ============================================================
- * SISTEMA MAESTRO - DETALLE DE DEVOLUCIONES
- * SECRETARÍA DE MOVILIDAD - LA CEJA DEL TAMBO
- *
- * VERSIÓN 3.1
- *
- * Compatible con:
- * - Google Sheets
- * - Google Docs
- * - Google Drive
- * - GitHub Pages
- *
- * Comunicación:
- * - GET + JSONP
- * - GET + JSON
- * - POST + JSON
- * ============================================================
- */
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sistema Maestro-Detalle de Devoluciones - Secretaría de Movilidad La Ceja del Tambo">
+  <title>DEVOLUCIÓN DE TRÁMITES</title>
 
-
-/* ============================================================
-   CONFIGURACIÓN
-   ============================================================ */
-
-const SPREADSHEET_ID =
-  "1e6sCQi0g3jlhIkU1OVCjqoQ7CorT854X48t_nst_U84";
-
-const TEMPLATE_DOC_ID =
-  "1Knnv5Uas66UC5Wsx4ir2JAFjbhROVZoKH9mw0N10RyM";
-
-
-/* ============================================================
-   NOMBRES DE HOJAS
-   ============================================================ */
-
-const HOJA_FUNCIONARIOS =
-  "FUNCIONARIOS";
-
-const HOJA_MOTIVOS =
-  "MOTIVOS";
-
-const HOJA_DEVOLUCIONES =
-  "DEVOLUCIONES";
-
-const HOJA_DETALLES =
-  "DEVOLUCIONES_DETALLES";
-
-
-/* ============================================================
-   DO GET
-   ============================================================ */
-
-function doGet(e) {
-
-  try {
-
-    e = e || {};
-
-    const params =
-      e.parameter || {};
-
-    const action =
-      String(
-        params.action || "ping"
-      ).trim();
-
-    const callback =
-      String(
-        params.callback || ""
-      ).trim();
-
-    let resultado;
-
-
-    /* ========================================================
-       PING
-       ======================================================== */
-
-    if (action === "ping") {
-
-      resultado = {
-
-        ok: true,
-
-        mensaje:
-          "API funcionando correctamente.",
-
-        version:
-          "3.1",
-
-        fecha:
-          Utilities.formatDate(
-            new Date(),
-            Session.getScriptTimeZone(),
-            "dd/MM/yyyy HH:mm:ss"
-          )
-
-      };
-
+  <style>
+    * {
+      box-sizing: border-box;
     }
 
-
-    /* ========================================================
-       DATOS INICIALES
-       ======================================================== */
-
-    else if (
-      action === "getInitialData"
-    ) {
-
-      resultado =
-        getInitialData();
-
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3f6f9;
+      color: #1f2937;
     }
 
-
-    /* ========================================================
-       DIAGNÓSTICO
-       ======================================================== */
-
-    else if (
-      action === "diagnostico"
-    ) {
-
-      resultado =
-        ejecutarDiagnostico();
-
+    .header {
+      background: #ffffff;
+      border-bottom: 4px solid #1d4ed8;
+      padding: 16px 22px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
 
+    .logo {
+      width: 58px;
+      height: 58px;
+      object-fit: contain;
+      border-radius: 8px;
+      background: #eef2ff;
+    }
 
-    /* ========================================================
-       DETALLE
-       ======================================================== */
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+      color: #123b6d;
+    }
 
-    else if (
-      action === "getDetalleDevolucion"
-    ) {
+    .header p {
+      margin: 4px 0 0;
+      color: #667085;
+      font-size: 14px;
+    }
 
-      const id =
-        params.id || "";
+    .container {
+      width: min(1180px, calc(100% - 28px));
+      margin: 22px auto 40px;
+    }
 
-      if (!id) {
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 3px 15px rgba(0,0,0,.08);
+      padding: 20px;
+      margin-bottom: 18px;
+    }
 
-        throw new Error(
-          "No se recibió el consecutivo."
-        );
+    .card h2 {
+      margin: 0 0 16px;
+      font-size: 18px;
+      color: #123b6d;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 10px;
+    }
 
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-weight: 700;
+      font-size: 13px;
+      color: #344054;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 10px 11px;
+      font-size: 14px;
+      background: #fff;
+      outline: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    }
+
+    textarea {
+      min-height: 82px;
+      resize: vertical;
+    }
+
+    .detail-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: end;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 11px 16px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .primary {
+      background: #1d4ed8;
+      color: #fff;
+    }
+
+    .secondary {
+      background: #475569;
+      color: #fff;
+    }
+
+    .success {
+      background: #15803d;
+      color: #fff;
+    }
+
+    .danger {
+      background: #b91c1c;
+      color: #fff;
+    }
+
+    .light {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+
+    .status {
+      display: none;
+      padding: 12px 14px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    .status.show {
+      display: block;
+    }
+
+    .status.info {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .status.ok {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 9px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #334155;
+    }
+
+    .small-btn {
+      padding: 7px 9px;
+      font-size: 12px;
+      margin-right: 4px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #64748b;
+    }
+
+    .footer {
+      text-align: center;
+      color: #64748b;
+      font-size: 12px;
+      padding: 15px;
+    }
+
+    @media (max-width: 760px) {
+      .grid,
+      .detail-row {
+        grid-template-columns: 1fr;
       }
 
-      resultado =
-        getDetalleDevolucion(id);
-
-    }
-
-
-    /* ========================================================
-       GUARDAR DEVOLUCIÓN
-       ======================================================== */
-
-    else if (
-      action === "guardarDevolucion"
-    ) {
-
-      const data =
-        params.data || "";
-
-      if (!data) {
-
-        throw new Error(
-          "No se recibieron los datos de la devolución."
-        );
-
+      .field.full {
+        grid-column: auto;
       }
 
-      resultado =
-        procesarGuardado(data);
-
-    }
-
-
-    /* ========================================================
-       GENERAR PDF
-       ======================================================== */
-
-    else if (
-      action === "generarPDF"
-    ) {
-
-      const id =
-        params.id || "";
-
-      if (!id) {
-
-        throw new Error(
-          "No se recibió el consecutivo."
-        );
-
+      .header h1 {
+        font-size: 18px;
       }
-
-      resultado =
-        generarPDF(id);
-
     }
-
-
-    /* ========================================================
-       ACCIÓN NO RECONOCIDA
-       ======================================================== */
-
-    else {
-
-      throw new Error(
-        "Acción no reconocida: " +
-        action
-      );
-
-    }
-
-
-    return responder(
-      resultado,
-      callback
-    );
-
-
-  } catch (error) {
-
-    const respuesta = {
-
-      ok: false,
-
-      error:
-        error &&
-        error.message
-          ? error.message
-          : String(error)
-
-    };
-
-
-    const callback =
-      e &&
-      e.parameter &&
-      e.parameter.callback
-        ? String(
-            e.parameter.callback
-          ).trim()
-        : "";
-
-
-    return responder(
-      respuesta,
-      callback
-    );
-
-  }
-
-}
-
-
-/* ============================================================
-   RESPUESTA JSON / JSONP
-   ============================================================ */
-
-function responder(
-  datos,
-  callback
-) {
-
-  const json =
-    JSON.stringify(datos);
-
-
-  /* ==========================================================
-     JSON NORMAL
-     ========================================================== */
-
-  if (!callback) {
-
-    return ContentService
-      .createTextOutput(json)
-      .setMimeType(
-        ContentService.MimeType.JSON
-      );
-
-  }
-
-
-  /* ==========================================================
-     VALIDAR CALLBACK JSONP
-     ========================================================== */
-
-  const callbackValido =
-    /^[a-zA-Z_$][0-9a-zA-Z_$]*(\.[a-zA-Z_$][0-9a-zA-Z_$]*)*$/;
-
-
-  if (
-    !callbackValido.test(callback)
-  ) {
-
-    return ContentService
-      .createTextOutput(
-        JSON.stringify({
-
-          ok: false,
-
-          error:
-            "Callback JSONP inválido."
-
-        })
-      )
-      .setMimeType(
-        ContentService.MimeType.JSON
-      );
-
-  }
-
-
-  /* ==========================================================
-     JSONP
-     ========================================================== */
-
-  const salida =
-    callback +
-    "(" +
-    json +
-    ");";
-
-
-  return ContentService
-    .createTextOutput(salida)
-    .setMimeType(
-      ContentService.MimeType.JAVASCRIPT
-    );
-
-}
-
-
-/* ============================================================
-   DO POST
-   ============================================================ */
-
-function doPost(e) {
-
-  try {
-
-    if (
-      !e ||
-      !e.postData
-    ) {
-
-      throw new Error(
-        "No se recibió información POST."
-      );
-
-    }
-
-
-    const body =
-      e.postData.contents || "";
-
-
-    if (!body) {
-
-      throw new Error(
-        "El cuerpo de la petición está vacío."
-      );
-
-    }
-
-
-    let payload;
-
-
-    try {
-
-      payload =
-        JSON.parse(body);
-
-    } catch (error) {
-
-      throw new Error(
-        "El contenido recibido no es JSON válido."
-      );
-
-    }
-
-
-    const action =
-      String(
-        payload.action || ""
-      ).trim();
-
-
-    let resultado;
-
-
-    /* ========================================================
-       GUARDAR
-       ======================================================== */
-
-    if (
-      action ===
-      "guardarDevolucion"
-    ) {
-
-      resultado =
-        procesarGuardado(
-          payload.data
-        );
-
-    }
-
-
-    /* ========================================================
-       ACCIÓN NO SOPORTADA
-       ======================================================== */
-
-    else {
-
-      throw new Error(
-        "Acción POST no soportada: " +
-        action
-      );
-
-    }
-
-
-    return ContentService
-      .createTextOutput(
-        JSON.stringify(resultado)
-      )
-      .setMimeType(
-        ContentService.MimeType.JSON
-      );
-
-
-  } catch (error) {
-
-    return ContentService
-      .createTextOutput(
-        JSON.stringify({
-
-          ok: false,
-
-          error:
-            error &&
-            error.message
-              ? error.message
-              : String(error)
-
-        })
-      )
-      .setMimeType(
-        ContentService.MimeType.JSON
-      );
-
-  }
-
-}
-
-
-/* ============================================================
-   OBTENER DATOS INICIALES
-   ============================================================ */
-
-function getInitialData() {
-
-  const ss =
-    SpreadsheetApp.openById(
-      SPREADSHEET_ID
-    );
-
-
-  /* ==========================================================
-     FUNCIONARIOS
-     ========================================================== */
-
-  const sheetFunc =
-    ss.getSheetByName(
-      HOJA_FUNCIONARIOS
-    );
-
-
-  if (!sheetFunc) {
-
-    throw new Error(
-      "No existe la hoja " +
-      HOJA_FUNCIONARIOS +
-      "."
-    );
-
-  }
-
+  </style>
+</head>
+
+<body>
+
+<header class="header">
+  <div class="logo" aria-hidden="true"></div>
+  <div>
+    <h1>DEVOLUCIÓN DE TRÁMITES</h1>
+    <p>Secretaría de Movilidad - La Ceja del Tambo</p>
+  </div>
+</header>
+
+<main class="container">
+
+  <div id="status" class="status"></div>
+
+  <section class="card">
+    <h2>Datos de la devolución</h2>
+
+    <div class="grid">
+
+      <div class="field">
+        <label for="funcionario">Funcionario *</label>
+        <select id="funcionario">
+          <option value="">Cargando funcionarios...</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="placa">Placa</label>
+        <input id="placa" type="text" maxlength="10" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="documento">Documento *</label>
+        <input id="documento" type="text" inputmode="numeric" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="ciudadano">Ciudadano *</label>
+        <input id="ciudadano" type="text" autocomplete="off">
+      </div>
+
+      <div class="field full">
+        <label for="observacion">Observación general</label>
+        <textarea id="observacion"></textarea>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Detalle de la devolución</h2>
+
+    <div id="detalles"></div>
+
+    <div class="buttons">
+      <button class="secondary" type="button" onclick="agregarDetalle()">
+        + Agregar motivo
+      </button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Acciones</h2>
+
+    <div class="buttons">
+      <button class="primary" id="btnGuardar" type="button" onclick="guardar()">
+        Guardar devolución
+      </button>
+
+      <button class="light" type="button" onclick="limpiarFormulario()">
+        Limpiar
+      </button>
+
+      <button class="secondary" type="button" onclick="cargarDatos()">
+        Actualizar datos
+      </button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Últimas devoluciones</h2>
+
+    <div id="tablaDevoluciones" class="loading">
+      Cargando devoluciones...
+    </div>
+  </section>
+
+  <div class="footer">
+    Sistema Maestro-Detalle de Devoluciones · Versión 3.1
+  </div>
+
+</main>
+
+<script>
+  /*
+   * ==========================================================
+   * CONFIGURACIÓN
+   * ==========================================================
+   */
+  const API_URL = "https://script.google.com/macros/s/AKfycbxSfqEoua_AMn4s5Wv1iXsc55vNoyA8jUo-pb5XY19ruNj3BcMpGS82Sg1dRZw6ycleag/exec";
 
   let funcionarios = [];
-
-
-  if (
-    sheetFunc.getLastRow() >= 2
-  ) {
-
-    funcionarios =
-      sheetFunc
-        .getRange(
-          2,
-          1,
-          sheetFunc.getLastRow() - 1,
-          1
-        )
-        .getDisplayValues()
-        .flat()
-        .map(
-          function(valor) {
-
-            return String(
-              valor || ""
-            ).trim();
-
-          }
-        )
-        .filter(
-          function(valor) {
-
-            return valor !== "";
-
-          }
-        );
-
-  }
-
-
-  /* ==========================================================
-     MOTIVOS
-     ========================================================== */
-
-  const sheetMotivos =
-    ss.getSheetByName(
-      HOJA_MOTIVOS
-    );
-
-
-  if (!sheetMotivos) {
-
-    throw new Error(
-      "No existe la hoja " +
-      HOJA_MOTIVOS +
-      "."
-    );
-
-  }
-
-
   let motivos = [];
-
-
-  if (
-    sheetMotivos.getLastRow() >= 2
-  ) {
-
-    motivos =
-      sheetMotivos
-        .getRange(
-          2,
-          1,
-          sheetMotivos.getLastRow() - 1,
-          1
-        )
-        .getDisplayValues()
-        .flat()
-        .map(
-          function(valor) {
-
-            return String(
-              valor || ""
-            ).trim();
-
-          }
-        )
-        .filter(
-          function(valor) {
-
-            return valor !== "";
-
-          }
-        );
-
-  }
-
-
-  /* ==========================================================
-     DEVOLUCIONES
-     ========================================================== */
-
-  const sheetDev =
-    ss.getSheetByName(
-      HOJA_DEVOLUCIONES
-    );
-
-
   let devoluciones = [];
+  let contadorJsonp = 0;
 
+  /*
+   * ==========================================================
+   * INICIO
+   * ==========================================================
+   */
+  document.addEventListener("DOMContentLoaded", function () {
+    cargarDatos();
+  });
 
-  if (
-    sheetDev &&
-    sheetDev.getLastRow() >= 2
-  ) {
+  /*
+   * ==========================================================
+   * MENSAJES
+   * ==========================================================
+   */
+  function mostrarEstado(mensaje, tipo) {
+    const box = document.getElementById("status");
 
-    const ultimaFila =
-      sheetDev.getLastRow();
+    box.textContent = mensaje;
+    box.className = "status show " + (tipo || "info");
+  }
 
+  function ocultarEstado() {
+    const box = document.getElementById("status");
+    box.className = "status";
+    box.textContent = "";
+  }
 
-    const ultimaColumna =
-      Math.max(
-        sheetDev.getLastColumn(),
-        7
-      );
+  /*
+   * ==========================================================
+   * JSONP
+   *
+   * Se utiliza JSONP para evitar problemas CORS entre
+   * GitHub Pages y Google Apps Script.
+   * ==========================================================
+   */
+  function llamarJSONP(action, parametros, timeoutMs) {
+    return new Promise(function(resolve, reject) {
 
+      const callbackName =
+        "__devolucionCallback_" +
+        Date.now() +
+        "_" +
+        (++contadorJsonp);
 
-    const filaInicial =
-      Math.max(
-        2,
-        ultimaFila - 49
-      );
+      const script = document.createElement("script");
 
+      const query = new URLSearchParams();
 
-    const cantidad =
-      ultimaFila -
-      filaInicial +
-      1;
+      query.set("action", action);
+      query.set("callback", callbackName);
+      query.set("_", Date.now().toString());
 
+      if (parametros) {
+        Object.keys(parametros).forEach(function(key) {
+          const valor = parametros[key];
 
-    if (cantidad > 0) {
+          if (valor !== undefined && valor !== null) {
+            query.set(key, String(valor));
+          }
+        });
+      }
 
-      const datos =
-        sheetDev
-          .getRange(
-            filaInicial,
-            1,
-            cantidad,
-            ultimaColumna
+      let terminado = false;
+
+      const timer = setTimeout(function() {
+        finalizarError(
+          new Error(
+            "Tiempo de espera agotado al conectar con Google Apps Script."
           )
-          .getDisplayValues();
+        );
+      }, timeoutMs || 30000);
 
+      function limpiar() {
+        clearTimeout(timer);
 
-      devoluciones =
-        datos
-          .map(
-            function(row) {
+        try {
+          delete window[callbackName];
+        } catch (e) {
+          window[callbackName] = undefined;
+        }
 
-              return {
+        if (script.parentNode) {
+          script.parentNode.removeChild(script);
+        }
+      }
 
-                consecutivo:
-                  row[0] || "",
+      function finalizarError(error) {
+        if (terminado) return;
 
-                fecha:
-                  row[1] || "",
+        terminado = true;
+        limpiar();
+        reject(error);
+      }
 
-                funcionario:
-                  row[2] || "",
+      window[callbackName] = function(respuesta) {
+        if (terminado) return;
 
-                placa:
-                  row[3] || "",
+        terminado = true;
+        limpiar();
 
-                documento:
-                  row[4] || "",
+        if (!respuesta) {
+          reject(new Error("Apps Script devolvió una respuesta vacía."));
+          return;
+        }
 
-                ciudadano:
-                  row[5] || "",
+        if (respuesta.ok === false) {
+          reject(
+            new Error(
+              respuesta.error ||
+              "Google Apps Script devolvió un error."
+            )
+          );
+          return;
+        }
 
-                observacion:
-                  row[6] || ""
+        resolve(respuesta);
+      };
 
-              };
-
-            }
+      script.onerror = function() {
+        finalizarError(
+          new Error(
+            "No fue posible cargar la respuesta JSONP de Apps Script."
           )
-          .reverse();
+        );
+      };
 
+      script.src = API_URL + "?" + query.toString();
+
+      document.head.appendChild(script);
+    });
+  }
+
+  /*
+   * ==========================================================
+   * CARGAR DATOS
+   * ==========================================================
+   */
+  async function cargarDatos() {
+    mostrarEstado("Conectando con Google Apps Script...", "info");
+
+    try {
+      const respuesta = await llamarJSONP(
+        "getInitialData",
+        {},
+        30000
+      );
+
+      funcionarios = Array.isArray(respuesta.funcionarios)
+        ? respuesta.funcionarios
+        : [];
+
+      motivos = Array.isArray(respuesta.motivos)
+        ? respuesta.motivos
+        : [];
+
+      devoluciones = Array.isArray(respuesta.devoluciones)
+        ? respuesta.devoluciones
+        : [];
+
+      cargarFuncionarios();
+      cargarTablaDevoluciones();
+
+      if (document.getElementById("detalles").children.length === 0) {
+        agregarDetalle();
+      }
+
+      mostrarEstado(
+        respuesta.mensaje || "Datos cargados correctamente.",
+        "ok"
+      );
+
+    } catch (error) {
+      console.error(error);
+
+      mostrarEstado(
+        "ERROR: " +
+        (error && error.message
+          ? error.message
+          : String(error)),
+        "error"
+      );
+
+      document.getElementById("tablaDevoluciones").innerHTML =
+        '<div class="status show error">' +
+        'No fue posible cargar los datos desde Apps Script.' +
+        '<br><small>Revise la implementación de la Web App y la URL API_URL.</small>' +
+        '</div>';
     }
-
   }
 
+  /*
+   * ==========================================================
+   * FUNCIONARIOS
+   * ==========================================================
+   */
+  function cargarFuncionarios() {
+    const select = document.getElementById("funcionario");
 
-  /* ==========================================================
-     VALIDAR HOJAS
-     ========================================================== */
+    select.innerHTML =
+      '<option value="">Seleccione un funcionario</option>';
 
-  const errores = [];
+    funcionarios.forEach(function(nombre) {
+      const option = document.createElement("option");
 
+      option.value = nombre;
+      option.textContent = nombre;
 
-  if (!sheetFunc) {
-
-    errores.push(
-      "No existe la hoja FUNCIONARIOS."
-    );
-
+      select.appendChild(option);
+    });
   }
 
+  /*
+   * ==========================================================
+   * DETALLES
+   * ==========================================================
+   */
+  function agregarDetalle(motivoInicial, observacionInicial) {
+    const contenedor = document.getElementById("detalles");
 
-  if (!sheetMotivos) {
+    const fila = document.createElement("div");
+    fila.className = "detail-row";
 
-    errores.push(
-      "No existe la hoja MOTIVOS."
-    );
+    const campoMotivo = document.createElement("div");
+    campoMotivo.className = "field";
 
+    const labelMotivo = document.createElement("label");
+    labelMotivo.textContent = "Motivo *";
+
+    const select = document.createElement("select");
+    select.className = "detalle-motivo";
+
+    const optionInicial = document.createElement("option");
+    optionInicial.value = "";
+    optionInicial.textContent = "Seleccione un motivo";
+    select.appendChild(optionInicial);
+
+    motivos.forEach(function(motivo) {
+      const option = document.createElement("option");
+
+      option.value = motivo;
+      option.textContent = motivo;
+
+      if (motivoInicial === motivo) {
+        option.selected = true;
+      }
+
+      select.appendChild(option);
+    });
+
+    campoMotivo.appendChild(labelMotivo);
+    campoMotivo.appendChild(select);
+
+    const campoObs = document.createElement("div");
+    campoObs.className = "field";
+
+    const labelObs = document.createElement("label");
+    labelObs.textContent = "Observación";
+
+    const textarea = document.createElement("textarea");
+    textarea.className = "detalle-observacion";
+    textarea.value = observacionInicial || "";
+    textarea.placeholder = "Observación del motivo";
+
+    campoObs.appendChild(labelObs);
+    campoObs.appendChild(textarea);
+
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "danger";
+    boton.textContent = "Eliminar";
+
+    boton.onclick = function() {
+      fila.remove();
+    };
+
+    fila.appendChild(campoMotivo);
+    fila.appendChild(campoObs);
+    fila.appendChild(boton);
+
+    contenedor.appendChild(fila);
   }
 
+  /*
+   * ==========================================================
+   * OBTENER DETALLES DEL FORMULARIO
+   * ==========================================================
+   */
+  function obtenerDetallesFormulario() {
+    const filas = document.querySelectorAll(".detail-row");
+    const detalles = [];
 
-  if (!sheetDev) {
+    filas.forEach(function(fila) {
+      const motivo =
+        fila.querySelector(".detalle-motivo").value.trim();
 
-    errores.push(
-      "No existe la hoja DEVOLUCIONES."
-    );
+      const observacion =
+        fila.querySelector(".detalle-observacion").value.trim();
 
+      if (motivo) {
+        detalles.push({
+          motivo: motivo,
+          observacion: observacion
+        });
+      }
+    });
+
+    return detalles;
   }
 
-
-  const sheetDet =
-    ss.getSheetByName(
-      HOJA_DETALLES
-    );
-
-
-  if (!sheetDet) {
-
-    errores.push(
-      "No existe la hoja DEVOLUCIONES_DETALLES."
-    );
-
-  }
-
-
-  return {
-
-    ok: true,
-
-    funcionarios:
-      funcionarios,
-
-    motivos:
-      motivos,
-
-    devoluciones:
-      devoluciones,
-
-    cantidadFuncionarios:
-      funcionarios.length,
-
-    cantidadMotivos:
-      motivos.length,
-
-    mensaje:
-      "Datos iniciales cargados: " +
-      funcionarios.length +
-      " funcionario(s), " +
-      motivos.length +
-      " motivo(s).",
-
-    advertencias:
-      errores
-
-  };
-
-}
-
-
-/* ============================================================
-   PROCESAR GUARDADO
-   ============================================================ */
-
-function procesarGuardado(data) {
-
-  if (
-    data === null ||
-    data === undefined ||
-    data === ""
-  ) {
-
-    throw new Error(
-      "No se recibieron datos."
-    );
-
-  }
-
-
-  let objeto;
-
-
-  try {
-
-    objeto =
-      typeof data === "string"
-        ? JSON.parse(data)
-        : data;
-
-  } catch (error) {
-
-    throw new Error(
-      "Los datos recibidos no tienen formato JSON válido."
-    );
-
-  }
-
-
-  if (
-    !objeto ||
-    typeof objeto !== "object"
-  ) {
-
-    throw new Error(
-      "Los datos recibidos no son válidos."
-    );
-
-  }
-
-
-  if (!objeto.master) {
-
-    throw new Error(
-      "No se recibieron los datos maestros."
-    );
-
-  }
-
-
-  const id =
-    guardarDevolucion(
-      objeto.master,
-      objeto.detalles || []
-    );
-
-
-  return {
-
-    ok: true,
-
-    id: id,
-
-    mensaje:
-      "Devolución guardada correctamente."
-
-  };
-
-}
-
-
-/* ============================================================
-   GUARDAR DEVOLUCIÓN
-   ============================================================ */
-
-function guardarDevolucion(
-  master,
-  detalles
-) {
-
-  const lock =
-    LockService.getScriptLock();
-
-
-  lock.waitLock(30000);
-
-
-  try {
-
-    const ss =
-      SpreadsheetApp.openById(
-        SPREADSHEET_ID
-      );
-
-
-    const sheetDev =
-      ss.getSheetByName(
-        HOJA_DEVOLUCIONES
-      );
-
-
-    const sheetDet =
-      ss.getSheetByName(
-        HOJA_DETALLES
-      );
-
-
-    if (!sheetDev) {
-
-      throw new Error(
-        "No existe la hoja DEVOLUCIONES."
-      );
-
-    }
-
-
-    if (!sheetDet) {
-
-      throw new Error(
-        "No existe la hoja DEVOLUCIONES_DETALLES."
-      );
-
-    }
-
-
-    /* ========================================================
-       DATOS MAESTROS
-       ======================================================== */
-
+  /*
+   * ==========================================================
+   * GUARDAR
+   * ==========================================================
+   */
+  async function guardar() {
     const funcionario =
-      String(
-        master.funcionario || ""
-      ).trim();
-
+      document.getElementById("funcionario").value.trim();
 
     const placa =
-      String(
-        master.placa || ""
-      )
-        .trim()
-        .toUpperCase();
-
+      document.getElementById("placa").value.trim().toUpperCase();
 
     const documento =
-      String(
-        master.documento || ""
-      ).trim();
-
+      document.getElementById("documento").value.trim();
 
     const ciudadano =
-      String(
-        master.ciudadano || ""
-      )
-        .trim()
-        .toUpperCase();
-
+      document.getElementById("ciudadano").value.trim().toUpperCase();
 
     const observacion =
-      String(
-        master.observacion || ""
-      ).trim();
-
-
-    if (!funcionario) {
-
-      throw new Error(
-        "Debe seleccionar un funcionario."
-      );
-
-    }
-
-
-    if (!documento) {
-
-      throw new Error(
-        "Debe ingresar el documento."
-      );
-
-    }
-
-
-    if (!ciudadano) {
-
-      throw new Error(
-        "Debe ingresar el ciudadano."
-      );
-
-    }
-
-
-    /* ========================================================
-       CONSECUTIVO
-       ======================================================== */
-
-    let maxId = 0;
-
-
-    if (
-      sheetDev.getLastRow() >= 2
-    ) {
-
-      const ids =
-        sheetDev
-          .getRange(
-            2,
-            1,
-            sheetDev.getLastRow() - 1,
-            1
-          )
-          .getDisplayValues();
-
-
-      ids.forEach(
-        function(row) {
-
-          const numero =
-            parseInt(
-              String(
-                row[0] || ""
-              ).replace(
-                /[^0-9]/g,
-                ""
-              ),
-              10
-            );
-
-
-          if (
-            !isNaN(numero) &&
-            numero > maxId
-          ) {
-
-            maxId = numero;
-
-          }
-
-        }
-      );
-
-    }
-
-
-    const nuevoId =
-      maxId + 1;
-
-
-    /* ========================================================
-       FECHA
-       ======================================================== */
-
-    const fecha =
-      Utilities.formatDate(
-        new Date(),
-        Session.getScriptTimeZone(),
-        "dd/MM/yyyy"
-      );
-
-
-    /* ========================================================
-       GUARDAR MAESTRO
-       ======================================================== */
-
-    sheetDev.appendRow([
-
-      nuevoId,
-
-      fecha,
-
-      funcionario,
-
-      placa,
-
-      documento,
-
-      ciudadano,
-
-      observacion
-
-    ]);
-
-
-    /* ========================================================
-       GUARDAR DETALLES
-       ======================================================== */
-
-    if (
-      Array.isArray(detalles) &&
-      detalles.length > 0
-    ) {
-
-      let maxNro = 0;
-
-
-      if (
-        sheetDet.getLastRow() >= 2
-      ) {
-
-        const numeros =
-          sheetDet
-            .getRange(
-              2,
-              1,
-              sheetDet.getLastRow() - 1,
-              1
-            )
-            .getDisplayValues();
-
-
-        numeros.forEach(
-          function(row) {
-
-            const numero =
-              parseInt(
-                String(
-                  row[0] || ""
-                ).replace(
-                  /[^0-9]/g,
-                  ""
-                ),
-                10
-              );
-
-
-            if (
-              !isNaN(numero) &&
-              numero > maxNro
-            ) {
-
-              maxNro = numero;
-
-            }
-
-          }
-        );
-
-      }
-
-
-      const filas = [];
-
-
-      detalles.forEach(
-        function(item) {
-
-          if (!item) {
-
-            return;
-
-          }
-
-
-          const motivo =
-            String(
-              item.motivo || ""
-            ).trim();
-
-
-          const obs =
-            String(
-              item.observacion || ""
-            ).trim();
-
-
-          if (!motivo) {
-
-            return;
-
-          }
-
-
-          maxNro++;
-
-
-          filas.push([
-
-            maxNro,
-
-            nuevoId,
-
-            motivo,
-
-            obs
-
-          ]);
-
-        }
-      );
-
-
-      if (
-        filas.length > 0
-      ) {
-
-        const filaInicio =
-          Math.max(
-            2,
-            sheetDet.getLastRow() + 1
-          );
-
-
-        sheetDet
-          .getRange(
-            filaInicio,
-            1,
-            filas.length,
-            4
-          )
-          .setValues(filas);
-
-      }
-
-    }
-
-
-    SpreadsheetApp.flush();
-
-
-    return nuevoId;
-
-
-  } finally {
-
-    lock.releaseLock();
-
-  }
-
-}
-
-
-/* ============================================================
-   OBTENER DETALLE
-   ============================================================ */
-
-function getDetalleDevolucion(id) {
-
-  const ss =
-    SpreadsheetApp.openById(
-      SPREADSHEET_ID
-    );
-
-
-  const sheet =
-    ss.getSheetByName(
-      HOJA_DETALLES
-    );
-
-
-  if (!sheet) {
-
-    throw new Error(
-      "No existe la hoja DEVOLUCIONES_DETALLES."
-    );
-
-  }
-
-
-  if (
-    sheet.getLastRow() < 2
-  ) {
-
-    return {
-
-      ok: true,
-
-      detalles: []
-
-    };
-
-  }
-
-
-  const datos =
-    sheet
-      .getRange(
-        2,
-        1,
-        sheet.getLastRow() - 1,
-        4
-      )
-      .getDisplayValues();
-
-
-  const detalles =
-    datos
-      .filter(
-        function(row) {
-
-          return String(
-            row[1] || ""
-          ).trim()
-          ===
-          String(id).trim();
-
-        }
-      )
-      .map(
-        function(row) {
-
-          return {
-
-            nro:
-              row[0] || "",
-
-            id:
-              row[1] || "",
-
-            motivo:
-              row[2] || "",
-
-            observacion:
-              row[3] || ""
-
-          };
-
-        }
-      );
-
-
-  return {
-
-    ok: true,
-
-    detalles:
-      detalles
-
-  };
-
-}
-
-
-/* ============================================================
-   GENERAR PDF
-   ============================================================ */
-
-function generarPDF(
-  consecutivoId
-) {
-
-  let copia = null;
-
-  let doc = null;
-
-
-  try {
-
-    if (
-      consecutivoId === null ||
-      consecutivoId === undefined ||
-      String(
-        consecutivoId
-      ).trim() === ""
-    ) {
-
-      throw new Error(
-        "No se recibió el consecutivo."
-      );
-
-    }
-
-
-    /* ========================================================
-       HOJA DEVOLUCIONES
-       ======================================================== */
-
-    const ss =
-      SpreadsheetApp.openById(
-        SPREADSHEET_ID
-      );
-
-
-    const sheet =
-      ss.getSheetByName(
-        HOJA_DEVOLUCIONES
-      );
-
-
-    if (!sheet) {
-
-      throw new Error(
-        "No existe la hoja DEVOLUCIONES."
-      );
-
-    }
-
-
-    if (
-      sheet.getLastRow() < 2
-    ) {
-
-      throw new Error(
-        "No existen devoluciones registradas."
-      );
-
-    }
-
-
-    const datos =
-      sheet
-        .getRange(
-          2,
-          1,
-          sheet.getLastRow() - 1,
-          7
-        )
-        .getValues();
-
-
-    let master = null;
-
-
-    for (
-      let i = 0;
-      i < datos.length;
-      i++
-    ) {
-
-      if (
-        String(
-          datos[i][0]
-        ).trim()
-        ===
-        String(
-          consecutivoId
-        ).trim()
-      ) {
-
-        let fecha =
-          datos[i][1];
-
-
-        if (
-          fecha instanceof Date
-        ) {
-
-          fecha =
-            Utilities.formatDate(
-              fecha,
-              Session.getScriptTimeZone(),
-              "dd/MM/yyyy"
-            );
-
-        } else {
-
-          fecha =
-            String(
-              fecha || ""
-            );
-
-        }
-
-
-        master = {
-
-          id:
-            datos[i][0],
-
-          fecha:
-            fecha,
-
-          funcionario:
-            datos[i][2],
-
-          placa:
-            datos[i][3],
-
-          documento:
-            datos[i][4],
-
-          ciudadano:
-            datos[i][5],
-
-          observacion:
-            datos[i][6] || ""
-
-        };
-
-
-        break;
-
-      }
-
-    }
-
-
-    if (!master) {
-
-      throw new Error(
-        "No existe la devolución número " +
-        consecutivoId +
-        "."
-      );
-
-    }
-
-
-    /* ========================================================
-       DETALLES
-       ======================================================== */
-
-    const respuesta =
-      getDetalleDevolucion(
-        consecutivoId
-      );
-
+      document.getElementById("observacion").value.trim();
 
     const detalles =
-      respuesta.detalles || [];
+      obtenerDetallesFormulario();
 
-
-    /* ========================================================
-       PLANTILLA GOOGLE DOCS
-       ======================================================== */
-
-    const plantilla =
-      DriveApp.getFileById(
-        TEMPLATE_DOC_ID
-      );
-
-
-    copia =
-      plantilla.makeCopy(
-        "DEVOLUCION_TEMP_" +
-        master.id
-      );
-
-
-    doc =
-      DocumentApp.openById(
-        copia.getId()
-      );
-
-
-    const body =
-      doc.getBody();
-
-
-    /* ========================================================
-       REEMPLAZOS
-       ======================================================== */
-
-    reemplazarTexto(
-      body,
-      "{{ID}}",
-      master.id
-    );
-
-
-    reemplazarTexto(
-      body,
-      "{{FECHA}}",
-      master.fecha
-    );
-
-
-    reemplazarTexto(
-      body,
-      "{{FUNCIONARIO}}",
-      master.funcionario
-    );
-
-
-    reemplazarTexto(
-      body,
-      "{{PLACA}}",
-      master.placa
-    );
-
-
-    reemplazarTexto(
-      body,
-      "{{CEDULA}}",
-      master.documento
-    );
-
-
-    reemplazarTexto(
-      body,
-      "{{CIUDADANO}}",
-      master.ciudadano
-    );
-
-
-    reemplazarTexto(
-      body,
-      "{{OBSERVACION}}",
-      master.observacion
-    );
-
-
-    /* ========================================================
-       TABLA
-       ======================================================== */
-
-    const encontrado =
-      body.findText(
-        "\\{\\{TABLA\\}\\}"
-      );
-
-
-    if (encontrado) {
-
-      const elemento =
-        encontrado.getElement();
-
-
-      const parrafo =
-        elemento
-          .getParent()
-          .asParagraph();
-
-
-      const indice =
-        body.getChildIndex(
-          parrafo
-        );
-
-
-      const datosTabla = [
-
-        [
-          "MOTIVO",
-          "OBSERVACIÓN"
-        ]
-
-      ];
-
-
-      detalles.forEach(
-        function(det) {
-
-          datosTabla.push([
-
-            String(
-              det.motivo || ""
-            ),
-
-            String(
-              det.observacion || ""
-            )
-
-          ]);
-
-        }
-      );
-
-
-      if (
-        detalles.length === 0
-      ) {
-
-        datosTabla.push([
-
-          "Sin detalles registrados",
-
-          ""
-
-        ]);
-
-      }
-
-
-      body.insertTable(
-        indice,
-        datosTabla
-      );
-
-
-      parrafo.removeFromParent();
-
+    if (!funcionario) {
+      mostrarEstado("Debe seleccionar un funcionario.", "error");
+      return;
     }
 
+    if (!documento) {
+      mostrarEstado("Debe ingresar el documento.", "error");
+      return;
+    }
 
-    /* ========================================================
-       GUARDAR DOCUMENTO
-       ======================================================== */
+    if (!ciudadano) {
+      mostrarEstado("Debe ingresar el ciudadano.", "error");
+      return;
+    }
 
-    doc.saveAndClose();
-
-    doc = null;
-
-
-    Utilities.sleep(2000);
-
-
-    /* ========================================================
-       CONVERTIR A PDF
-       ======================================================== */
-
-    const archivo =
-      DriveApp.getFileById(
-        copia.getId()
+    if (detalles.length === 0) {
+      mostrarEstado(
+        "Debe registrar por lo menos un motivo de devolución.",
+        "error"
       );
+      return;
+    }
 
-
-    const pdf =
-      archivo
-        .getBlob()
-        .getAs(
-          MimeType.PDF
-        );
-
-
-    const nombre =
-      "Devolucion_" +
-      (
-        master.placa ||
-        "SIN_PLACA"
-      ) +
-      "_" +
-      master.id +
-      ".pdf";
-
-
-    pdf.setName(
-      nombre
-    );
-
-
-    return {
-
-      ok: true,
-
-      filename:
-        nombre,
-
-      base64:
-        Utilities.base64Encode(
-          pdf.getBytes()
-        )
-
+    const payload = {
+      master: {
+        funcionario: funcionario,
+        placa: placa,
+        documento: documento,
+        ciudadano: ciudadano,
+        observacion: observacion
+      },
+      detalles: detalles
     };
 
+    const boton = document.getElementById("btnGuardar");
 
-  } catch (error) {
+    boton.disabled = true;
+    mostrarEstado(
+      "Guardando devolución en Google Sheets...",
+      "info"
+    );
 
-    throw new Error(
-      "Error al generar el PDF: " +
-      (
-        error &&
-        error.message
+    try {
+      /*
+       * Se usa GET + JSONP porque GitHub Pages no puede leer
+       * directamente la respuesta de un POST de Apps Script
+       * cuando el navegador aplica CORS.
+       */
+      const respuesta = await llamarJSONP(
+        "guardarDevolucion",
+        {
+          data: JSON.stringify(payload)
+        },
+        60000
+      );
+
+      mostrarEstado(
+        "Devolución guardada correctamente. Consecutivo: " +
+        respuesta.id,
+        "ok"
+      );
+
+      limpiarFormulario();
+      await cargarDatos();
+
+    } catch (error) {
+      console.error(error);
+
+      mostrarEstado(
+        "Error al guardar: " +
+        (error && error.message
           ? error.message
-          : String(error)
-      )
-    );
+          : String(error)),
+        "error"
+      );
 
+    } finally {
+      boton.disabled = false;
+    }
+  }
 
-  } finally {
+  /*
+   * ==========================================================
+   * LIMPIAR
+   * ==========================================================
+   */
+  function limpiarFormulario() {
+    document.getElementById("funcionario").value = "";
+    document.getElementById("placa").value = "";
+    document.getElementById("documento").value = "";
+    document.getElementById("ciudadano").value = "";
+    document.getElementById("observacion").value = "";
 
+    document.getElementById("detalles").innerHTML = "";
 
-    if (doc) {
+    agregarDetalle();
 
-      try {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }
 
-        doc.saveAndClose();
+  /*
+   * ==========================================================
+   * TABLA
+   * ==========================================================
+   */
+  function cargarTablaDevoluciones() {
+    const contenedor =
+      document.getElementById("tablaDevoluciones");
 
-      } catch (e) {}
-
+    if (!devoluciones.length) {
+      contenedor.innerHTML =
+        "<div class='loading'>No existen devoluciones registradas.</div>";
+      return;
     }
 
+    let html = "";
 
-    if (copia) {
+    html += '<div class="table-wrap">';
+    html += "<table>";
+    html += "<thead><tr>";
+    html += "<th>No.</th>";
+    html += "<th>Fecha</th>";
+    html += "<th>Funcionario</th>";
+    html += "<th>Placa</th>";
+    html += "<th>Documento</th>";
+    html += "<th>Ciudadano</th>";
+    html += "<th>Acciones</th>";
+    html += "</tr></thead>";
+    html += "<tbody>";
 
-      try {
+    devoluciones.forEach(function(item) {
+      const id = escaparHTML(item.consecutivo);
+      const fecha = escaparHTML(item.fecha);
+      const funcionario = escaparHTML(item.funcionario);
+      const placa = escaparHTML(item.placa);
+      const documento = escaparHTML(item.documento);
+      const ciudadano = escaparHTML(item.ciudadano);
 
-        copia.setTrashed(
-          true
+      html += "<tr>";
+      html += "<td>" + id + "</td>";
+      html += "<td>" + fecha + "</td>";
+      html += "<td>" + funcionario + "</td>";
+      html += "<td>" + placa + "</td>";
+      html += "<td>" + documento + "</td>";
+      html += "<td>" + ciudadano + "</td>";
+      html += "<td>";
+      html +=
+        '<button class="small-btn secondary" type="button" ' +
+        'onclick="verDetalle(\'' +
+        escaparJS(item.consecutivo) +
+        '\')">Detalle</button>';
+
+      html +=
+        '<button class="small-btn success" type="button" ' +
+        'onclick="generarPDF(\'' +
+        escaparJS(item.consecutivo) +
+        '\')">PDF</button>';
+
+      html += "</td>";
+      html += "</tr>";
+    });
+
+    html += "</tbody></table></div>";
+
+    contenedor.innerHTML = html;
+  }
+
+  /*
+   * ==========================================================
+   * DETALLE
+   * ==========================================================
+   */
+  async function verDetalle(id) {
+    mostrarEstado(
+      "Consultando detalle de la devolución " + id + "...",
+      "info"
+    );
+
+    try {
+      const respuesta = await llamarJSONP(
+        "getDetalleDevolucion",
+        { id: id },
+        30000
+      );
+
+      const detalles = respuesta.detalles || [];
+
+      if (!detalles.length) {
+        mostrarEstado(
+          "La devolución " + id + " no tiene detalles.",
+          "info"
         );
+        return;
+      }
 
-      } catch (e) {}
+      const texto = detalles.map(function(item, index) {
+        return (
+          (index + 1) +
+          ". " +
+          item.motivo +
+          (item.observacion
+            ? " — " + item.observacion
+            : "")
+        );
+      }).join("\n");
 
+      alert(
+        "DETALLE DE DEVOLUCIÓN " +
+        id +
+        "\n\n" +
+        texto
+      );
+
+      ocultarEstado();
+
+    } catch (error) {
+      mostrarEstado(
+        "Error consultando detalle: " +
+        (error && error.message
+          ? error.message
+          : String(error)),
+        "error"
+      );
+    }
+  }
+
+  /*
+   * ==========================================================
+   * GENERAR PDF
+   * ==========================================================
+   */
+  async function generarPDF(id) {
+    mostrarEstado(
+      "Generando PDF de la devolución " + id + "...",
+      "info"
+    );
+
+    try {
+      const respuesta = await llamarJSONP(
+        "generarPDF",
+        { id: id },
+        120000
+      );
+
+      if (!respuesta.base64) {
+        throw new Error(
+          "Apps Script no devolvió el PDF."
+        );
+      }
+
+      descargarBase64PDF(
+        respuesta.base64,
+        respuesta.filename || ("Devolucion_" + id + ".pdf")
+      );
+
+      mostrarEstado(
+        "PDF generado correctamente.",
+        "ok"
+      );
+
+    } catch (error) {
+      console.error(error);
+
+      mostrarEstado(
+        "Error al generar PDF: " +
+        (error && error.message
+          ? error.message
+          : String(error)),
+        "error"
+      );
+    }
+  }
+
+  /*
+   * ==========================================================
+   * DESCARGAR PDF
+   * ==========================================================
+   */
+  function descargarBase64PDF(base64, nombre) {
+    const byteCharacters = atob(base64);
+    const byteNumbers = new Array(byteCharacters.length);
+
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
     }
 
-  }
+    const byteArray =
+      new Uint8Array(byteNumbers);
 
-}
-
-
-/* ============================================================
-   REEMPLAZAR TEXTO
-   ============================================================ */
-
-function reemplazarTexto(
-  body,
-  marcador,
-  valor
-) {
-
-  const texto =
-    String(
-      valor === null ||
-      valor === undefined
-        ? ""
-        : valor
-    );
-
-
-  /* ==========================================================
-     ESCAPAR CARACTERES ESPECIALES DE REGEX
-     ========================================================== */
-
-  const patron =
-    marcador.replace(
-      /[.*+?^${}()|[\]\\]/g,
-      "\\$&"
-    );
-
-
-  try {
-
-    body.replaceText(
-      patron,
-      texto
-    );
-
-
-  } catch (error) {
-
-    Logger.log(
-      "Error reemplazando " +
-      marcador +
-      ": " +
-      error.message
-    );
-
-  }
-
-}
-
-
-/* ============================================================
-   DIAGNÓSTICO
-   ============================================================ */
-
-function ejecutarDiagnostico() {
-
-  const resultado = {
-
-    ok: true,
-
-    version:
-      "3.1",
-
-    fecha:
-      Utilities.formatDate(
-        new Date(),
-        Session.getScriptTimeZone(),
-        "dd/MM/yyyy HH:mm:ss"
-      ),
-
-    checks: []
-
-  };
-
-
-  /* ==========================================================
-     SPREADSHEET
-     ========================================================== */
-
-  try {
-
-    const ss =
-      SpreadsheetApp.openById(
-        SPREADSHEET_ID
+    const blob =
+      new Blob(
+        [byteArray],
+        { type: "application/pdf" }
       );
 
+    const url =
+      URL.createObjectURL(blob);
 
-    resultado.checks.push({
+    const enlace =
+      document.createElement("a");
 
-      item:
-        "Spreadsheet",
+    enlace.href = url;
+    enlace.download = nombre;
+    document.body.appendChild(enlace);
+    enlace.click();
+    enlace.remove();
 
-      ok:
-        true,
-
-      nombre:
-        ss.getName(),
-
-      hojas:
-        ss.getSheets()
-          .map(
-            function(s) {
-
-              return s.getName();
-
-            }
-          )
-
-    });
-
-
-  } catch (error) {
-
-    resultado.ok = false;
-
-
-    resultado.checks.push({
-
-      item:
-        "Spreadsheet",
-
-      ok:
-        false,
-
-      error:
-        error.message
-
-    });
-
+    setTimeout(function() {
+      URL.revokeObjectURL(url);
+    }, 1000);
   }
 
-
-  /* ==========================================================
-     DRIVE / PLANTILLA
-     ========================================================== */
-
-  try {
-
-    const archivo =
-      DriveApp.getFileById(
-        TEMPLATE_DOC_ID
-      );
-
-
-    resultado.checks.push({
-
-      item:
-        "Plantilla Google Docs",
-
-      ok:
-        true,
-
-      nombre:
-        archivo.getName()
-
-    });
-
-
-  } catch (error) {
-
-    resultado.ok = false;
-
-
-    resultado.checks.push({
-
-      item:
-        "Plantilla Google Docs",
-
-      ok:
-        false,
-
-      error:
-        error.message
-
-    });
-
+  /*
+   * ==========================================================
+   * SEGURIDAD HTML
+   * ==========================================================
+   */
+  function escaparHTML(valor) {
+    return String(valor || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
 
-
-  /* ==========================================================
-     HOJAS
-     ========================================================== */
-
-  try {
-
-    const ss =
-      SpreadsheetApp.openById(
-        SPREADSHEET_ID
-      );
-
-
-    [
-
-      HOJA_FUNCIONARIOS,
-
-      HOJA_MOTIVOS,
-
-      HOJA_DEVOLUCIONES,
-
-      HOJA_DETALLES
-
-    ].forEach(
-      function(nombre) {
-
-        const hoja =
-          ss.getSheetByName(
-            nombre
-          );
-
-
-        resultado.checks.push({
-
-          item:
-            "Hoja " +
-            nombre,
-
-          ok:
-            !!hoja,
-
-          filas:
-            hoja
-              ? hoja.getLastRow()
-              : 0
-
-        });
-
-      }
-    );
-
-
-  } catch (error) {
-
-    resultado.ok = false;
-
+  function escaparJS(valor) {
+    return String(valor || "")
+      .replace(/\\/g, "\\\\")
+      .replace(/'/g, "\\'")
+      .replace(/"/g, '\"')
+      .replace(/\n/g, "\\n")
+      .replace(/\r/g, "\\r");
   }
+</script>
 
-
-  return resultado;
-
-}
-
-
-/* ============================================================
-   AUTORIZAR TODO
-   ============================================================ */
-
-function autorizarTodo() {
-
-  Logger.log(
-    "======================================"
-  );
-
-  Logger.log(
-    "INICIANDO AUTORIZACIÓN"
-  );
-
-  Logger.log(
-    "======================================"
-  );
-
-
-  /* ==========================================================
-     SPREADSHEET
-     ========================================================== */
-
-  const ss =
-    SpreadsheetApp.openById(
-      SPREADSHEET_ID
-    );
-
-
-  Logger.log(
-    "OK Spreadsheet: " +
-    ss.getName()
-  );
-
-
-  /* ==========================================================
-     DRIVE
-     ========================================================== */
-
-  const archivo =
-    DriveApp.getFileById(
-      TEMPLATE_DOC_ID
-    );
-
-
-  Logger.log(
-    "OK Drive: " +
-    archivo.getName()
-  );
-
-
-  /* ==========================================================
-     DOCUMENTO
-     ========================================================== */
-
-  const documento =
-    DocumentApp.openById(
-      TEMPLATE_DOC_ID
-    );
-
-
-  Logger.log(
-    "OK Documento: " +
-    documento.getName()
-  );
-
-
-  documento.saveAndClose();
-
-
-  Logger.log(
-    "======================================"
-  );
-
-  Logger.log(
-    "AUTORIZACIÓN COMPLETADA"
-  );
-
-  Logger.log(
-    "======================================"
-  );
-
-
-  return true;
-
-}
-
-
-/* ============================================================
-   PRUEBA PING
-   ============================================================ */
-
-function probarPing() {
-
-  const resultado = {
-
-    ok: true,
-
-    mensaje:
-      "API funcionando correctamente.",
-
-    version:
-      "3.1",
-
-    fecha:
-      Utilities.formatDate(
-        new Date(),
-        Session.getScriptTimeZone(),
-        "dd/MM/yyyy HH:mm:ss"
-      )
-
-  };
-
-
-  Logger.log(
-    JSON.stringify(
-      resultado,
-      null,
-      2
-    )
-  );
-
-
-  return resultado;
-
-}
-
-
-/* ============================================================
-   PRUEBA DATOS
-   ============================================================ */
-
-function probarDatos() {
-
-  const datos =
-    getInitialData();
-
-
-  Logger.log(
-    "FUNCIONARIOS: " +
-    datos.funcionarios.length
-  );
-
-
-  Logger.log(
-    "MOTIVOS: " +
-    datos.motivos.length
-  );
-
-
-  Logger.log(
-    "DEVOLUCIONES: " +
-    datos.devoluciones.length
-  );
-
-
-  Logger.log(
-    JSON.stringify(
-      datos,
-      null,
-      2
-    )
-  );
-
-
-  return datos;
-
-}
-
-
-/* ============================================================
-   PRUEBA DIAGNÓSTICO
-   ============================================================ */
-
-function probarDiagnostico() {
-
-  const resultado =
-    ejecutarDiagnostico();
-
-
-  Logger.log(
-    JSON.stringify(
-      resultado,
-      null,
-      2
-    )
-  );
-
-
-  return resultado;
-
-}
-
-
-/* ============================================================
-   PRUEBA JSONP
-   ============================================================ */
-
-function probarJSONP() {
-
-  const datos = {
-
-    ok: true,
-
-    mensaje:
-      "Prueba JSONP correcta.",
-
-    version:
-      "3.1",
-
-    fecha:
-      Utilities.formatDate(
-        new Date(),
-        Session.getScriptTimeZone(),
-        "dd/MM/yyyy HH:mm:ss"
-      )
-
-  };
-
-
-  const callback =
-    "prueba";
-
-
-  const respuesta =
-    responder(
-      datos,
-      callback
-    );
-
-
-  Logger.log(
-    respuesta.getContent()
-  );
-
-
-  return respuesta;
-
-}
+</body>
+</html>
