@@ -11,20 +11,13 @@
 :root {
   --primary:#2563eb;
   --primary-dark:#1d4ed8;
-  --primary-light:#dbeafe;
-  --success:#10b981;
-  --success-light:#d1fae5;
-  --success-dark:#065f46;
-  --danger:#ef4444;
-  --danger-light:#fee2e2;
-  --danger-dark:#991b1b;
+  --success:#16a34a;
+  --danger:#dc2626;
   --gray-50:#f9fafb;
   --gray-100:#f3f4f6;
   --gray-200:#e5e7eb;
-  --gray-300:#d1d5db;
   --gray-400:#9ca3af;
   --gray-500:#6b7280;
-  --gray-600:#4b5563;
   --gray-700:#374151;
   --gray-800:#1f2937;
   --gray-900:#111827;
@@ -58,14 +51,14 @@ body {
 }
 
 .logo {
-  width:50px;
-  height:50px;
-  border-radius:10px;
+  width:52px;
+  height:52px;
   background:linear-gradient(135deg,var(--primary),var(--primary-dark));
   color:white;
+  border-radius:var(--radius);
   display:flex;
-  justify-content:center;
   align-items:center;
+  justify-content:center;
   font-size:25px;
   font-weight:bold;
 }
@@ -77,7 +70,6 @@ body {
 
 .header p {
   color:var(--gray-500);
-  font-size:14px;
   margin-top:3px;
 }
 
@@ -86,7 +78,7 @@ body {
   border-radius:14px;
   padding:25px;
   margin-bottom:20px;
-  box-shadow:0 5px 15px rgba(0,0,0,.08);
+  box-shadow:0 5px 18px rgba(0,0,0,.08);
 }
 
 .card-title {
@@ -111,8 +103,8 @@ body {
 label {
   font-size:13px;
   font-weight:bold;
-  margin-bottom:6px;
   color:var(--gray-700);
+  margin-bottom:6px;
 }
 
 .required::after {
@@ -123,10 +115,10 @@ label {
 input,
 select {
   width:100%;
-  padding:11px 13px;
-  border:1px solid var(--gray-300);
+  padding:12px 13px;
+  border:1px solid var(--gray-200);
   border-radius:7px;
-  background:#fff;
+  background:var(--gray-50);
   font-size:14px;
   outline:none;
 }
@@ -134,6 +126,7 @@ select {
 input:focus,
 select:focus {
   border-color:var(--primary);
+  background:white;
   box-shadow:0 0 0 3px rgba(37,99,235,.12);
 }
 
@@ -141,12 +134,13 @@ select {
   cursor:pointer;
 }
 
-.loading-select {
-  color:var(--gray-500);
-}
-
 .search-container {
   position:relative;
+  margin-bottom:20px;
+}
+
+#buscarMotivo {
+  padding-left:40px;
 }
 
 .search-icon {
@@ -156,35 +150,32 @@ select {
   color:var(--gray-400);
 }
 
-#buscarMotivo {
-  padding-left:38px;
-}
-
-.suggestions-list {
-  display:none;
+.suggestions {
   position:absolute;
-  top:68px;
   left:0;
   right:0;
+  top:100%;
+  margin-top:4px;
   background:white;
-  border:1px solid var(--gray-300);
+  border:1px solid var(--gray-200);
   border-radius:7px;
-  max-height:250px;
+  max-height:220px;
   overflow-y:auto;
-  z-index:1000;
+  display:none;
+  z-index:9999;
   box-shadow:0 8px 20px rgba(0,0,0,.12);
 }
 
-.suggestion-item {
+.suggestion {
   padding:11px 14px;
   cursor:pointer;
   border-bottom:1px solid var(--gray-100);
   font-size:14px;
 }
 
-.suggestion-item:hover {
-  background:var(--primary-light);
-  color:var(--primary-dark);
+.suggestion:hover {
+  background:#dbeafe;
+  color:#1d4ed8;
 }
 
 .table-wrapper {
@@ -202,125 +193,112 @@ th {
   background:var(--gray-800);
   color:white;
   padding:12px;
-  font-size:13px;
   text-align:left;
+  font-size:13px;
 }
 
 td {
   padding:10px 12px;
-  border-bottom:1px solid var(--gray-200);
+  border-bottom:1px solid var(--gray-100);
   font-size:13px;
 }
 
 td input {
+  background:white;
   padding:8px 10px;
 }
 
-.empty-state {
+.empty {
   text-align:center;
-  color:var(--gray-500);
   padding:30px;
+  color:var(--gray-500);
 }
 
-.btn-container {
+.buttons {
   display:flex;
   gap:12px;
   flex-wrap:wrap;
 }
 
-.btn {
-  border:none;
-  padding:12px 20px;
+button {
+  border:0;
   border-radius:7px;
+  padding:12px 20px;
   cursor:pointer;
   font-weight:bold;
   font-size:14px;
 }
 
-.btn-save {
+.btn-primary {
   background:linear-gradient(135deg,var(--primary),var(--primary-dark));
   color:white;
 }
 
-.btn-save:hover {
-  opacity:.92;
-}
-
-.btn-clear {
+.btn-secondary {
   background:white;
-  border:1px solid var(--gray-300);
   color:var(--gray-700);
+  border:1px solid var(--gray-200);
 }
 
-.btn-delete {
-  background:var(--danger-light);
-  color:var(--danger-dark);
-  border:none;
+.btn-danger {
+  background:#fee2e2;
+  color:#991b1b;
   padding:7px 12px;
-  border-radius:6px;
-  cursor:pointer;
-  font-size:12px;
-  font-weight:bold;
 }
 
-.btn-delete:hover {
-  background:var(--danger);
-  color:white;
+button:disabled {
+  opacity:.6;
+  cursor:not-allowed;
 }
 
 .status {
   display:none;
-  margin-top:16px;
+  margin-top:15px;
   padding:12px 15px;
   border-radius:7px;
   font-size:14px;
 }
 
-.status-success {
+.status.success {
   display:block;
-  background:var(--success-light);
-  color:var(--success-dark);
+  background:#dcfce7;
+  color:#166534;
 }
 
-.status-error {
+.status.error {
   display:block;
-  background:var(--danger-light);
-  color:var(--danger-dark);
+  background:#fee2e2;
+  color:#991b1b;
 }
 
-.status-loading {
+.status.info {
   display:block;
-  background:var(--primary-light);
-  color:var(--primary-dark);
+  background:#dbeafe;
+  color:#1e40af;
 }
 
-.spinner {
+.loading {
   display:inline-block;
-  width:15px;
-  height:15px;
-  border:2px solid rgba(37,99,235,.25);
-  border-top-color:var(--primary);
+  width:14px;
+  height:14px;
+  border:2px solid rgba(0,0,0,.2);
+  border-top-color:currentColor;
   border-radius:50%;
-  animation:girar .8s linear infinite;
-  vertical-align:middle;
+  animation:girar .7s linear infinite;
   margin-right:8px;
+  vertical-align:-2px;
 }
 
 @keyframes girar {
-  to { transform:rotate(360deg); }
+  to {
+    transform:rotate(360deg);
+  }
 }
 
-.connection {
+.api-status {
   font-size:12px;
-  margin-top:8px;
-}
-
-.connection.ok {
-  color:var(--success-dark);
-}
-
-.connection.error {
-  color:var(--danger-dark);
+  margin-top:6px;
+  color:var(--gray-500);
 }
 
 @media(max-width:700px) {
@@ -335,6 +313,10 @@ td input {
   .card {
     padding:18px;
   }
+
+  .header h1 {
+    font-size:21px;
+  }
 }
 </style>
 
@@ -346,17 +328,13 @@ td input {
 
   <div class="header">
     <div class="logo">✓</div>
-
-```
-<div>
-  <h1>Sistema Maestro</h1>
-  <p>Gestión de devoluciones - Secretaría de Movilidad</p>
-  <div id="estadoConexion" class="connection">
-    Conectando con Google Apps Script...
-  </div>
-</div>
-```
-
+    <div>
+      <h1>Sistema Maestro</h1>
+      <p>Gestión de devoluciones</p>
+      <div id="apiStatus" class="api-status">
+        Conectando con Google Apps Script...
+      </div>
+    </div>
   </div>
 
   <!-- DATOS MAESTROS -->
@@ -370,7 +348,6 @@ td input {
 
 <div class="form-grid">
 
-  <!-- FUNCIONARIO -->
   <div class="form-group">
 
     <label for="funcionario" class="required">
@@ -385,8 +362,6 @@ td input {
 
   </div>
 
-
-  <!-- PLACA -->
   <div class="form-group">
 
     <label for="placa">
@@ -397,13 +372,12 @@ td input {
       type="text"
       id="placa"
       placeholder="Ej. ABC123"
+      maxlength="10"
       autocomplete="off"
     >
 
   </div>
 
-
-  <!-- DOCUMENTO -->
   <div class="form-group">
 
     <label for="documento" class="required">
@@ -419,8 +393,6 @@ td input {
 
   </div>
 
-
-  <!-- CIUDADANO -->
   <div class="form-group">
 
     <label for="ciudadano" class="required">
@@ -450,14 +422,15 @@ td input {
   Motivos de la devolución
 </h2>
 
-
 <div class="form-group search-container">
 
   <label for="buscarMotivo">
     Buscar y agregar motivo
   </label>
 
-  <span class="search-icon">🔎</span>
+  <div class="search-icon">
+    🔎
+  </div>
 
   <input
     type="text"
@@ -468,7 +441,7 @@ td input {
 
   <div
     id="listaSugerencias"
-    class="suggestions-list">
+    class="suggestions">
   </div>
 
 </div>
@@ -479,32 +452,20 @@ td input {
   <table>
 
     <thead>
-
       <tr>
-        <th style="width:50px">#</th>
+        <th style="width:50px;">#</th>
         <th>Motivo</th>
-        <th>Observación del motivo</th>
-        <th style="width:100px">Acción</th>
+        <th>Observación del Motivo</th>
+        <th style="width:100px;">Acción</th>
       </tr>
-
     </thead>
 
     <tbody id="bodyMotivos">
 
       <tr>
-
-        <td
-          colspan="4"
-          class="empty-state">
-
-          No hay motivos agregados.
-
-          <br>
-
-          Busque arriba para agregar un motivo.
-
+        <td colspan="4" class="empty">
+          Cargando motivos...
         </td>
-
       </tr>
 
     </tbody>
@@ -521,20 +482,19 @@ td input {
   <div class="card">
 
 ```
-<div class="btn-container">
+<div class="buttons">
 
   <button
     id="btnGuardar"
-    class="btn btn-save"
+    class="btn-primary"
     onclick="guardarYExportarPDF()">
 
     💾 Guardar y Exportar PDF
 
   </button>
 
-
   <button
-    class="btn btn-clear"
+    class="btn-secondary"
     onclick="limpiarFormulario()">
 
     🗑 Limpiar
@@ -542,7 +502,6 @@ td input {
   </button>
 
 </div>
-
 
 <div
   id="mensajeStatus"
@@ -560,18 +519,6 @@ td input {
    CONFIGURACIÓN
    ========================================================= */
 
-/*
-   IMPORTANTE:
-
-   Esta debe ser exactamente la URL /exec de tu Web App
-   de Google Apps Script.
-
-   NO colocar:
-   h[https://
-   [https://
-   ni corchetes.
-*/
-
 const API_URL =
 "https://script.google.com/macros/s/AKfycbz0drxHb69aZ2EiajQOM5ObodCUNKIDxsXuJL_a182JNUA2iIcXlgpPMX4iSrhfBegjuA/exec";
 
@@ -581,63 +528,41 @@ const API_URL =
    ========================================================= */
 
 let listaMotivosBase = [];
-
 let motivosAgregados = [];
-
-let cargandoDatos = false;
 
 
 /* =========================================================
    JSONP
    ========================================================= */
 
-function requestJSONP(action, params = {}) {
+function requestJSONP(action, params = {}, timeout = 20000) {
 
   return new Promise((resolve, reject) => {
 
     const callbackName =
-      "jsonp_cb_" +
+      "jsonp_callback_" +
       Date.now() +
       "_" +
       Math.floor(Math.random() * 100000);
 
-
     let terminado = false;
 
+    const script = document.createElement("script");
 
-    function limpiar() {
+    const limpiar = () => {
 
-      const script =
-        document.getElementById(callbackName);
-
-      if (script) {
-        script.remove();
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
       }
 
       try {
         delete window[callbackName];
-      } catch (e) {
+      } catch(e) {
         window[callbackName] = undefined;
       }
-    }
 
-
-    const timeout =
-      setTimeout(() => {
-
-        if (terminado) return;
-
-        terminado = true;
-
-        limpiar();
-
-        reject(
-          new Error(
-            "Tiempo de espera agotado al conectar con Google Apps Script."
-          )
-        );
-
-      }, 20000);
+      clearTimeout(timer);
+    };
 
 
     window[callbackName] = function(data) {
@@ -646,8 +571,6 @@ function requestJSONP(action, params = {}) {
 
       terminado = true;
 
-      clearTimeout(timeout);
-
       limpiar();
 
       resolve(data);
@@ -655,8 +578,9 @@ function requestJSONP(action, params = {}) {
     };
 
 
-    let query =
-      "action=" +
+    let url =
+      API_URL +
+      "?action=" +
       encodeURIComponent(action) +
       "&callback=" +
       encodeURIComponent(callbackName);
@@ -664,7 +588,7 @@ function requestJSONP(action, params = {}) {
 
     Object.keys(params).forEach(function(key) {
 
-      query +=
+      url +=
         "&" +
         encodeURIComponent(key) +
         "=" +
@@ -673,13 +597,9 @@ function requestJSONP(action, params = {}) {
     });
 
 
-    const script =
-      document.createElement("script");
+    script.src = url;
 
-    script.id = callbackName;
-
-    script.src =
-      API_URL + "?" + query;
+    script.async = true;
 
 
     script.onerror = function() {
@@ -687,8 +607,6 @@ function requestJSONP(action, params = {}) {
       if (terminado) return;
 
       terminado = true;
-
-      clearTimeout(timeout);
 
       limpiar();
 
@@ -701,6 +619,23 @@ function requestJSONP(action, params = {}) {
     };
 
 
+    const timer = setTimeout(function() {
+
+      if (terminado) return;
+
+      terminado = true;
+
+      limpiar();
+
+      reject(
+        new Error(
+          "Tiempo de espera agotado al conectar con Google Apps Script."
+        )
+      );
+
+    }, timeout);
+
+
     document.body.appendChild(script);
 
   });
@@ -709,28 +644,23 @@ function requestJSONP(action, params = {}) {
 
 
 /* =========================================================
-   INICIALIZACIÓN
+   INICIO
    ========================================================= */
 
-async function init() {
+document.addEventListener(
+  "DOMContentLoaded",
+  iniciarSistema
+);
 
-  if (cargandoDatos) return;
 
-  cargandoDatos = true;
+async function iniciarSistema() {
 
-  actualizarConexion(
+  mostrarEstadoAPI(
     "Conectando con Google Apps Script...",
-    ""
+    "info"
   );
 
-
   try {
-
-    console.log(
-      "Conectando a:",
-      API_URL
-    );
-
 
     const respuesta =
       await requestJSONP(
@@ -747,7 +677,7 @@ async function init() {
     if (!respuesta) {
 
       throw new Error(
-        "Google Apps Script no devolvió información."
+        "Google Apps Script no devolvió datos."
       );
 
     }
@@ -763,7 +693,11 @@ async function init() {
     }
 
 
-    /* FUNCIONARIOS */
+    listaMotivosBase =
+      Array.isArray(respuesta.motivos)
+        ? respuesta.motivos
+        : [];
+
 
     cargarFuncionarios(
       Array.isArray(respuesta.funcionarios)
@@ -772,34 +706,28 @@ async function init() {
     );
 
 
-    /* MOTIVOS */
-
-    cargarMotivos(
-      Array.isArray(respuesta.motivos)
-        ? respuesta.motivos
-        : []
-    );
+    renderizarTablaMotivos();
 
 
-    actualizarConexion(
-      "✓ Conectado correctamente con Google Apps Script",
-      "ok"
+    mostrarEstadoAPI(
+      "✓ Conectado correctamente con Google Apps Script.",
+      "success"
     );
 
 
     console.log(
-      "Funcionarios cargados:",
+      "Funcionarios:",
       respuesta.funcionarios
     );
 
-
     console.log(
-      "Motivos cargados:",
+      "Motivos:",
       respuesta.motivos
     );
 
+  }
 
-  } catch (error) {
+  catch(error) {
 
     console.error(
       "Error de conexión:",
@@ -807,35 +735,19 @@ async function init() {
     );
 
 
-    actualizarConexion(
-      "✕ Error de conexión con Google Apps Script",
+    mostrarEstadoAPI(
+      "✕ " + error.message,
       "error"
     );
 
 
     mostrarMensaje(
-      error.message,
+      error.message +
+      " Verifique que la implementación de Apps Script esté activa.",
       true
     );
 
-
-    /* Mantener los controles utilizables */
-
-    const funcionario =
-      document.getElementById("funcionario");
-
-    funcionario.innerHTML =
-      '<option value="">No se pudieron cargar los funcionarios</option>';
-
-
-  } finally {
-
-    cargandoDatos = false;
-
   }
-
-
-  renderizarTablaMotivos();
 
 }
 
@@ -844,10 +756,12 @@ async function init() {
    CARGAR FUNCIONARIOS
    ========================================================= */
 
-function cargarFuncionarios(funcionarios) {
+function cargarFuncionarios(lista) {
 
   const select =
-    document.getElementById("funcionario");
+    document.getElementById(
+      "funcionario"
+    );
 
 
   select.innerHTML = "";
@@ -859,83 +773,28 @@ function cargarFuncionarios(funcionarios) {
   opcionInicial.value = "";
 
   opcionInicial.textContent =
-    "Seleccione funcionario...";
-
-  select.appendChild(opcionInicial);
-
-
-  if (
-    !Array.isArray(funcionarios) ||
-    funcionarios.length === 0
-  ) {
-
-    const opcion =
-      document.createElement("option");
-
-    opcion.value = "";
-
-    opcion.textContent =
-      "No hay funcionarios registrados";
-
-    opcion.disabled = true;
-
-    select.appendChild(opcion);
-
-    return;
-  }
+    lista.length > 0
+      ? "Seleccione funcionario..."
+      : "No hay funcionarios registrados";
 
 
-  funcionarios.forEach(function(funcionario) {
+  select.appendChild(
+    opcionInicial
+  );
 
-    const nombre =
-      String(funcionario || "").trim();
 
-    if (!nombre) return;
-
+  lista.forEach(function(funcionario) {
 
     const opcion =
       document.createElement("option");
 
-    opcion.value = nombre;
+    opcion.value = funcionario;
 
-    opcion.textContent = nombre;
+    opcion.textContent = funcionario;
 
-    select.appendChild(opcion);
-
-  });
-
-}
-
-
-/* =========================================================
-   CARGAR MOTIVOS
-   ========================================================= */
-
-function cargarMotivos(motivos) {
-
-  listaMotivosBase = [];
-
-
-  if (
-    !Array.isArray(motivos)
-  ) {
-    return;
-  }
-
-
-  motivos.forEach(function(motivo) {
-
-    const texto =
-      String(motivo || "").trim();
-
-    if (
-      texto &&
-      !listaMotivosBase.includes(texto)
-    ) {
-
-      listaMotivosBase.push(texto);
-
-    }
+    select.appendChild(
+      opcion
+    );
 
   });
 
@@ -985,7 +844,7 @@ inputBuscar.addEventListener(
       listaMotivosBase.filter(
         function(motivo) {
 
-          return motivo
+          return String(motivo)
             .toLowerCase()
             .includes(texto);
 
@@ -993,9 +852,7 @@ inputBuscar.addEventListener(
       );
 
 
-    if (
-      filtrados.length === 0
-    ) {
+    if (filtrados.length === 0) {
 
       cajaSugerencias.style.display =
         "none";
@@ -1013,24 +870,22 @@ inputBuscar.addEventListener(
             "div"
           );
 
-
         div.className =
-          "suggestion-item";
-
+          "suggestion";
 
         div.textContent =
           motivo;
 
-
-        div.onclick =
+        div.addEventListener(
+          "click",
           function() {
 
             seleccionarMotivo(
               motivo
             );
 
-          };
-
+          }
+        );
 
         cajaSugerencias.appendChild(
           div
@@ -1053,38 +908,6 @@ inputBuscar.addEventListener(
 
 function seleccionarMotivo(motivo) {
 
-  /*
-     Evita agregar dos veces
-     exactamente el mismo motivo.
-  */
-
-  const existe =
-    motivosAgregados.some(
-      function(item) {
-
-        return item.motivo === motivo;
-
-      }
-    );
-
-
-  if (existe) {
-
-    mostrarMensaje(
-      "Este motivo ya fue agregado.",
-      true
-    );
-
-    inputBuscar.value = "";
-
-    cajaSugerencias.style.display =
-      "none";
-
-    return;
-
-  }
-
-
   motivosAgregados.push({
 
     motivo: motivo,
@@ -1106,7 +929,7 @@ function seleccionarMotivo(motivo) {
 
 
 /* =========================================================
-   RENDERIZAR TABLA
+   TABLA MOTIVOS
    ========================================================= */
 
 function renderizarTablaMotivos() {
@@ -1128,20 +951,14 @@ function renderizarTablaMotivos() {
       document.createElement("tr");
 
 
-    const td =
-      document.createElement("td");
+    tr.innerHTML =
+      `
+      <td colspan="4" class="empty">
+        No hay motivos agregados.
+        Busque arriba para añadir uno.
+      </td>
+      `;
 
-
-    td.colSpan = 4;
-
-    td.className =
-      "empty-state";
-
-    td.textContent =
-      "No hay motivos agregados. Busque arriba para añadir uno.";
-
-
-    tr.appendChild(td);
 
     tbody.appendChild(tr);
 
@@ -1151,7 +968,7 @@ function renderizarTablaMotivos() {
 
 
   motivosAgregados.forEach(
-    function(item, index) {
+    function(item,index) {
 
       const tr =
         document.createElement("tr");
@@ -1184,7 +1001,7 @@ function renderizarTablaMotivos() {
         "Observación específica...";
 
       input.value =
-        item.observacion || "";
+        item.observacion;
 
 
       input.addEventListener(
@@ -1193,7 +1010,7 @@ function renderizarTablaMotivos() {
 
           motivosAgregados[index]
             .observacion =
-              this.value;
+            this.value;
 
         }
       );
@@ -1209,23 +1026,25 @@ function renderizarTablaMotivos() {
 
 
       const boton =
-        document.createElement("button");
-
+        document.createElement(
+          "button"
+        );
 
       boton.className =
-        "btn-delete";
-
+        "btn-danger";
 
       boton.textContent =
         "Quitar";
 
 
-      boton.onclick =
+      boton.addEventListener(
+        "click",
         function() {
 
           eliminarMotivo(index);
 
-        };
+        }
+      );
 
 
       tdAccion.appendChild(
@@ -1267,7 +1086,7 @@ function eliminarMotivo(index) {
 
 
 /* =========================================================
-   GUARDAR Y GENERAR PDF
+   GUARDAR
    ========================================================= */
 
 async function guardarYExportarPDF() {
@@ -1332,20 +1151,6 @@ async function guardarYExportarPDF() {
   }
 
 
-  if (
-    motivosAgregados.length === 0
-  ) {
-
-    mostrarMensaje(
-      "Debe agregar por lo menos un motivo.",
-      true
-    );
-
-    return;
-
-  }
-
-
   const payload = {
 
     master: {
@@ -1370,6 +1175,15 @@ async function guardarYExportarPDF() {
   };
 
 
+  const boton =
+    document.getElementById(
+      "btnGuardar"
+    );
+
+
+  boton.disabled = true;
+
+
   mostrarMensaje(
     "Guardando devolución...",
     false,
@@ -1379,31 +1193,34 @@ async function guardarYExportarPDF() {
 
   try {
 
-    const respuestaGuardar =
+    const respuesta =
       await requestJSONP(
         "guardarDevolucion",
         {
           data:
-            JSON.stringify(payload)
-        }
+            JSON.stringify(
+              payload
+            )
+        },
+        30000
       );
 
 
     console.log(
-      "Respuesta guardar:",
-      respuestaGuardar
+      "Respuesta guardado:",
+      respuesta
     );
 
 
     if (
-      !respuestaGuardar ||
-      !respuestaGuardar.ok
+      !respuesta ||
+      !respuesta.ok
     ) {
 
       throw new Error(
-        respuestaGuardar &&
-        respuestaGuardar.error
-          ? respuestaGuardar.error
+        respuesta &&
+        respuesta.error
+          ? respuesta.error
           : "No se pudo guardar la devolución."
       );
 
@@ -1411,7 +1228,7 @@ async function guardarYExportarPDF() {
 
 
     const consecutivo =
-      respuestaGuardar.id;
+      respuesta.id;
 
 
     mostrarMensaje(
@@ -1429,20 +1246,14 @@ async function guardarYExportarPDF() {
         {
           id:
             consecutivo
-        }
+        },
+        60000
       );
-
-
-    console.log(
-      "Respuesta PDF:",
-      respuestaPDF
-    );
 
 
     if (
       !respuestaPDF ||
-      !respuestaPDF.ok ||
-      !respuestaPDF.base64
+      !respuestaPDF.ok
     ) {
 
       throw new Error(
@@ -1455,8 +1266,21 @@ async function guardarYExportarPDF() {
     }
 
 
+    if (
+      !respuestaPDF.base64
+    ) {
+
+      throw new Error(
+        "Google Apps Script no devolvió el archivo PDF."
+      );
+
+    }
+
+
     const enlace =
-      document.createElement("a");
+      document.createElement(
+        "a"
+      );
 
 
     enlace.href =
@@ -1466,9 +1290,11 @@ async function guardarYExportarPDF() {
 
     enlace.download =
       respuestaPDF.filename ||
-      ("Devolucion_" +
-       consecutivo +
-       ".pdf");
+      (
+        "Devolucion_" +
+        consecutivo +
+        ".pdf"
+      );
 
 
     document.body.appendChild(
@@ -1483,17 +1309,18 @@ async function guardarYExportarPDF() {
 
 
     mostrarMensaje(
-      "Devolución N° " +
+      "✓ Devolución N° " +
       consecutivo +
       " guardada y PDF generado correctamente.",
       false
     );
 
 
-  } catch (error) {
+  }
+
+  catch(error) {
 
     console.error(
-      "Error:",
       error
     );
 
@@ -1502,6 +1329,12 @@ async function guardarYExportarPDF() {
       error.message,
       true
     );
+
+  }
+
+  finally {
+
+    boton.disabled = false;
 
   }
 
@@ -1534,22 +1367,23 @@ function limpiarFormulario() {
   ).value = "";
 
 
-  document.getElementById(
-    "buscarMotivo"
-  ).value = "";
-
-
-  motivosAgregados = [];
+  inputBuscar.value = "";
 
 
   cajaSugerencias.style.display =
     "none";
 
 
+  motivosAgregados = [];
+
+
   renderizarTablaMotivos();
 
 
-  ocultarMensaje();
+  document.getElementById(
+    "mensajeStatus"
+  ).style.display =
+    "none";
 
 }
 
@@ -1561,7 +1395,7 @@ function limpiarFormulario() {
 function mostrarMensaje(
   mensaje,
   error = false,
-  loading = false
+  cargando = false
 ) {
 
   const box =
@@ -1573,46 +1407,19 @@ function mostrarMensaje(
   box.className =
     "status " +
     (
-      loading
-        ? "status-loading"
-        : error
-          ? "status-error"
-          : "status-success"
+      error
+        ? "error"
+        : "success"
     );
 
 
-  box.innerHTML = "";
-
-
-  if (loading) {
-
-    const spinner =
-      document.createElement(
-        "span"
-      );
-
-    spinner.className =
-      "spinner";
-
-    box.appendChild(
-      spinner
-    );
-
-  }
-
-
-  const texto =
-    document.createElement(
-      "span"
-    );
-
-  texto.textContent =
+  box.innerHTML =
+    (
+      cargando
+        ? '<span class="loading"></span>'
+        : ""
+    ) +
     mensaje;
-
-
-  box.appendChild(
-    texto
-  );
 
 
   box.style.display =
@@ -1621,41 +1428,45 @@ function mostrarMensaje(
 }
 
 
-function ocultarMensaje() {
-
-  const box =
-    document.getElementById(
-      "mensajeStatus"
-    );
-
-  box.style.display =
-    "none";
-
-}
-
-
 /* =========================================================
-   ESTADO DE CONEXIÓN
+   ESTADO API
    ========================================================= */
 
-function actualizarConexion(
-  texto,
-  clase
+function mostrarEstadoAPI(
+  mensaje,
+  tipo
 ) {
 
   const elemento =
     document.getElementById(
-      "estadoConexion"
+      "apiStatus"
     );
 
 
   elemento.textContent =
-    texto;
+    mensaje;
 
 
-  elemento.className =
-    "connection " +
-    clase;
+  if (tipo === "error") {
+
+    elemento.style.color =
+      "#dc2626";
+
+  }
+
+  else if (tipo === "success") {
+
+    elemento.style.color =
+      "#16a34a";
+
+  }
+
+  else {
+
+    elemento.style.color =
+      "#6b7280";
+
+  }
 
 }
 
@@ -1687,41 +1498,27 @@ document.addEventListener(
    MAYÚSCULAS
    ========================================================= */
 
-document
-  .getElementById("placa")
-  .addEventListener(
-    "input",
-    function() {
-
-      this.value =
-        this.value.toUpperCase();
-
-    }
-  );
-
-
-document
-  .getElementById("ciudadano")
-  .addEventListener(
-    "input",
-    function() {
-
-      this.value =
-        this.value.toUpperCase();
-
-    }
-  );
-
-
-/* =========================================================
-   INICIAR
-   ========================================================= */
-
-document.addEventListener(
-  "DOMContentLoaded",
+document.getElementById(
+  "placa"
+).addEventListener(
+  "input",
   function() {
 
-    init();
+    this.value =
+      this.value.toUpperCase();
+
+  }
+);
+
+
+document.getElementById(
+  "ciudadano"
+).addEventListener(
+  "input",
+  function() {
+
+    this.value =
+      this.value.toUpperCase();
 
   }
 );
@@ -1730,5 +1527,3 @@ document.addEventListener(
 
 </body>
 </html>
-
- 
