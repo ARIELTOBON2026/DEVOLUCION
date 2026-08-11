@@ -1,526 +1,1060 @@
 <!DOCTYPE html>
-
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
 
-<title>Sistema Maestro - Devoluciones</title>
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
 
-<style>
-:root {
-  --primary:#2563eb;
-  --primary-dark:#1d4ed8;
-  --success:#16a34a;
-  --danger:#dc2626;
-  --gray-50:#f9fafb;
-  --gray-100:#f3f4f6;
-  --gray-200:#e5e7eb;
-  --gray-400:#9ca3af;
-  --gray-500:#6b7280;
-  --gray-700:#374151;
-  --gray-800:#1f2937;
-  --gray-900:#111827;
-  --radius:10px;
-}
+  <meta name="description"
+        content="Sistema Maestro-Detalle de Devoluciones - Secretaría de Movilidad">
 
-* {
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
+  <title>DEVOLUCIÓN DE TRÁMITES</title>
 
-body {
-  font-family:Arial,Helvetica,sans-serif;
-  background:linear-gradient(135deg,#eef2f7,#dfe8f5);
-  min-height:100vh;
-  padding:25px;
-  color:var(--gray-800);
-}
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
 
-.container {
-  max-width:1100px;
-  margin:auto;
-}
+  <style>
 
-.header {
-  display:flex;
-  align-items:center;
-  gap:15px;
-  margin-bottom:25px;
-}
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --primary-light: #dbeafe;
 
-.logo {
-  width:52px;
-  height:52px;
-  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
-  color:white;
-  border-radius:var(--radius);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:25px;
-  font-weight:bold;
-}
+      --success: #10b981;
+      --success-light: #d1fae5;
+      --success-dark: #065f46;
 
-.header h1 {
-  font-size:25px;
-  color:var(--gray-900);
-}
+      --danger: #ef4444;
+      --danger-light: #fee2e2;
+      --danger-dark: #991b1b;
 
-.header p {
-  color:var(--gray-500);
-  margin-top:3px;
-}
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
 
-.card {
-  background:white;
-  border-radius:14px;
-  padding:25px;
-  margin-bottom:20px;
-  box-shadow:0 5px 18px rgba(0,0,0,.08);
-}
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
 
-.card-title {
-  font-size:18px;
-  margin-bottom:20px;
-  padding-bottom:12px;
-  border-bottom:1px solid var(--gray-200);
-  color:var(--gray-900);
-}
+      --shadow-sm:
+        0 1px 2px 0 rgba(0,0,0,0.05);
 
-.form-grid {
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:18px;
-}
+      --shadow-md:
+        0 4px 6px -1px rgba(0,0,0,0.08),
+        0 2px 4px -2px rgba(0,0,0,0.05);
 
-.form-group {
-  display:flex;
-  flex-direction:column;
-}
+      --shadow-lg:
+        0 10px 15px -3px rgba(0,0,0,0.08),
+        0 4px 6px -4px rgba(0,0,0,0.05);
+    }
 
-label {
-  font-size:13px;
-  font-weight:bold;
-  color:var(--gray-700);
-  margin-bottom:6px;
-}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-.required::after {
-  content:" *";
-  color:var(--danger);
-}
+    body {
+      font-family: 'Inter',
+                   -apple-system,
+                   BlinkMacSystemFont,
+                   sans-serif;
 
-input,
-select {
-  width:100%;
-  padding:12px 13px;
-  border:1px solid var(--gray-200);
-  border-radius:7px;
-  background:var(--gray-50);
-  font-size:14px;
-  outline:none;
-}
+      background:
+        linear-gradient(
+          135deg,
+          #f0f4f8 0%,
+          #e4ecf7 100%
+        );
 
-input:focus,
-select:focus {
-  border-color:var(--primary);
-  background:white;
-  box-shadow:0 0 0 3px rgba(37,99,235,.12);
-}
+      min-height: 100vh;
+      padding: 24px;
 
-select {
-  cursor:pointer;
-}
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
 
-.search-container {
-  position:relative;
-  margin-bottom:20px;
-}
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
 
-#buscarMotivo {
-  padding-left:40px;
-}
+    /* =========================
+       ENCABEZADO
+       ========================= */
 
-.search-icon {
-  position:absolute;
-  left:13px;
-  top:36px;
-  color:var(--gray-400);
-}
+    .page-header {
+      margin-bottom: 24px;
 
-.suggestions {
-  position:absolute;
-  left:0;
-  right:0;
-  top:100%;
-  margin-top:4px;
-  background:white;
-  border:1px solid var(--gray-200);
-  border-radius:7px;
-  max-height:220px;
-  overflow-y:auto;
-  display:none;
-  z-index:9999;
-  box-shadow:0 8px 20px rgba(0,0,0,.12);
-}
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-.suggestion {
-  padding:11px 14px;
-  cursor:pointer;
-  border-bottom:1px solid var(--gray-100);
-  font-size:14px;
-}
+    .page-header .logo {
+      width: 48px;
+      height: 48px;
 
-.suggestion:hover {
-  background:#dbeafe;
-  color:#1d4ed8;
-}
+      background:
+        linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-dark)
+        );
 
-.table-wrapper {
-  overflow-x:auto;
-  border:1px solid var(--gray-200);
-  border-radius:8px;
-}
+      border-radius: var(--radius-md);
 
-table {
-  width:100%;
-  border-collapse:collapse;
-}
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-th {
-  background:var(--gray-800);
-  color:white;
-  padding:12px;
-  text-align:left;
-  font-size:13px;
-}
+      color: white;
 
-td {
-  padding:10px 12px;
-  border-bottom:1px solid var(--gray-100);
-  font-size:13px;
-}
+      box-shadow: var(--shadow-md);
+    }
 
-td input {
-  background:white;
-  padding:8px 10px;
-}
+    .page-header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
 
-.empty {
-  text-align:center;
-  padding:30px;
-  color:var(--gray-500);
-}
+    .page-header p {
+      font-size: 14px;
+      color: var(--gray-500);
+    }
 
-.buttons {
-  display:flex;
-  gap:12px;
-  flex-wrap:wrap;
-}
+    /* =========================
+       TARJETAS
+       ========================= */
 
-button {
-  border:0;
-  border-radius:7px;
-  padding:12px 20px;
-  cursor:pointer;
-  font-weight:bold;
-  font-size:14px;
-}
+    .card {
+      background: white;
 
-.btn-primary {
-  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
-  color:white;
-}
+      padding: 28px;
 
-.btn-secondary {
-  background:white;
-  color:var(--gray-700);
-  border:1px solid var(--gray-200);
-}
+      border-radius: var(--radius-lg);
 
-.btn-danger {
-  background:#fee2e2;
-  color:#991b1b;
-  padding:7px 12px;
-}
+      box-shadow: var(--shadow-md);
 
-button:disabled {
-  opacity:.6;
-  cursor:not-allowed;
-}
+      margin-bottom: 20px;
 
-.status {
-  display:none;
-  margin-top:15px;
-  padding:12px 15px;
-  border-radius:7px;
-  font-size:14px;
-}
+      border: 1px solid var(--gray-100);
 
-.status.success {
-  display:block;
-  background:#dcfce7;
-  color:#166534;
-}
+      transition: box-shadow 0.2s ease;
+    }
 
-.status.error {
-  display:block;
-  background:#fee2e2;
-  color:#991b1b;
-}
+    .card:hover {
+      box-shadow: var(--shadow-lg);
+    }
 
-.status.info {
-  display:block;
-  background:#dbeafe;
-  color:#1e40af;
-}
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
 
-.loading {
-  display:inline-block;
-  width:14px;
-  height:14px;
-  border:2px solid rgba(0,0,0,.2);
-  border-top-color:currentColor;
-  border-radius:50%;
-  animation:girar .7s linear infinite;
-  margin-right:8px;
-  vertical-align:-2px;
-}
+      color: var(--gray-900);
 
-@keyframes girar {
-  to {
-    transform:rotate(360deg);
-  }
-}
+      margin-bottom: 20px;
 
-.api-status {
-  font-size:12px;
-  margin-top:6px;
-  color:var(--gray-500);
-}
+      padding-bottom: 14px;
 
-@media(max-width:700px) {
-  body {
-    padding:12px;
-  }
+      border-bottom:
+        1px solid var(--gray-100);
 
-  .form-grid {
-    grid-template-columns:1fr;
-  }
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-  .card {
-    padding:18px;
-  }
+    .card-title::before {
+      content: '';
 
-  .header h1 {
-    font-size:21px;
-  }
-}
-</style>
+      width: 4px;
+      height: 20px;
 
+      background:
+        var(--primary);
+
+      border-radius: 2px;
+    }
+
+    /* =========================
+       FORMULARIO
+       ========================= */
+
+    .form-grid {
+      display: grid;
+
+      grid-template-columns:
+        repeat(2, 1fr);
+
+      gap: 18px;
+    }
+
+    @media (max-width: 640px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+
+      color: var(--gray-700);
+
+      margin-bottom: 6px;
+
+      display: flex;
+      align-items: center;
+
+      gap: 4px;
+    }
+
+    .required::after {
+      content: '*';
+
+      color: var(--danger);
+
+      margin-left: 2px;
+    }
+
+    input,
+    select {
+      width: 100%;
+
+      padding: 11px 14px;
+
+      font-size: 14px;
+
+      font-family: inherit;
+
+      border:
+        1.5px solid var(--gray-200);
+
+      border-radius:
+        var(--radius-sm);
+
+      background:
+        var(--gray-50);
+
+      color:
+        var(--gray-900);
+
+      transition:
+        all 0.15s ease;
+
+      outline: none;
+    }
+
+    input::placeholder {
+      color: var(--gray-400);
+    }
+
+    input:focus,
+    select:focus {
+      border-color:
+        var(--primary);
+
+      background: white;
+
+      box-shadow:
+        0 0 0 3px
+        rgba(59,130,246,0.15);
+    }
+
+    /* =========================
+       BUSCADOR MOTIVOS
+       ========================= */
+
+    .search-container {
+      position: relative;
+
+      margin-bottom: 16px;
+    }
+
+    .search-icon {
+      position: absolute;
+
+      top: 40px;
+      left: 14px;
+
+      color:
+        var(--gray-400);
+
+      pointer-events: none;
+    }
+
+    #buscarMotivo {
+      padding-left: 40px;
+    }
+
+    .suggestions-list {
+      position: absolute;
+
+      top:
+        calc(100% + 4px);
+
+      left: 0;
+      right: 0;
+
+      background: white;
+
+      border:
+        1px solid var(--gray-200);
+
+      border-radius:
+        var(--radius-sm);
+
+      max-height: 220px;
+
+      overflow-y: auto;
+
+      z-index: 1000;
+
+      display: none;
+
+      box-shadow:
+        var(--shadow-lg);
+    }
+
+    .suggestion-item {
+      padding: 10px 14px;
+
+      cursor: pointer;
+
+      font-size: 14px;
+
+      border-bottom:
+        1px solid var(--gray-50);
+
+      transition:
+        background 0.1s;
+    }
+
+    .suggestion-item:hover {
+      background:
+        var(--primary-light);
+
+      color:
+        var(--primary-dark);
+    }
+
+    /* =========================
+       TABLA
+       ========================= */
+
+    .table-wrapper {
+      overflow-x: auto;
+
+      border-radius:
+        var(--radius-md);
+
+      border:
+        1px solid var(--gray-200);
+    }
+
+    table {
+      width: 100%;
+
+      border-collapse:
+        collapse;
+
+      font-size: 14px;
+    }
+
+    th {
+      background:
+        var(--gray-800);
+
+      color: white;
+
+      padding: 12px 14px;
+
+      text-align: left;
+
+      font-weight: 500;
+
+      font-size: 13px;
+
+      letter-spacing: 0.3px;
+    }
+
+    td {
+      padding: 10px 14px;
+
+      border-bottom:
+        1px solid var(--gray-100);
+
+      vertical-align: middle;
+    }
+
+    tbody tr:hover {
+      background:
+        var(--gray-50);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    td input {
+      background: white;
+
+      padding: 8px 12px;
+
+      font-size: 13px;
+
+      border:
+        1px solid var(--gray-200);
+    }
+
+    td input:focus {
+      border-color:
+        var(--primary);
+
+      box-shadow:
+        0 0 0 2px
+        rgba(59,130,246,0.1);
+    }
+
+    .empty-state {
+      text-align: center;
+
+      padding: 32px 20px;
+
+      color:
+        var(--gray-500);
+
+      font-size: 14px;
+    }
+
+    /* =========================
+       BOTONES
+       ========================= */
+
+    .btn-container {
+      display: flex;
+
+      gap: 12px;
+
+      margin-top: 8px;
+
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 11px 22px;
+
+      border: none;
+
+      border-radius:
+        var(--radius-sm);
+
+      cursor: pointer;
+
+      font-weight: 600;
+
+      font-size: 14px;
+
+      font-family: inherit;
+
+      display: inline-flex;
+
+      align-items: center;
+
+      gap: 8px;
+
+      transition:
+        all 0.15s ease;
+    }
+
+    .btn-save-pdf {
+      background:
+        linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-dark)
+        );
+
+      color: white;
+
+      box-shadow:
+        0 2px 4px
+        rgba(37,99,235,0.3);
+    }
+
+    .btn-save-pdf:hover {
+      transform:
+        translateY(-1px);
+
+      box-shadow:
+        0 4px 12px
+        rgba(37,99,235,0.35);
+    }
+
+    .btn-clear {
+      background: white;
+
+      color:
+        var(--gray-700);
+
+      border:
+        1.5px solid var(--gray-200);
+    }
+
+    .btn-clear:hover {
+      background:
+        var(--gray-50);
+
+      border-color:
+        var(--gray-300);
+    }
+
+    .btn-delete {
+      background:
+        var(--danger-light);
+
+      color:
+        var(--danger-dark);
+
+      border: none;
+
+      padding: 7px 14px;
+
+      cursor: pointer;
+
+      border-radius:
+        var(--radius-sm);
+
+      font-weight: 500;
+
+      font-size: 13px;
+
+      font-family: inherit;
+
+      display: inline-flex;
+
+      align-items: center;
+
+      gap: 5px;
+
+      transition:
+        all 0.15s ease;
+    }
+
+    .btn-delete:hover {
+      background:
+        var(--danger);
+
+      color: white;
+    }
+
+    /* =========================
+       MENSAJES
+       ========================= */
+
+    .status-msg {
+      margin-top: 16px;
+
+      padding: 12px 16px;
+
+      border-radius:
+        var(--radius-sm);
+
+      display: none;
+
+      font-size: 14px;
+
+      align-items: center;
+
+      gap: 10px;
+
+      border-left: 4px solid;
+    }
+
+    .status-success {
+      background:
+        var(--success-light);
+
+      color:
+        var(--success-dark);
+
+      border-left-color:
+        var(--success);
+    }
+
+    .status-error {
+      background:
+        var(--danger-light);
+
+      color:
+        var(--danger-dark);
+
+      border-left-color:
+        var(--danger);
+    }
+
+    /* =========================
+       LOADER
+       ========================= */
+
+    .spinner {
+      display: inline-block;
+
+      width: 14px;
+      height: 14px;
+
+      border:
+        2px solid
+        rgba(255,255,255,0.3);
+
+      border-top-color:
+        white;
+
+      border-radius: 50%;
+
+      animation:
+        spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform:
+          rotate(360deg);
+      }
+    }
+
+    /* =========================
+       ESTADO DE CONEXIÓN
+       ========================= */
+
+    .connection-status {
+      margin-bottom: 20px;
+
+      padding: 10px 14px;
+
+      border-radius:
+        var(--radius-sm);
+
+      background:
+        var(--gray-100);
+
+      color:
+        var(--gray-600);
+
+      font-size: 13px;
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 8px;
+    }
+
+    .connection-dot {
+      width: 9px;
+      height: 9px;
+
+      border-radius: 50%;
+
+      background:
+        var(--gray-400);
+    }
+
+    .connection-ok {
+      background:
+        var(--success);
+    }
+
+    .connection-error {
+      background:
+        var(--danger);
+    }
+
+  </style>
 </head>
+
 
 <body>
 
 <div class="container">
 
-  <div class="header">
-    <div class="logo">✓</div>
-    <div>
-      <h1>Sistema Maestro</h1>
-      <p>Gestión de devoluciones</p>
-      <div id="apiStatus" class="api-status">
-        Conectando con Google Apps Script...
-      </div>
+  <!-- =========================
+       ENCABEZADO
+       ========================= -->
+
+  <div class="page-header">
+
+    <div class="logo">
+
+      <svg
+        width="26"
+        height="26"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round">
+
+        <polyline
+          points="9 11 12 14 20 6">
+        </polyline>
+
+        <path
+          d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9">
+        </path>
+
+      </svg>
+
     </div>
-  </div>
 
-  <!-- DATOS MAESTROS -->
+    <div>
 
-  <div class="card">
+      <h1>Sistema Maestro</h1>
 
-```
-<h2 class="card-title">
-  Datos de la devolución
-</h2>
+      <p>
+        Gestión de devoluciones
+      </p>
 
-<div class="form-grid">
-
-  <div class="form-group">
-
-    <label for="funcionario" class="required">
-      Funcionario
-    </label>
-
-    <select id="funcionario">
-      <option value="">
-        Cargando funcionarios...
-      </option>
-    </select>
+    </div>
 
   </div>
 
-  <div class="form-group">
 
-    <label for="placa">
-      Placa
-    </label>
-
-    <input
-      type="text"
-      id="placa"
-      placeholder="Ej. ABC123"
-      maxlength="10"
-      autocomplete="off"
-    >
-
-  </div>
-
-  <div class="form-group">
-
-    <label for="documento" class="required">
-      Documento
-    </label>
-
-    <input
-      type="text"
-      id="documento"
-      placeholder="Número de documento"
-      autocomplete="off"
-    >
-
-  </div>
-
-  <div class="form-group">
-
-    <label for="ciudadano" class="required">
-      Ciudadano
-    </label>
-
-    <input
-      type="text"
-      id="ciudadano"
-      placeholder="Nombre completo"
-      autocomplete="off"
-    >
-
-  </div>
-
-</div>
-```
-
-  </div>
-
-  <!-- MOTIVOS -->
-
-  <div class="card">
-
-```
-<h2 class="card-title">
-  Motivos de la devolución
-</h2>
-
-<div class="form-group search-container">
-
-  <label for="buscarMotivo">
-    Buscar y agregar motivo
-  </label>
-
-  <div class="search-icon">
-    🔎
-  </div>
-
-  <input
-    type="text"
-    id="buscarMotivo"
-    placeholder="Escriba para buscar un motivo..."
-    autocomplete="off"
-  >
+  <!-- =========================
+       ESTADO CONEXIÓN
+       ========================= -->
 
   <div
-    id="listaSugerencias"
-    class="suggestions">
-  </div>
+    id="estadoConexion"
+    class="connection-status">
 
-</div>
+    <span
+      id="connectionDot"
+      class="connection-dot">
+    </span>
 
-
-<div class="table-wrapper">
-
-  <table>
-
-    <thead>
-      <tr>
-        <th style="width:50px;">#</th>
-        <th>Motivo</th>
-        <th>Observación del Motivo</th>
-        <th style="width:100px;">Acción</th>
-      </tr>
-    </thead>
-
-    <tbody id="bodyMotivos">
-
-      <tr>
-        <td colspan="4" class="empty">
-          Cargando motivos...
-        </td>
-      </tr>
-
-    </tbody>
-
-  </table>
-
-</div>
-```
+    <span id="connectionText">
+      Conectando con Google Apps Script...
+    </span>
 
   </div>
 
-  <!-- BOTONES -->
+
+  <!-- =========================
+       DATOS DEVOLUCIÓN
+       ========================= -->
 
   <div class="card">
 
-```
-<div class="buttons">
+    <h2 class="card-title">
+      Datos de la devolución
+    </h2>
 
-  <button
-    id="btnGuardar"
-    class="btn-primary"
-    onclick="guardarYExportarPDF()">
 
-    💾 Guardar y Exportar PDF
+    <div class="form-grid">
 
-  </button>
+      <!-- FUNCIONARIO -->
 
-  <button
-    class="btn-secondary"
-    onclick="limpiarFormulario()">
+      <div class="form-group">
 
-    🗑 Limpiar
+        <label
+          for="funcionario"
+          class="required">
 
-  </button>
+          Funcionario
 
-</div>
+        </label>
 
-<div
-  id="mensajeStatus"
-  class="status">
-</div>
-```
+        <select id="funcionario">
+
+          <option value="">
+            Cargando funcionarios...
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- PLACA -->
+
+      <div class="form-group">
+
+        <label for="placa">
+          Placa
+        </label>
+
+        <input
+          type="text"
+          id="placa"
+          placeholder="Ej. ABC-123"
+          autocomplete="off">
+
+      </div>
+
+
+      <!-- DOCUMENTO -->
+
+      <div class="form-group">
+
+        <label
+          for="documento"
+          class="required">
+
+          Documento
+
+        </label>
+
+        <input
+          type="text"
+          id="documento"
+          placeholder="Número de documento"
+          autocomplete="off">
+
+      </div>
+
+
+      <!-- CIUDADANO -->
+
+      <div class="form-group">
+
+        <label
+          for="ciudadano"
+          class="required">
+
+          Ciudadano
+
+        </label>
+
+        <input
+          type="text"
+          id="ciudadano"
+          placeholder="Nombre completo"
+          autocomplete="off">
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       MOTIVOS
+       ========================= -->
+
+  <div class="card">
+
+    <h2 class="card-title">
+      Motivos de la devolución
+    </h2>
+
+
+    <div
+      class="form-group search-container">
+
+      <label for="buscarMotivo">
+
+        Buscar y agregar motivo
+
+      </label>
+
+
+      <svg
+        class="search-icon"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round">
+
+        <circle
+          cx="11"
+          cy="11"
+          r="8">
+        </circle>
+
+        <line
+          x1="21"
+          y1="21"
+          x2="16.65"
+          y2="16.65">
+        </line>
+
+      </svg>
+
+
+      <input
+        type="text"
+        id="buscarMotivo"
+        placeholder="Escriba para buscar un motivo..."
+        autocomplete="off">
+
+
+      <div
+        id="listaSugerencias"
+        class="suggestions-list">
+      </div>
+
+    </div>
+
+
+    <!-- TABLA -->
+
+    <div class="table-wrapper">
+
+      <table id="tablaMotivos">
+
+        <thead>
+
+          <tr>
+
+            <th style="width:50px;">
+              #
+            </th>
+
+            <th>
+              Motivo
+            </th>
+
+            <th>
+              Observación del Motivo
+            </th>
+
+            <th style="width:100px;">
+              Acción
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody id="bodyMotivos">
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       BOTONES
+       ========================= -->
+
+  <div class="card">
+
+    <div class="btn-container">
+
+      <button
+        id="btnGuardar"
+        class="btn btn-save-pdf"
+        onclick="guardarYExportarPDF()">
+
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round">
+
+          <path
+            d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4">
+          </path>
+
+          <polyline
+            points="7 10 12 15 17 10">
+          </polyline>
+
+          <line
+            x1="12"
+            y1="15"
+            x2="12"
+            y2="3">
+          </line>
+
+        </svg>
+
+        Guardar y Exportar PDF
+
+      </button>
+
+
+      <button
+        class="btn btn-clear"
+        onclick="limpiarFormulario()">
+
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round">
+
+          <polyline
+            points="3 6 5 6 21 6">
+          </polyline>
+
+          <path
+            d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6">
+          </path>
+
+        </svg>
+
+        Limpiar
+
+      </button>
+
+    </div>
+
+
+    <div
+      id="mensajeStatus"
+      class="status-msg">
+    </div>
 
   </div>
 
 </div>
+
 
 <script>
 
 /* =========================================================
-   CONFIGURACIÓN
+   URL DEFINITIVA DE LA WEB APP
    ========================================================= */
 
 const API_URL =
-"https://script.google.com/macros/s/AKfycbz0drxHb69aZ2EiajQOM5ObodCUNKIDxsXuJL_a182JNUA2iIcXlgpPMX4iSrhfBegjuA/exec";
+  "https://script.google.com/macros/s/AKfycbxSfqEoua_AMn4s5Wv1iXsc55vNoyA8jUo-pb5XY19ruNj3BcMpGS82Sg1dRZw6ycleag/exec";
 
 
 /* =========================================================
@@ -528,115 +1062,143 @@ const API_URL =
    ========================================================= */
 
 let listaMotivosBase = [];
+
 let motivosAgregados = [];
+
+let cargando = false;
 
 
 /* =========================================================
    JSONP
    ========================================================= */
 
-function requestJSONP(action, params = {}, timeout = 20000) {
+function requestJSONP(action, params = {}) {
 
   return new Promise((resolve, reject) => {
 
     const callbackName =
-      "jsonp_callback_" +
+      "jsonp_cb_" +
       Date.now() +
       "_" +
-      Math.floor(Math.random() * 100000);
+      Math.floor(
+        Math.random() * 100000
+      );
+
 
     let terminado = false;
 
-    const script = document.createElement("script");
 
-    const limpiar = () => {
+    function finalizar() {
 
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
+      if (terminado) {
+        return;
       }
-
-      try {
-        delete window[callbackName];
-      } catch(e) {
-        window[callbackName] = undefined;
-      }
-
-      clearTimeout(timer);
-    };
-
-
-    window[callbackName] = function(data) {
-
-      if (terminado) return;
 
       terminado = true;
 
-      limpiar();
+      try {
+        delete window[callbackName];
+      } catch (e) {}
 
-      resolve(data);
+      const script =
+        document.getElementById(
+          callbackName
+        );
 
-    };
+      if (script) {
+        script.remove();
+      }
+
+      if (timer) {
+        clearTimeout(timer);
+      }
+
+    }
 
 
-    let url =
-      API_URL +
+    window[callbackName] =
+      function(data) {
+
+        finalizar();
+
+        resolve(data);
+
+      };
+
+
+    let query =
       "?action=" +
       encodeURIComponent(action) +
       "&callback=" +
       encodeURIComponent(callbackName);
 
 
-    Object.keys(params).forEach(function(key) {
+    Object.keys(params).forEach(
+      function(key) {
 
-      url +=
-        "&" +
-        encodeURIComponent(key) +
-        "=" +
-        encodeURIComponent(params[key]);
+        query +=
+          "&" +
+          encodeURIComponent(key) +
+          "=" +
+          encodeURIComponent(
+            params[key]
+          );
 
-    });
+      }
+    );
 
 
-    script.src = url;
+    const script =
+      document.createElement("script");
+
+
+    script.id = callbackName;
+
+
+    script.src =
+      API_URL + query;
+
 
     script.async = true;
 
 
-    script.onerror = function() {
+    script.onerror =
+      function() {
 
-      if (terminado) return;
+        finalizar();
 
-      terminado = true;
+        reject(
+          new Error(
+            "No fue posible conectar con Google Apps Script. " +
+            "Verifique que la implementación esté activa y tenga acceso para cualquier persona."
+          )
+        );
 
-      limpiar();
-
-      reject(
-        new Error(
-          "No fue posible conectar con Google Apps Script."
-        )
-      );
-
-    };
-
-
-    const timer = setTimeout(function() {
-
-      if (terminado) return;
-
-      terminado = true;
-
-      limpiar();
-
-      reject(
-        new Error(
-          "Tiempo de espera agotado al conectar con Google Apps Script."
-        )
-      );
-
-    }, timeout);
+      };
 
 
     document.body.appendChild(script);
+
+
+    const timer =
+      setTimeout(
+        function() {
+
+          if (terminado) {
+            return;
+          }
+
+          finalizar();
+
+          reject(
+            new Error(
+              "Tiempo de espera agotado al conectar con Google Apps Script."
+            )
+          );
+
+        },
+        15000
+      );
 
   });
 
@@ -647,105 +1209,118 @@ function requestJSONP(action, params = {}, timeout = 20000) {
    INICIO
    ========================================================= */
 
-document.addEventListener(
-  "DOMContentLoaded",
-  iniciarSistema
-);
+async function init() {
 
-
-async function iniciarSistema() {
-
-  mostrarEstadoAPI(
-    "Conectando con Google Apps Script...",
-    "info"
+  mostrarEstadoConexion(
+    false,
+    "Conectando con Google Apps Script..."
   );
+
 
   try {
 
-    const respuesta =
+    const res =
+      await requestJSONP(
+        "ping"
+      );
+
+
+    if (!res || !res.ok) {
+
+      throw new Error(
+        res && res.error
+          ? res.error
+          : "La API no respondió correctamente."
+      );
+
+    }
+
+
+    mostrarEstadoConexion(
+      true,
+      "Conexión con Google Apps Script establecida."
+    );
+
+
+    const datos =
       await requestJSONP(
         "getInitialData"
       );
 
 
-    console.log(
-      "Respuesta getInitialData:",
-      respuesta
-    );
-
-
-    if (!respuesta) {
+    if (!datos || !datos.ok) {
 
       throw new Error(
-        "Google Apps Script no devolvió datos."
+        datos && datos.error
+          ? datos.error
+          : "No fue posible obtener los datos iniciales."
       );
 
     }
-
-
-    if (!respuesta.ok) {
-
-      throw new Error(
-        respuesta.error ||
-        "Google Apps Script devolvió un error."
-      );
-
-    }
-
-
-    listaMotivosBase =
-      Array.isArray(respuesta.motivos)
-        ? respuesta.motivos
-        : [];
 
 
     cargarFuncionarios(
-      Array.isArray(respuesta.funcionarios)
-        ? respuesta.funcionarios
-        : []
+      datos.funcionarios || []
     );
+
+
+    listaMotivosBase =
+      Array.isArray(datos.motivos)
+        ? datos.motivos
+        : [];
 
 
     renderizarTablaMotivos();
 
 
-    mostrarEstadoAPI(
-      "✓ Conectado correctamente con Google Apps Script.",
-      "success"
-    );
+    if (
+      datos.funcionarios &&
+      datos.funcionarios.length > 0
+    ) {
 
+      mostrarEstadoConexion(
+        true,
+        "Conectado. Funcionarios y motivos cargados correctamente."
+      );
 
-    console.log(
-      "Funcionarios:",
-      respuesta.funcionarios
-    );
+    } else {
 
-    console.log(
-      "Motivos:",
-      respuesta.motivos
-    );
+      mostrarEstadoConexion(
+        true,
+        "Conectado, pero no se encontraron funcionarios en la hoja FUNCIONARIOS."
+      );
+
+    }
 
   }
-
-  catch(error) {
+  catch (error) {
 
     console.error(
-      "Error de conexión:",
+      "ERROR DE CONEXIÓN:",
       error
     );
 
 
-    mostrarEstadoAPI(
-      "✕ " + error.message,
-      "error"
+    mostrarEstadoConexion(
+      false,
+      error.message
     );
 
 
     mostrarMensaje(
-      error.message +
-      " Verifique que la implementación de Apps Script esté activa.",
+      error.message,
       true
     );
+
+
+    const select =
+      document.getElementById(
+        "funcionario"
+      );
+
+
+    select.innerHTML =
+      '<option value="">No se pudieron cargar los funcionarios</option>';
 
   }
 
@@ -756,7 +1331,9 @@ async function iniciarSistema() {
    CARGAR FUNCIONARIOS
    ========================================================= */
 
-function cargarFuncionarios(lista) {
+function cargarFuncionarios(
+  funcionarios
+) {
 
   const select =
     document.getElementById(
@@ -764,18 +1341,24 @@ function cargarFuncionarios(lista) {
     );
 
 
-  select.innerHTML = "";
+  select.innerHTML =
+    "";
 
 
   const opcionInicial =
-    document.createElement("option");
+    document.createElement(
+      "option"
+    );
 
-  opcionInicial.value = "";
+
+  opcionInicial.value =
+    "";
+
 
   opcionInicial.textContent =
-    lista.length > 0
+    funcionarios.length > 0
       ? "Seleccione funcionario..."
-      : "No hay funcionarios registrados";
+      : "No hay funcionarios";
 
 
   select.appendChild(
@@ -783,20 +1366,79 @@ function cargarFuncionarios(lista) {
   );
 
 
-  lista.forEach(function(funcionario) {
+  funcionarios.forEach(
+    function(funcionario) {
 
-    const opcion =
-      document.createElement("option");
+      const option =
+        document.createElement(
+          "option"
+        );
 
-    opcion.value = funcionario;
 
-    opcion.textContent = funcionario;
+      option.value =
+        funcionario;
 
-    select.appendChild(
-      opcion
+
+      option.textContent =
+        funcionario;
+
+
+      select.appendChild(
+        option
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   ESTADO DE CONEXIÓN
+   ========================================================= */
+
+function mostrarEstadoConexion(
+  conectado,
+  mensaje
+) {
+
+  const dot =
+    document.getElementById(
+      "connectionDot"
     );
 
-  });
+
+  const text =
+    document.getElementById(
+      "connectionText"
+    );
+
+
+  if (conectado) {
+
+    dot.classList.add(
+      "connection-ok"
+    );
+
+    dot.classList.remove(
+      "connection-error"
+    );
+
+  } else {
+
+    dot.classList.add(
+      "connection-error"
+    );
+
+    dot.classList.remove(
+      "connection-ok"
+    );
+
+  }
+
+
+  text.textContent =
+    mensaje;
 
 }
 
@@ -827,7 +1469,8 @@ inputBuscar.addEventListener(
         .trim();
 
 
-    cajaSugerencias.innerHTML = "";
+    cajaSugerencias.innerHTML =
+      "";
 
 
     if (!texto) {
@@ -852,7 +1495,9 @@ inputBuscar.addEventListener(
       );
 
 
-    if (filtrados.length === 0) {
+    if (
+      filtrados.length === 0
+    ) {
 
       cajaSugerencias.style.display =
         "none";
@@ -870,22 +1515,24 @@ inputBuscar.addEventListener(
             "div"
           );
 
+
         div.className =
-          "suggestion";
+          "suggestion-item";
+
 
         div.textContent =
           motivo;
 
-        div.addEventListener(
-          "click",
+
+        div.onclick =
           function() {
 
             seleccionarMotivo(
               motivo
             );
 
-          }
-        );
+          };
+
 
         cajaSugerencias.appendChild(
           div
@@ -906,18 +1553,52 @@ inputBuscar.addEventListener(
    SELECCIONAR MOTIVO
    ========================================================= */
 
-function seleccionarMotivo(motivo) {
+function seleccionarMotivo(
+  motivo
+) {
+
+  const existe =
+    motivosAgregados.some(
+      function(item) {
+
+        return item.motivo === motivo;
+
+      }
+    );
+
+
+  if (existe) {
+
+    mostrarMensaje(
+      "Ese motivo ya fue agregado.",
+      true
+    );
+
+    inputBuscar.value =
+      "";
+
+    cajaSugerencias.style.display =
+      "none";
+
+    return;
+
+  }
+
 
   motivosAgregados.push({
 
-    motivo: motivo,
+    motivo:
+      motivo,
 
-    observacion: ""
+    observacion:
+      ""
 
   });
 
 
-  inputBuscar.value = "";
+  inputBuscar.value =
+    "";
+
 
   cajaSugerencias.style.display =
     "none";
@@ -929,7 +1610,7 @@ function seleccionarMotivo(motivo) {
 
 
 /* =========================================================
-   TABLA MOTIVOS
+   TABLA DE MOTIVOS
    ========================================================= */
 
 function renderizarTablaMotivos() {
@@ -940,7 +1621,8 @@ function renderizarTablaMotivos() {
     );
 
 
-  tbody.innerHTML = "";
+  tbody.innerHTML =
+    "";
 
 
   if (
@@ -948,19 +1630,29 @@ function renderizarTablaMotivos() {
   ) {
 
     const tr =
-      document.createElement("tr");
+      document.createElement(
+        "tr"
+      );
 
 
-    tr.innerHTML =
-      `
-      <td colspan="4" class="empty">
+    tr.innerHTML = `
+
+      <td
+        colspan="4"
+        class="empty-state">
+
         No hay motivos agregados.
         Busque arriba para añadir uno.
+
       </td>
-      `;
+
+    `;
 
 
-    tbody.appendChild(tr);
+    tbody.appendChild(
+      tr
+    );
+
 
     return;
 
@@ -968,40 +1660,64 @@ function renderizarTablaMotivos() {
 
 
   motivosAgregados.forEach(
-    function(item,index) {
+    function(item, index) {
 
       const tr =
-        document.createElement("tr");
+        document.createElement(
+          "tr"
+        );
 
 
       const tdNumero =
-        document.createElement("td");
+        document.createElement(
+          "td"
+        );
+
 
       tdNumero.textContent =
         index + 1;
 
 
+      tdNumero.style.color =
+        "var(--gray-500)";
+
+
       const tdMotivo =
-        document.createElement("td");
+        document.createElement(
+          "td"
+        );
+
 
       tdMotivo.textContent =
         item.motivo;
 
 
+      tdMotivo.style.fontWeight =
+        "500";
+
+
       const tdObservacion =
-        document.createElement("td");
+        document.createElement(
+          "td"
+        );
 
 
       const input =
-        document.createElement("input");
+        document.createElement(
+          "input"
+        );
 
-      input.type = "text";
+
+      input.type =
+        "text";
+
 
       input.placeholder =
         "Observación específica...";
 
+
       input.value =
-        item.observacion;
+        item.observacion || "";
 
 
       input.addEventListener(
@@ -1010,7 +1726,7 @@ function renderizarTablaMotivos() {
 
           motivosAgregados[index]
             .observacion =
-            this.value;
+              this.value;
 
         }
       );
@@ -1022,7 +1738,9 @@ function renderizarTablaMotivos() {
 
 
       const tdAccion =
-        document.createElement("td");
+        document.createElement(
+          "td"
+        );
 
 
       const boton =
@@ -1030,21 +1748,23 @@ function renderizarTablaMotivos() {
           "button"
         );
 
+
       boton.className =
-        "btn-danger";
+        "btn-delete";
+
 
       boton.textContent =
         "Quitar";
 
 
-      boton.addEventListener(
-        "click",
+      boton.onclick =
         function() {
 
-          eliminarMotivo(index);
+          eliminarMotivo(
+            index
+          );
 
-        }
-      );
+        };
 
 
       tdAccion.appendChild(
@@ -1052,16 +1772,29 @@ function renderizarTablaMotivos() {
       );
 
 
-      tr.appendChild(tdNumero);
-
-      tr.appendChild(tdMotivo);
-
-      tr.appendChild(tdObservacion);
-
-      tr.appendChild(tdAccion);
+      tr.appendChild(
+        tdNumero
+      );
 
 
-      tbody.appendChild(tr);
+      tr.appendChild(
+        tdMotivo
+      );
+
+
+      tr.appendChild(
+        tdObservacion
+      );
+
+
+      tr.appendChild(
+        tdAccion
+      );
+
+
+      tbody.appendChild(
+        tr
+      );
 
     }
   );
@@ -1073,12 +1806,15 @@ function renderizarTablaMotivos() {
    ELIMINAR MOTIVO
    ========================================================= */
 
-function eliminarMotivo(index) {
+function eliminarMotivo(
+  index
+) {
 
   motivosAgregados.splice(
     index,
     1
   );
+
 
   renderizarTablaMotivos();
 
@@ -1086,10 +1822,15 @@ function eliminarMotivo(index) {
 
 
 /* =========================================================
-   GUARDAR
+   GUARDAR Y GENERAR PDF
    ========================================================= */
 
 async function guardarYExportarPDF() {
+
+  if (cargando) {
+    return;
+  }
+
 
   const funcionario =
     document.getElementById(
@@ -1118,7 +1859,7 @@ async function guardarYExportarPDF() {
   if (!funcionario) {
 
     mostrarMensaje(
-      "Debe seleccionar un funcionario.",
+      "Seleccione un funcionario.",
       true
     );
 
@@ -1130,7 +1871,7 @@ async function guardarYExportarPDF() {
   if (!documento) {
 
     mostrarMensaje(
-      "Debe ingresar el documento.",
+      "Ingrese el documento.",
       true
     );
 
@@ -1142,7 +1883,21 @@ async function guardarYExportarPDF() {
   if (!ciudadano) {
 
     mostrarMensaje(
-      "Debe ingresar el ciudadano.",
+      "Ingrese el ciudadano.",
+      true
+    );
+
+    return;
+
+  }
+
+
+  if (
+    motivosAgregados.length === 0
+  ) {
+
+    mostrarMensaje(
+      "Debe agregar al menos un motivo de devolución.",
       true
     );
 
@@ -1175,13 +1930,18 @@ async function guardarYExportarPDF() {
   };
 
 
+  cargando =
+    true;
+
+
   const boton =
     document.getElementById(
       "btnGuardar"
     );
 
 
-  boton.disabled = true;
+  boton.disabled =
+    true;
 
 
   mostrarMensaje(
@@ -1193,7 +1953,7 @@ async function guardarYExportarPDF() {
 
   try {
 
-    const respuesta =
+    const resGuardar =
       await requestJSONP(
         "guardarDevolucion",
         {
@@ -1201,26 +1961,19 @@ async function guardarYExportarPDF() {
             JSON.stringify(
               payload
             )
-        },
-        30000
+        }
       );
 
 
-    console.log(
-      "Respuesta guardado:",
-      respuesta
-    );
-
-
     if (
-      !respuesta ||
-      !respuesta.ok
+      !resGuardar ||
+      !resGuardar.ok
     ) {
 
       throw new Error(
-        respuesta &&
-        respuesta.error
-          ? respuesta.error
+        resGuardar &&
+        resGuardar.error
+          ? resGuardar.error
           : "No se pudo guardar la devolución."
       );
 
@@ -1228,7 +1981,7 @@ async function guardarYExportarPDF() {
 
 
     const consecutivo =
-      respuesta.id;
+      resGuardar.id;
 
 
     mostrarMensaje(
@@ -1240,76 +1993,45 @@ async function guardarYExportarPDF() {
     );
 
 
-    const respuestaPDF =
+    const resPDF =
       await requestJSONP(
         "generarPDF",
         {
           id:
             consecutivo
-        },
-        60000
+        }
       );
 
 
     if (
-      !respuestaPDF ||
-      !respuestaPDF.ok
+      !resPDF ||
+      !resPDF.ok ||
+      !resPDF.base64
     ) {
 
       throw new Error(
-        respuestaPDF &&
-        respuestaPDF.error
-          ? respuestaPDF.error
-          : "La devolución fue guardada, pero no se pudo generar el PDF."
+        resPDF &&
+        resPDF.error
+          ? resPDF.error
+          : "La devolución fue guardada, pero no fue posible generar el PDF."
       );
 
     }
 
 
-    if (
-      !respuestaPDF.base64
-    ) {
-
-      throw new Error(
-        "Google Apps Script no devolvió el archivo PDF."
-      );
-
-    }
-
-
-    const enlace =
-      document.createElement(
-        "a"
-      );
-
-
-    enlace.href =
-      "data:application/pdf;base64," +
-      respuestaPDF.base64;
-
-
-    enlace.download =
-      respuestaPDF.filename ||
+    descargarPDF(
+      resPDF.base64,
+      resPDF.filename ||
       (
         "Devolucion_" +
         consecutivo +
         ".pdf"
-      );
-
-
-    document.body.appendChild(
-      enlace
+      )
     );
 
 
-    enlace.click();
-
-
-    enlace.remove();
-
-
     mostrarMensaje(
-      "✓ Devolución N° " +
+      "Devolución N° " +
       consecutivo +
       " guardada y PDF generado correctamente.",
       false
@@ -1317,8 +2039,7 @@ async function guardarYExportarPDF() {
 
 
   }
-
-  catch(error) {
+  catch (error) {
 
     console.error(
       error
@@ -1331,10 +2052,122 @@ async function guardarYExportarPDF() {
     );
 
   }
-
   finally {
 
-    boton.disabled = false;
+    cargando =
+      false;
+
+    boton.disabled =
+      false;
+
+  }
+
+}
+
+
+/* =========================================================
+   DESCARGAR PDF
+   ========================================================= */
+
+function descargarPDF(
+  base64,
+  filename
+) {
+
+  try {
+
+    const byteCharacters =
+      atob(base64);
+
+
+    const byteNumbers =
+      new Array(
+        byteCharacters.length
+      );
+
+
+    for (
+      let i = 0;
+      i < byteCharacters.length;
+      i++
+    ) {
+
+      byteNumbers[i] =
+        byteCharacters.charCodeAt(
+          i
+        );
+
+    }
+
+
+    const byteArray =
+      new Uint8Array(
+        byteNumbers
+      );
+
+
+    const blob =
+      new Blob(
+        [byteArray],
+        {
+          type:
+            "application/pdf"
+        }
+      );
+
+
+    const url =
+      URL.createObjectURL(
+        blob
+      );
+
+
+    const link =
+      document.createElement(
+        "a"
+      );
+
+
+    link.href =
+      url;
+
+
+    link.download =
+      filename;
+
+
+    document.body.appendChild(
+      link
+    );
+
+
+    link.click();
+
+
+    link.remove();
+
+
+    setTimeout(
+      function() {
+
+        URL.revokeObjectURL(
+          url
+        );
+
+      },
+      1000
+    );
+
+  }
+  catch (error) {
+
+    console.error(
+      error
+    );
+
+    throw new Error(
+      "No fue posible descargar el PDF."
+    );
 
   }
 
@@ -1349,36 +2182,116 @@ function limpiarFormulario() {
 
   document.getElementById(
     "funcionario"
-  ).value = "";
+  ).value =
+    "";
 
 
   document.getElementById(
     "placa"
-  ).value = "";
+  ).value =
+    "";
 
 
   document.getElementById(
     "documento"
-  ).value = "";
+  ).value =
+    "";
 
 
   document.getElementById(
     "ciudadano"
-  ).value = "";
+  ).value =
+    "";
 
 
-  inputBuscar.value = "";
+  document.getElementById(
+    "buscarMotivo"
+  ).value =
+    "";
 
 
-  cajaSugerencias.style.display =
-    "none";
-
-
-  motivosAgregados = [];
+  motivosAgregados =
+    [];
 
 
   renderizarTablaMotivos();
 
+
+  ocultarMensaje();
+
+}
+
+
+/* =========================================================
+   MENSAJES
+   ========================================================= */
+
+function mostrarMensaje(
+  msg,
+  esError = false,
+  loading = false
+) {
+
+  const box =
+    document.getElementById(
+      "mensajeStatus"
+    );
+
+
+  box.innerHTML =
+    "";
+
+
+  if (loading) {
+
+    const spinner =
+      document.createElement(
+        "span"
+      );
+
+
+    spinner.className =
+      "spinner";
+
+
+    box.appendChild(
+      spinner
+    );
+
+  }
+
+
+  const span =
+    document.createElement(
+      "span"
+    );
+
+
+  span.textContent =
+    msg;
+
+
+  box.appendChild(
+    span
+  );
+
+
+  box.className =
+    "status-msg " +
+    (
+      esError
+        ? "status-error"
+        : "status-success"
+    );
+
+
+  box.style.display =
+    "flex";
+
+}
+
+
+function ocultarMensaje() {
 
   document.getElementById(
     "mensajeStatus"
@@ -1389,98 +2302,15 @@ function limpiarFormulario() {
 
 
 /* =========================================================
-   MENSAJES
-   ========================================================= */
-
-function mostrarMensaje(
-  mensaje,
-  error = false,
-  cargando = false
-) {
-
-  const box =
-    document.getElementById(
-      "mensajeStatus"
-    );
-
-
-  box.className =
-    "status " +
-    (
-      error
-        ? "error"
-        : "success"
-    );
-
-
-  box.innerHTML =
-    (
-      cargando
-        ? '<span class="loading"></span>'
-        : ""
-    ) +
-    mensaje;
-
-
-  box.style.display =
-    "block";
-
-}
-
-
-/* =========================================================
-   ESTADO API
-   ========================================================= */
-
-function mostrarEstadoAPI(
-  mensaje,
-  tipo
-) {
-
-  const elemento =
-    document.getElementById(
-      "apiStatus"
-    );
-
-
-  elemento.textContent =
-    mensaje;
-
-
-  if (tipo === "error") {
-
-    elemento.style.color =
-      "#dc2626";
-
-  }
-
-  else if (tipo === "success") {
-
-    elemento.style.color =
-      "#16a34a";
-
-  }
-
-  else {
-
-    elemento.style.color =
-      "#6b7280";
-
-  }
-
-}
-
-
-/* =========================================================
    CERRAR SUGERENCIAS
    ========================================================= */
 
 document.addEventListener(
   "click",
-  function(event) {
+  function(e) {
 
     if (
-      !event.target.closest(
+      !e.target.closest(
         ".search-container"
       )
     ) {
@@ -1519,6 +2349,20 @@ document.getElementById(
 
     this.value =
       this.value.toUpperCase();
+
+  }
+);
+
+
+/* =========================================================
+   INICIAR
+   ========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function() {
+
+    init();
 
   }
 );
