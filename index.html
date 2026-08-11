@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="es">
 
@@ -12,33 +11,78 @@
 
   <meta
     name="description"
-    content="Sistema Maestro-Detalle de Devoluciones - Secretaría de Movilidad"
+    content="Sistema Maestro-Detalle de Devoluciones - Secretaría de Movilidad - La Ceja del Tambo"
   >
 
-  <title>DEVOLUCIÓN DE TRÁMITES</title>
+  <title>
+    DEVOLUCIÓN DE TRÁMITES
+  </title>
 
   <style>
+
+    /* =========================================================
+       RESET
+       ========================================================= */
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
+    html,
     body {
-      font-family: Arial, Helvetica, sans-serif;
-      background: #f2f4f7;
-      color: #1f2937;
-      min-height: 100vh;
+      min-height: 100%;
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
     }
+
+    body {
+      padding: 20px;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font-family: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    /* =========================================================
+       CONTENEDOR
+       ========================================================= */
+
+    .container {
+      max-width: 1250px;
+      margin: 0 auto;
+    }
+
+    /* =========================================================
+       ENCABEZADO
+       ========================================================= */
 
     .header {
       background: #ffffff;
-      border-bottom: 1px solid #d9dee5;
-      padding: 18px 30px;
+      border-radius: 14px;
+      padding: 20px 25px;
+      margin-bottom: 20px;
+      box-shadow:
+        0 4px 18px rgba(15, 23, 42, 0.08);
+
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 20px;
+
+      border-left: 6px solid #0f766e;
     }
 
     .header-left {
@@ -48,109 +92,154 @@
     }
 
     .logo {
-      width: 70px;
-      height: 70px;
+      width: 75px;
+      height: 75px;
       object-fit: contain;
+      border-radius: 8px;
     }
 
     .header-title h1 {
       font-size: 24px;
-      color: #163a63;
+      color: #0f172a;
       margin-bottom: 5px;
     }
 
+    .header-title h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0f766e;
+      margin-bottom: 4px;
+    }
+
     .header-title p {
-      font-size: 14px;
-      color: #667085;
-    }
-
-    .status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
       font-size: 13px;
-      color: #667085;
+      color: #64748b;
     }
 
-    .status-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #98a2b3;
+    /* =========================================================
+       ESTADO API
+       ========================================================= */
+
+    .api-status {
+      min-width: 210px;
+      text-align: center;
+      padding: 10px 15px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: bold;
+      background: #fef3c7;
+      color: #92400e;
     }
 
-    .status-dot.online {
-      background: #12b76a;
+    .api-status.ok {
+      background: #dcfce7;
+      color: #166534;
     }
 
-    .status-dot.error {
-      background: #f04438;
+    .api-status.error {
+      background: #fee2e2;
+      color: #991b1b;
     }
 
-    .container {
-      width: min(1400px, 96%);
-      margin: 24px auto;
+    .api-status.loading {
+      background: #dbeafe;
+      color: #1d4ed8;
     }
+
+    /* =========================================================
+       TARJETAS
+       ========================================================= */
 
     .card {
       background: #ffffff;
-      border: 1px solid #e4e7ec;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(16, 24, 40, 0.05);
+      border-radius: 14px;
       margin-bottom: 20px;
-      overflow: hidden;
+      padding: 22px;
+      box-shadow:
+        0 4px 18px rgba(15, 23, 42, 0.07);
     }
 
-    .card-header {
-      background: #163a63;
-      color: #ffffff;
-      padding: 14px 18px;
-      font-size: 16px;
-      font-weight: bold;
-    }
-
-    .card-body {
-      padding: 20px;
-    }
-
-    .toolbar {
+    .card-title {
       display: flex;
-      flex-wrap: wrap;
-      align-items: end;
-      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+
+      border-bottom: 1px solid #e2e8f0;
     }
 
-    .field {
+    .card-title h3 {
+      font-size: 18px;
+      color: #0f172a;
+    }
+
+    /* =========================================================
+       GRID
+       ========================================================= */
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid-2 {
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+    }
+
+    .grid-3 {
+      grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+    }
+
+    .grid-4 {
+      grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+    }
+
+    /* =========================================================
+       FORMULARIOS
+       ========================================================= */
+
+    .form-group {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 7px;
     }
 
-    .field label {
+    .form-group label {
       font-size: 13px;
       font-weight: bold;
-      color: #344054;
+      color: #334155;
+    }
+
+    .required {
+      color: #dc2626;
     }
 
     input,
     select,
     textarea {
       width: 100%;
-      border: 1px solid #d0d5dd;
-      border-radius: 6px;
-      padding: 10px 12px;
-      font-family: inherit;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 11px 12px;
       font-size: 14px;
+      color: #0f172a;
       background: #ffffff;
-      color: #101828;
       outline: none;
+      transition: 0.2s;
     }
 
     input:focus,
     select:focus,
     textarea:focus {
-      border-color: #2e75b6;
-      box-shadow: 0 0 0 3px rgba(46, 117, 182, 0.12);
+      border-color: #0f766e;
+      box-shadow:
+        0 0 0 3px rgba(15, 118, 110, 0.12);
     }
 
     textarea {
@@ -158,239 +247,198 @@
       min-height: 90px;
     }
 
-    .search-field {
-      flex: 1 1 280px;
+    .uppercase {
+      text-transform: uppercase;
     }
 
-    .button-group {
+    /* =========================================================
+       BOTONES
+       ========================================================= */
+
+    .actions {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 10px;
+      margin-top: 20px;
     }
 
-    button {
-      border: 0;
-      border-radius: 6px;
-      padding: 10px 16px;
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 11px 17px;
       font-size: 14px;
       font-weight: bold;
-      cursor: pointer;
-      transition: 0.15s ease;
+      transition: 0.2s;
     }
 
-    button:hover {
+    .btn:hover {
       transform: translateY(-1px);
-      opacity: 0.95;
-    }
-
-    button:disabled {
-      cursor: not-allowed;
-      opacity: 0.55;
-      transform: none;
+      opacity: 0.92;
     }
 
     .btn-primary {
-      background: #163a63;
-      color: #ffffff;
+      background: #0f766e;
+      color: white;
     }
 
     .btn-secondary {
-      background: #667085;
-      color: #ffffff;
+      background: #475569;
+      color: white;
     }
 
     .btn-success {
-      background: #12b76a;
-      color: #ffffff;
+      background: #15803d;
+      color: white;
     }
 
     .btn-danger {
-      background: #d92d20;
-      color: #ffffff;
+      background: #dc2626;
+      color: white;
+    }
+
+    .btn-warning {
+      background: #d97706;
+      color: white;
+    }
+
+    .btn-info {
+      background: #2563eb;
+      color: white;
     }
 
     .btn-light {
-      background: #eef2f6;
-      color: #344054;
-      border: 1px solid #d0d5dd;
+      background: #e2e8f0;
+      color: #334155;
     }
 
-    .table-container {
+    .btn-small {
+      padding: 7px 10px;
+      font-size: 12px;
+    }
+
+    /* =========================================================
+       TABLA DETALLE
+       ========================================================= */
+
+    .table-wrapper {
+      width: 100%;
       overflow-x: auto;
-      border: 1px solid #e4e7ec;
-      border-radius: 8px;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 900px;
+      min-width: 650px;
     }
 
-    th,
-    td {
-      border-bottom: 1px solid #eaecf0;
-      padding: 10px 12px;
+    th {
+      background: #0f766e;
+      color: #ffffff;
+      padding: 11px;
       text-align: left;
+      font-size: 13px;
+    }
+
+    td {
+      border-bottom: 1px solid #e2e8f0;
+      padding: 10px;
       font-size: 13px;
       vertical-align: middle;
     }
 
-    th {
-      background: #f8f9fb;
-      color: #344054;
-      font-weight: bold;
-      position: sticky;
-      top: 0;
-      z-index: 1;
-    }
-
-    tbody tr {
-      cursor: pointer;
-    }
-
     tbody tr:hover {
-      background: #f5f9ff;
+      background: #f8fafc;
     }
 
-    tbody tr.selected {
-      background: #eaf3ff;
-    }
-
-    .empty {
-      padding: 35px 20px;
+    .empty-row {
       text-align: center;
-      color: #667085;
-      font-size: 14px;
+      color: #64748b;
+      padding: 25px;
     }
 
-    .detail-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
+    /* =========================================================
+       TABLA DEVOLUCIONES
+       ========================================================= */
+
+    .search-box {
+      max-width: 350px;
     }
 
-    .detail-grid .full {
-      grid-column: 1 / -1;
+    .table-main td:first-child {
+      font-weight: bold;
+      color: #0f766e;
     }
 
-    .detail-box {
-      background: #f8f9fb;
-      border: 1px solid #eaecf0;
-      border-radius: 6px;
-      padding: 11px 12px;
-    }
+    /* =========================================================
+       BADGES
+       ========================================================= */
 
-    .detail-box label {
-      display: block;
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 20px;
       font-size: 11px;
       font-weight: bold;
-      text-transform: uppercase;
-      color: #667085;
-      margin-bottom: 5px;
     }
 
-    .detail-box .value {
-      min-height: 18px;
-      font-size: 14px;
-      color: #101828;
-      word-break: break-word;
+    .badge-green {
+      background: #dcfce7;
+      color: #166534;
     }
 
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
+    .badge-blue {
+      background: #dbeafe;
+      color: #1d4ed8;
     }
 
-    .form-grid .full {
-      grid-column: 1 / -1;
-    }
+    /* =========================================================
+       ALERTAS
+       ========================================================= */
 
-    .actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
-
-    .message {
-      display: none;
-      padding: 12px 15px;
-      border-radius: 6px;
+    .alert {
+      padding: 13px 15px;
+      border-radius: 8px;
       margin-bottom: 15px;
+      display: none;
       font-size: 14px;
     }
 
-    .message.show {
+    .alert.show {
       display: block;
     }
 
-    .message.success {
-      background: #ecfdf3;
-      border: 1px solid #abefc6;
-      color: #067647;
+    .alert-success {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #86efac;
     }
 
-    .message.error {
-      background: #fef3f2;
-      border: 1px solid #fecdca;
-      color: #b42318;
+    .alert-error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
     }
 
-    .message.info {
-      background: #eff8ff;
-      border: 1px solid #b2ddff;
-      color: #175cd3;
+    .alert-info {
+      background: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #93c5fd;
     }
 
-    .loading {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(16, 24, 40, 0.35);
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .loading.show {
-      display: flex;
-    }
-
-    .loading-box {
-      background: #ffffff;
-      padding: 25px 35px;
-      border-radius: 10px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-      text-align: center;
-    }
-
-    .spinner {
-      width: 35px;
-      height: 35px;
-      border: 4px solid #e4e7ec;
-      border-top-color: #163a63;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 12px;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
+    /* =========================================================
+       MODAL
+       ========================================================= */
 
     .modal {
       display: none;
       position: fixed;
+      z-index: 9999;
       inset: 0;
-      background: rgba(16, 24, 40, 0.45);
-      z-index: 9000;
+      background: rgba(15, 23, 42, 0.65);
+
       align-items: center;
       justify-content: center;
+
       padding: 20px;
     }
 
@@ -399,115 +447,184 @@
     }
 
     .modal-content {
-      width: min(650px, 100%);
+      width: 100%;
+      max-width: 850px;
       max-height: 90vh;
       overflow-y: auto;
+
       background: #ffffff;
-      border-radius: 10px;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+      border-radius: 14px;
+      padding: 25px;
+      box-shadow:
+        0 15px 50px rgba(0, 0, 0, 0.25);
     }
 
     .modal-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid #eaecf0;
       display: flex;
       align-items: center;
       justify-content: space-between;
+
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+
+      border-bottom: 1px solid #e2e8f0;
     }
 
     .modal-header h3 {
-      color: #163a63;
+      color: #0f172a;
     }
 
-    .modal-close {
+    .close {
+      border: none;
       background: transparent;
-      color: #667085;
-      font-size: 22px;
-      padding: 2px 8px;
+      font-size: 26px;
+      color: #64748b;
+      cursor: pointer;
     }
 
-    .modal-body {
-      padding: 20px;
-    }
+    /* =========================================================
+       LOADER
+       ========================================================= */
 
-    .pagination {
-      display: flex;
-      justify-content: space-between;
+    .loader {
+      display: none;
+      position: fixed;
+      z-index: 10000;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.75);
+
       align-items: center;
-      margin-top: 15px;
-      gap: 10px;
-      flex-wrap: wrap;
+      justify-content: center;
+      flex-direction: column;
+      gap: 15px;
     }
 
-    .pagination-info {
-      font-size: 13px;
-      color: #667085;
+    .loader.show {
+      display: flex;
     }
+
+    .spinner {
+      width: 45px;
+      height: 45px;
+      border: 5px solid #cbd5e1;
+      border-top-color: #0f766e;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loader-text {
+      font-weight: bold;
+      color: #334155;
+    }
+
+    /* =========================================================
+       DIAGNÓSTICO
+       ========================================================= */
+
+    .diagnostico {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      max-height: 300px;
+      overflow: auto;
+      display: none;
+    }
+
+    .diagnostico.show {
+      display: block;
+    }
+
+    /* =========================================================
+       FOOTER
+       ========================================================= */
 
     .footer {
       text-align: center;
-      padding: 20px;
-      color: #667085;
+      color: #64748b;
       font-size: 12px;
+      padding: 15px;
     }
 
-    .hidden {
-      display: none !important;
-    }
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
 
-    @media (max-width: 1000px) {
-      .detail-grid,
-      .form-grid {
-        grid-template-columns: repeat(2, 1fr);
+    @media (max-width: 900px) {
+
+      .grid-3,
+      .grid-4 {
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
       }
-    }
 
-    @media (max-width: 700px) {
       .header {
-        padding: 15px;
-        align-items: flex-start;
         flex-direction: column;
+        align-items: stretch;
       }
 
-      .header-title h1 {
-        font-size: 19px;
+      .api-status {
+        width: 100%;
       }
 
-      .container {
-        width: 98%;
-        margin: 12px auto;
+    }
+
+    @media (max-width: 650px) {
+
+      body {
+        padding: 10px;
       }
 
-      .card-body {
-        padding: 14px;
-      }
-
-      .detail-grid,
-      .form-grid {
+      .grid-2,
+      .grid-3,
+      .grid-4 {
         grid-template-columns: 1fr;
       }
 
-      .detail-grid .full,
-      .form-grid .full {
-        grid-column: auto;
+      .header-left {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .header-title h1 {
+        font-size: 20px;
+      }
+
+      .card {
+        padding: 15px;
       }
 
       .actions {
-        justify-content: stretch;
+        flex-direction: column;
       }
 
-      .actions button {
-        flex: 1;
+      .actions .btn {
+        width: 100%;
       }
+
     }
+
   </style>
+
 </head>
+
 
 <body>
 
-  <!-- =========================================================
+<div class="container">
+
+  <!-- ======================================================
        ENCABEZADO
-       ========================================================= -->
+       ====================================================== -->
 
   <header class="header">
 
@@ -521,958 +638,738 @@
       >
 
       <div class="header-title">
-        <h1>DEVOLUCIÓN DE TRÁMITES V_11_08</h1>
-        <p>Secretaría de Movilidad — La Ceja del Tambo</p>
+
+        <h1>
+          DEVOLUCIÓN DE TRÁMITES
+        </h1>
+
+        <h2>
+          Secretaría de Movilidad
+        </h2>
+
+        <p>
+          La Ceja del Tambo - Antioquia
+        </p>
+
       </div>
 
     </div>
 
-    <div class="status">
-      <span
-        id="statusDot"
-        class="status-dot"
-      ></span>
-
-      <span id="statusText">
-        Conectando...
-      </span>
+    <div
+      id="apiStatus"
+      class="api-status loading"
+    >
+      CONECTANDO CON API...
     </div>
 
   </header>
 
 
-  <main class="container">
-
-    <!-- =======================================================
-         MENSAJES
-         ======================================================= -->
-
-    <div
-      id="message"
-      class="message"
-    ></div>
-
-
-    <!-- =======================================================
-         CONSULTA / FILTROS
-         ======================================================= -->
-
-    <section class="card">
-
-      <div class="card-header">
-        CONSULTA DE DEVOLUCIONES
-      </div>
-
-      <div class="card-body">
-
-        <div class="toolbar">
-
-          <div class="field search-field">
-
-            <label for="searchInput">
-              Buscar
-            </label>
-
-            <input
-              type="text"
-              id="searchInput"
-              placeholder="Radicado, placa, documento, propietario..."
-              autocomplete="off"
-            >
-
-          </div>
-
-
-          <div class="field">
-
-            <label for="estadoFilter">
-              Estado
-            </label>
-
-            <select id="estadoFilter">
-
-              <option value="">
-                Todos
-              </option>
-
-            </select>
-
-          </div>
-
-
-          <div class="field">
-
-            <label for="tipoFilter">
-              Tipo
-            </label>
-
-            <select id="tipoFilter">
-
-              <option value="">
-                Todos
-              </option>
-
-            </select>
-
-          </div>
-
-
-          <div class="button-group">
-
-            <button
-              type="button"
-              class="btn-primary"
-              id="btnBuscar"
-            >
-              Buscar
-            </button>
-
-            <button
-              type="button"
-              class="btn-light"
-              id="btnLimpiar"
-            >
-              Limpiar
-            </button>
-
-            <button
-              type="button"
-              class="btn-secondary"
-              id="btnRecargar"
-            >
-              Recargar
-            </button>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- =======================================================
-         MAESTRO
-         ======================================================= -->
-
-    <section class="card">
-
-      <div class="card-header">
-        REGISTROS
-      </div>
-
-      <div class="card-body">
-
-        <div class="table-container">
-
-          <table id="masterTable">
-
-            <thead>
-              <tr>
-
-                <th>Consecutivo</th>
-                <th>Fecha</th>
-                <th>Radicado</th>
-                <th>Placa</th>
-                <th>Propietario</th>
-                <th>Trámite</th>
-                <th>Estado</th>
-                <th>Acción</th>
-
-              </tr>
-            </thead>
-
-            <tbody id="masterBody"></tbody>
-
-          </table>
-
-          <div
-            id="emptyMaster"
-            class="empty hidden"
-          >
-            No se encontraron registros.
-          </div>
-
-        </div>
-
-
-        <div class="pagination">
-
-          <div
-            id="paginationInfo"
-            class="pagination-info"
-          >
-            0 registros
-          </div>
-
-          <div class="button-group">
-
-            <button
-              type="button"
-              class="btn-light"
-              id="btnPrev"
-            >
-              ‹ Anterior
-            </button>
-
-            <button
-              type="button"
-              class="btn-light"
-              id="btnNext"
-            >
-              Siguiente ›
-            </button>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- =======================================================
-         DETALLE
-         ======================================================= -->
-
-    <section
-      class="card"
-      id="detailSection"
-    >
-
-      <div class="card-header">
-        DETALLE DEL TRÁMITE
-      </div>
-
-      <div class="card-body">
-
-        <div
-          id="detailEmpty"
-          class="empty"
-        >
-          Seleccione un registro para consultar su detalle.
-        </div>
-
-
-        <div
-          id="detailContent"
-          class="hidden"
-        >
-
-          <div class="detail-grid">
-
-            <div class="detail-box">
-              <label>Consecutivo</label>
-              <div
-                id="d_consecutivo"
-                class="value"
-              ></div>
-            </div>
-
-            <div class="detail-box">
-              <label>Fecha</label>
-              <div
-                id="d_fecha"
-                class="value"
-              ></div>
-            </div>
-
-            <div class="detail-box">
-              <label>Radicado</label>
-              <div
-                id="d_radicado"
-                class="value"
-              ></div>
-            </div>
-
-            <div class="detail-box">
-              <label>Estado</label>
-              <div
-                id="d_estado"
-                class="value"
-              ></div>
-            </div>
-
-            <div class="detail-box">
-              <label>Placa</label>
-              <div
-                id="d_placa"
-                class="value"
-              ></div>
-            </div>
-
-            <div class="detail-box">
-              <label>Documento</label>
-              <div
-                id="d_documento"
-                class="value"
-              ></div>
-            </div>
-
-            <div class="detail-box">
-              <label>Propietario</label>
-              <div
-                id="d_propietario"
-                class="value"
-              ></div>
-            </div>
-
-            <div class="detail-box">
-              <label>Trámite</label>
-              <div
-                id="d_tramite"
-                class="value"
-              ></div>
-            </div>
-
-            <div class="detail-box">
-              <label>Fecha devolución</label>
-              <div
-                id="d_fechaDevolucion"
-                class="value"
-              ></div>
-            </div>
-
-            <div class="detail-box">
-              <label>Fecha límite</label>
-              <div
-                id="d_fechaLimite"
-                class="value"
-              ></div>
-            </div>
-
-            <div class="detail-box">
-              <label>Funcionario</label>
-              <div
-                id="d_funcionario"
-                class="value"
-              ></div>
-            </div>
-
-            <div class="detail-box">
-              <label>Teléfono</label>
-              <div
-                id="d_telefono"
-                class="value"
-              ></div>
-            </div>
-
-            <div class="detail-box full">
-              <label>Motivo de devolución</label>
-              <div
-                id="d_motivo"
-                class="value"
-              ></div>
-            </div>
-
-            <div class="detail-box full">
-              <label>Observaciones</label>
-              <div
-                id="d_observaciones"
-                class="value"
-              ></div>
-            </div>
-
-          </div>
-
-
-          <div class="actions">
-
-            <button
-              type="button"
-              class="btn-primary"
-              id="btnEditar"
-            >
-              Editar
-            </button>
-
-            <button
-              type="button"
-              class="btn-success"
-              id="btnGuardar"
-            >
-              Guardar cambios
-            </button>
-
-            <button
-              type="button"
-              class="btn-secondary"
-              id="btnPDF"
-            >
-              Generar PDF
-            </button>
-
-            <button
-              type="button"
-              class="btn-light"
-              id="btnCancelarEdicion"
-            >
-              Cancelar
-            </button>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- =======================================================
-         FORMULARIO DE EDICIÓN
-         ======================================================= -->
-
-    <section
-      class="card hidden"
-      id="editSection"
-    >
-
-      <div class="card-header">
-        EDITAR DEVOLUCIÓN
-      </div>
-
-      <div class="card-body">
-
-        <form id="editForm">
-
-          <div class="form-grid">
-
-            <div class="field">
-
-              <label for="f_consecutivo">
-                Consecutivo
-              </label>
-
-              <input
-                type="text"
-                id="f_consecutivo"
-                readonly
-              >
-
-            </div>
-
-
-            <div class="field">
-
-              <label for="f_fecha">
-                Fecha
-              </label>
-
-              <input
-                type="text"
-                id="f_fecha"
-              >
-
-            </div>
-
-
-            <div class="field">
-
-              <label for="f_radicado">
-                Radicado
-              </label>
-
-              <input
-                type="text"
-                id="f_radicado"
-              >
-
-            </div>
-
-
-            <div class="field">
-
-              <label for="f_placa">
-                Placa
-              </label>
-
-              <input
-                type="text"
-                id="f_placa"
-                style="text-transform:uppercase"
-              >
-
-            </div>
-
-
-            <div class="field">
-
-              <label for="f_documento">
-                Documento
-              </label>
-
-              <input
-                type="text"
-                id="f_documento"
-              >
-
-            </div>
-
-
-            <div class="field">
-
-              <label for="f_propietario">
-                Propietario
-              </label>
-
-              <input
-                type="text"
-                id="f_propietario"
-              >
-
-            </div>
-
-
-            <div class="field">
-
-              <label for="f_tramite">
-                Trámite
-              </label>
-
-              <input
-                type="text"
-                id="f_tramite"
-              >
-
-            </div>
-
-
-            <div class="field">
-
-              <label for="f_estado">
-                Estado
-              </label>
-
-              <select id="f_estado">
-
-                <option value="">
-                  Seleccione
-                </option>
-
-              </select>
-
-            </div>
-
-
-            <div class="field">
-
-              <label for="f_fechaDevolucion">
-                Fecha devolución
-              </label>
-
-              <input
-                type="text"
-                id="f_fechaDevolucion"
-              >
-
-            </div>
-
-
-            <div class="field">
-
-              <label for="f_fechaLimite">
-                Fecha límite
-              </label>
-
-              <input
-                type="text"
-                id="f_fechaLimite"
-              >
-
-            </div>
-
-
-            <div class="field">
-
-              <label for="f_funcionario">
-                Funcionario
-              </label>
-
-              <input
-                type="text"
-                id="f_funcionario"
-              >
-
-            </div>
-
-
-            <div class="field">
-
-              <label for="f_telefono">
-                Teléfono
-              </label>
-
-              <input
-                type="text"
-                id="f_telefono"
-              >
-
-            </div>
-
-
-            <div class="field full">
-
-              <label for="f_motivo">
-                Motivo de devolución
-              </label>
-
-              <textarea
-                id="f_motivo"
-              ></textarea>
-
-            </div>
-
-
-            <div class="field full">
-
-              <label for="f_observaciones">
-                Observaciones
-              </label>
-
-              <textarea
-                id="f_observaciones"
-              ></textarea>
-
-            </div>
-
-          </div>
-
-
-          <div class="actions">
-
-            <button
-              type="submit"
-              class="btn-success"
-            >
-              Guardar cambios
-            </button>
-
-            <button
-              type="button"
-              class="btn-light"
-              id="btnCerrarEdicion"
-            >
-              Cancelar
-            </button>
-
-          </div>
-
-        </form>
-
-      </div>
-
-    </section>
-
-  </main>
-
-
-  <footer class="footer">
-    Sistema Maestro-Detalle de Devoluciones
-    — Secretaría de Movilidad de La Ceja del Tambo
-  </footer>
-
-
-  <!-- =========================================================
-       MODAL
-       ========================================================= -->
+  <!-- ======================================================
+       ALERTAS
+       ====================================================== -->
 
   <div
-    id="modal"
-    class="modal"
-  >
+    id="alert"
+    class="alert"
+  ></div>
 
-    <div class="modal-content">
 
-      <div class="modal-header">
+  <!-- ======================================================
+       NUEVA DEVOLUCIÓN
+       ====================================================== -->
 
-        <h3 id="modalTitle">
-          Información
-        </h3>
+  <section class="card">
 
-        <button
-          type="button"
-          class="modal-close"
-          id="modalClose"
-        >
-          ×
-        </button>
+    <div class="card-title">
+
+      <h3>
+        Nueva devolución
+      </h3>
+
+      <span
+        id="nuevoId"
+        class="badge badge-blue"
+      >
+        Nuevo consecutivo
+      </span>
+
+    </div>
+
+
+    <!-- ====================================================
+         DATOS MAESTROS
+         ==================================================== -->
+
+    <div class="grid grid-3">
+
+      <div class="form-group">
+
+        <label>
+          Funcionario
+          <span class="required">*</span>
+        </label>
+
+        <select id="funcionario">
+
+          <option value="">
+            Cargando funcionarios...
+          </option>
+
+        </select>
 
       </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Placa
+        </label>
+
+        <input
+          id="placa"
+          type="text"
+          class="uppercase"
+          maxlength="10"
+          placeholder="ABC123"
+          autocomplete="off"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Documento
+          <span class="required">*</span>
+        </label>
+
+        <input
+          id="documento"
+          type="text"
+          maxlength="20"
+          placeholder="Número de documento"
+          autocomplete="off"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Ciudadano
+          <span class="required">*</span>
+        </label>
+
+        <input
+          id="ciudadano"
+          type="text"
+          class="uppercase"
+          maxlength="150"
+          placeholder="Nombre completo"
+          autocomplete="off"
+        >
+
+      </div>
+
 
       <div
-        id="modalBody"
-        class="modal-body"
-      ></div>
+        class="form-group"
+        style="grid-column: span 2;"
+      >
 
-    </div>
+        <label>
+          Observación general
+        </label>
 
-  </div>
+        <textarea
+          id="observacion"
+          placeholder="Observación general de la devolución..."
+        ></textarea>
 
-
-  <!-- =========================================================
-       LOADING
-       ========================================================= -->
-
-  <div
-    id="loading"
-    class="loading"
-  >
-
-    <div class="loading-box">
-
-      <div class="spinner"></div>
-
-      <div id="loadingText">
-        Procesando...
       </div>
 
     </div>
 
+
+    <!-- ====================================================
+         DETALLES
+         ==================================================== -->
+
+    <div
+      class="card-title"
+      style="margin-top:25px;"
+    >
+
+      <h3>
+        Detalle de la devolución
+      </h3>
+
+    </div>
+
+
+    <div class="grid grid-3">
+
+      <div class="form-group">
+
+        <label>
+          Motivo
+          <span class="required">*</span>
+        </label>
+
+        <select id="motivo">
+
+          <option value="">
+            Cargando motivos...
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div
+        class="form-group"
+        style="grid-column: span 2;"
+      >
+
+        <label>
+          Observación del motivo
+        </label>
+
+        <input
+          id="detalleObservacion"
+          type="text"
+          maxlength="500"
+          placeholder="Detalle u observación del motivo"
+        >
+
+      </div>
+
+    </div>
+
+
+    <div class="actions">
+
+      <button
+        type="button"
+        class="btn btn-info"
+        onclick="agregarDetalle()"
+      >
+        + Agregar motivo
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-light"
+        onclick="limpiarDetalle()"
+      >
+        Limpiar motivo
+      </button>
+
+    </div>
+
+
+    <div
+      class="table-wrapper"
+      style="margin-top:20px;"
+    >
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th style="width:70px;">
+              #
+            </th>
+
+            <th>
+              Motivo
+            </th>
+
+            <th>
+              Observación
+            </th>
+
+            <th style="width:100px;">
+              Acción
+            </th>
+
+          </tr>
+
+        </thead>
+
+        <tbody id="tablaDetalles">
+
+          <tr>
+
+            <td
+              colspan="4"
+              class="empty-row"
+            >
+              No hay motivos agregados.
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- ====================================================
+         BOTONES
+         ==================================================== -->
+
+    <div class="actions">
+
+      <button
+        type="button"
+        class="btn btn-success"
+        id="btnGuardar"
+        onclick="guardarFormulario()"
+      >
+        💾 Guardar devolución
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        onclick="nuevoFormulario()"
+      >
+        ↻ Nueva / Limpiar
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-warning"
+        onclick="probarConexion()"
+      >
+        🔌 Probar conexión
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-light"
+        onclick="mostrarDiagnostico()"
+      >
+        ⚙ Diagnóstico
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- ======================================================
+       DEVOLUCIONES REGISTRADAS
+       ====================================================== -->
+
+  <section class="card">
+
+    <div class="card-title">
+
+      <h3>
+        Devoluciones registradas
+      </h3>
+
+      <input
+        id="buscar"
+        class="search-box"
+        type="search"
+        placeholder="Buscar por consecutivo, placa, documento..."
+        oninput="filtrarDevoluciones()"
+      >
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+      <table class="table-main">
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Consecutivo
+            </th>
+
+            <th>
+              Fecha
+            </th>
+
+            <th>
+              Funcionario
+            </th>
+
+            <th>
+              Placa
+            </th>
+
+            <th>
+              Documento
+            </th>
+
+            <th>
+              Ciudadano
+            </th>
+
+            <th>
+              Acciones
+            </th>
+
+          </tr>
+
+        </thead>
+
+        <tbody id="tablaDevoluciones">
+
+          <tr>
+
+            <td
+              colspan="7"
+              class="empty-row"
+            >
+              Cargando devoluciones...
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <!-- ======================================================
+       DIAGNÓSTICO
+       ====================================================== -->
+
+  <section class="card">
+
+    <div class="card-title">
+
+      <h3>
+        Diagnóstico técnico
+      </h3>
+
+    </div>
+
+    <div
+      id="diagnostico"
+      class="diagnostico"
+    ></div>
+
+  </section>
+
+
+  <!-- ======================================================
+       FOOTER
+       ====================================================== -->
+
+  <footer class="footer">
+
+    Sistema Maestro - Detalle de Devoluciones
+    <br>
+
+    Secretaría de Movilidad - La Ceja del Tambo
+
+    <br><br>
+
+    Versión 3.0
+
+  </footer>
+
+</div>
+
+
+<!-- ========================================================
+     MODAL DETALLE
+     ======================================================== -->
+
+<div
+  id="modalDetalle"
+  class="modal"
+>
+
+  <div class="modal-content">
+
+    <div class="modal-header">
+
+      <h3>
+        Detalle de devolución
+      </h3>
+
+      <button
+        class="close"
+        onclick="cerrarModal()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div id="contenidoDetalle"></div>
+
   </div>
 
-
-  <script>
-
-    /* =========================================================
-       CONFIGURACIÓN
-       ========================================================= */
-
-    const API_URL =
-      "hhttps://script.google.com/macros/s/AKfycbxTzNDgdOdbJN-xIFZ-5H9Vnh4JEDi6UMrZs9d1HcyqQZ5i6KBPynQLoIeoGsygggU_0A/exec";
+</div>
 
 
-    /* =========================================================
-       VARIABLES
-       ========================================================= */
+<!-- ========================================================
+     LOADER
+     ======================================================== -->
 
-    let registros = [];
+<div
+  id="loader"
+  class="loader"
+>
 
-    let registrosFiltrados = [];
+  <div class="spinner"></div>
 
-    let registroSeleccionado = null;
+  <div
+    id="loaderText"
+    class="loader-text"
+  >
+    Procesando...
+  </div>
 
-    let detalleActual = null;
-
-    let paginaActual = 1;
-
-    const registrosPorPagina = 15;
-
-    let modoEdicion = false;
+</div>
 
 
-    /* =========================================================
-       INICIO
-       ========================================================= */
+<script>
 
-    document.addEventListener(
-      "DOMContentLoaded",
-      iniciar
+/* =========================================================
+   CONFIGURACIÓN
+   ========================================================= */
+
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbxzoWB9fbZiPNmFplnu9xMK3cJJMr0a4nMkbmEeyD1q2tIS57kSYpvj_doN7tEN8u5QtA/exec";
+
+
+/* =========================================================
+   VARIABLES GLOBALES
+   ========================================================= */
+
+let funcionarios = [];
+
+let motivos = [];
+
+let devoluciones = [];
+
+let detalles = [];
+
+let jsonpCounter = 0;
+
+
+/* =========================================================
+   ELEMENTOS
+   ========================================================= */
+
+const $ = function(id) {
+  return document.getElementById(id);
+};
+
+
+/* =========================================================
+   INICIO
+   ========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function() {
+
+    inicializar();
+
+  }
+);
+
+
+/* =========================================================
+   INICIALIZAR
+   ========================================================= */
+
+async function inicializar() {
+
+  mostrarLoader(
+    "Conectando con Google Apps Script..."
+  );
+
+  actualizarEstadoAPI(
+    "loading",
+    "CONECTANDO CON API..."
+  );
+
+  try {
+
+    await probarPingInterno();
+
+    actualizarEstadoAPI(
+      "ok",
+      "● API CONECTADA"
     );
 
+    await cargarDatosIniciales();
 
-    function iniciar() {
+  } catch (error) {
 
-      configurarEventos();
+    console.error(error);
 
-      verificarConexion();
+    actualizarEstadoAPI(
+      "error",
+      "● ERROR DE CONEXIÓN"
+    );
 
-      cargarDatosIniciales();
+    mostrarAlerta(
+      "No fue posible conectar con Google Apps Script. " +
+      "Verifique que la implementación esté activa y " +
+      "tenga acceso para cualquier persona.",
+      "error"
+    );
 
-    }
+  } finally {
 
+    ocultarLoader();
 
-    /* =========================================================
-       EVENTOS
-       ========================================================= */
+  }
 
-    function configurarEventos() {
-
-      document
-        .getElementById("btnBuscar")
-        .addEventListener(
-          "click",
-          aplicarFiltros
-        );
-
-
-      document
-        .getElementById("btnLimpiar")
-        .addEventListener(
-          "click",
-          limpiarFiltros
-        );
+}
 
 
-      document
-        .getElementById("btnRecargar")
-        .addEventListener(
-          "click",
-          cargarDatosIniciales
-        );
+/* =========================================================
+   ESTADO API
+   ========================================================= */
+
+function actualizarEstadoAPI(
+  clase,
+  texto
+) {
+
+  const elemento = $("apiStatus");
+
+  elemento.className =
+    "api-status " + clase;
+
+  elemento.textContent =
+    texto;
+
+}
 
 
-      document
-        .getElementById("searchInput")
-        .addEventListener(
-          "input",
-          aplicarFiltros
-        );
+/* =========================================================
+   PING
+   ========================================================= */
+
+function probarPingInterno() {
+
+  return jsonpRequest(
+    "ping",
+    {}
+  );
+}
 
 
-      document
-        .getElementById("estadoFilter")
-        .addEventListener(
-          "change",
-          aplicarFiltros
-        );
+async function probarConexion() {
 
+  mostrarLoader(
+    "Probando conexión..."
+  );
 
-      document
-        .getElementById("tipoFilter")
-        .addEventListener(
-          "change",
-          aplicarFiltros
-        );
+  try {
 
+    const respuesta =
+      await probarPingInterno();
 
-      document
-        .getElementById("btnPrev")
-        .addEventListener(
-          "click",
-          paginaAnterior
-        );
+    if (
+      respuesta &&
+      respuesta.ok
+    ) {
 
+      actualizarEstadoAPI(
+        "ok",
+        "● API CONECTADA"
+      );
 
-      document
-        .getElementById("btnNext")
-        .addEventListener(
-          "click",
-          paginaSiguiente
-        );
+      mostrarAlerta(
+        "Conexión correcta con Google Apps Script. " +
+        "Versión: " +
+        (respuesta.version || ""),
+        "success"
+      );
 
+    } else {
 
-      document
-        .getElementById("btnEditar")
-        .addEventListener(
-          "click",
-          abrirEdicion
-        );
-
-
-      document
-        .getElementById("btnGuardar")
-        .addEventListener(
-          "click",
-          guardarDesdeDetalle
-        );
-
-
-      document
-        .getElementById("btnCancelarEdicion")
-        .addEventListener(
-          "click",
-          cerrarEdicion
-        );
-
-
-      document
-        .getElementById("btnCerrarEdicion")
-        .addEventListener(
-          "click",
-          cerrarEdicion
-        );
-
-
-      document
-        .getElementById("editForm")
-        .addEventListener(
-          "submit",
-          guardarFormulario
-        );
-
-
-      document
-        .getElementById("btnPDF")
-        .addEventListener(
-          "click",
-          generarPDF
-        );
-
-
-      document
-        .getElementById("modalClose")
-        .addEventListener(
-          "click",
-          cerrarModal
-        );
-
-
-      document
-        .getElementById("modal")
-        .addEventListener(
-          "click",
-          function(e) {
-
-            if (
-              e.target ===
-              document.getElementById("modal")
-            ) {
-
-              cerrarModal();
-
-            }
-
-          }
-        );
-
-
-      document.addEventListener(
-        "keydown",
-        function(e) {
-
-          if (e.key === "Escape") {
-
-            cerrarModal();
-
-          }
-
-        }
+      throw new Error(
+        respuesta &&
+        respuesta.error
+          ? respuesta.error
+          : "Respuesta inválida del servidor."
       );
 
     }
 
+  } catch (error) {
 
-    /* =========================================================
-       JSONP
-       ========================================================= */
+    actualizarEstadoAPI(
+      "error",
+      "● ERROR DE CONEXIÓN"
+    );
 
-    function llamarAPI(
-      action,
-      params = {},
-      timeout = 30000
-    ) {
+    mostrarAlerta(
+      error.message,
+      "error"
+    );
 
-      return new Promise(
-        function(resolve, reject) {
+  } finally {
 
-          const callbackName =
-            "jsonpCallback_" +
-            Date.now() +
-            "_" +
-            Math.floor(
-              Math.random() * 100000
-            );
+    ocultarLoader();
+
+  }
+
+}
 
 
-          let script = document.createElement("script");
+/* =========================================================
+   JSONP
+   ========================================================= */
 
-          let terminado = false;
+function jsonpRequest(
+  action,
+  params
+) {
+
+  return new Promise(
+    function(resolve, reject) {
+
+      const callbackName =
+        "__jsonp_" +
+        Date.now() +
+        "_" +
+        (++jsonpCounter);
+
+      const script =
+        document.createElement(
+          "script"
+        );
+
+      let terminado = false;
 
 
-          function finalizar() {
+      const timeout =
+        setTimeout(
+          function() {
 
             if (terminado) {
               return;
@@ -1480,673 +1377,123 @@
 
             terminado = true;
 
-            clearTimeout(timer);
+            limpiar();
 
-            if (script.parentNode) {
-              script.parentNode.removeChild(script);
-            }
+            reject(
+              new Error(
+                "Tiempo de espera agotado al conectar con Apps Script."
+              )
+            );
 
-            try {
-              delete window[callbackName];
-            } catch (e) {
-              window[callbackName] = undefined;
-            }
-
-          }
+          },
+          30000
+        );
 
 
+      function limpiar() {
+
+        clearTimeout(timeout);
+
+        try {
+          delete window[callbackName];
+        } catch (e) {
           window[callbackName] =
-            function(data) {
+            undefined;
+        }
 
-              finalizar();
-
-              resolve(data);
-
-            };
-
-
-          const query =
-            new URLSearchParams();
-
-
-          query.set(
-            "action",
-            action
-          );
-
-
-          query.set(
-            "callback",
-            callbackName
-          );
-
-
-          Object.keys(params).forEach(
-            function(key) {
-
-              const value =
-                params[key];
-
-              if (
-                value !== undefined &&
-                value !== null
-              ) {
-
-                if (
-                  typeof value === "object"
-                ) {
-
-                  query.set(
-                    key,
-                    JSON.stringify(value)
-                  );
-
-                } else {
-
-                  query.set(
-                    key,
-                    String(value)
-                  );
-
-                }
-
-              }
-
-            }
-          );
-
-
-          script.src =
-            API_URL +
-            (API_URL.includes("?") ? "&" : "?") +
-            query.toString();
-
-
-          script.async = true;
-
-
-          script.onerror =
-            function() {
-
-              finalizar();
-
-              reject(
-                new Error(
-                  "No fue posible conectar con Google Apps Script."
-                )
-              );
-
-            };
-
-
-          document.body.appendChild(
+        if (script.parentNode) {
+          script.parentNode.removeChild(
             script
           );
-
-
-          const timer =
-            setTimeout(
-              function() {
-
-                finalizar();
-
-                reject(
-                  new Error(
-                    "Tiempo de espera agotado al conectar con Google Apps Script."
-                  )
-                );
-
-              },
-              timeout
-            );
-
-        }
-      );
-
-    }
-
-
-    /* =========================================================
-       CONEXIÓN
-       ========================================================= */
-
-    async function verificarConexion() {
-
-      cambiarEstado(
-        "Conectando...",
-        ""
-      );
-
-      try {
-
-        const respuesta =
-          await llamarAPI(
-            "ping"
-          );
-
-
-        if (
-          respuesta &&
-          (
-            respuesta.success === true ||
-            respuesta.ok === true
-          )
-        ) {
-
-          cambiarEstado(
-            "Conectado",
-            "online"
-          );
-
-        } else {
-
-          cambiarEstado(
-            "Servidor respondió",
-            "online"
-          );
-
-        }
-
-      } catch (error) {
-
-        console.error(
-          "Error de conexión:",
-          error
-        );
-
-        cambiarEstado(
-          "Sin conexión",
-          "error"
-        );
-
-      }
-
-    }
-
-
-    function cambiarEstado(
-      texto,
-      clase
-    ) {
-
-      const dot =
-        document.getElementById(
-          "statusDot"
-        );
-
-      const label =
-        document.getElementById(
-          "statusText"
-        );
-
-
-      dot.className =
-        "status-dot";
-
-
-      if (clase) {
-
-        dot.classList.add(
-          clase
-        );
-
-      }
-
-
-      label.textContent =
-        texto;
-
-    }
-
-
-    /* =========================================================
-       CARGAR DATOS
-       ========================================================= */
-
-    async function cargarDatosIniciales() {
-
-      mostrarLoading(
-        true,
-        "Cargando información..."
-      );
-
-
-      try {
-
-        const respuesta =
-          await llamarAPI(
-            "getInitialData"
-          );
-
-
-        console.log(
-          "Respuesta getInitialData:",
-          respuesta
-        );
-
-
-        if (
-          !respuesta ||
-          respuesta.success === false
-        ) {
-
-          throw new Error(
-            respuesta?.message ||
-            "El servidor no pudo entregar la información."
-          );
-
-        }
-
-
-        registros =
-          extraerRegistros(
-            respuesta
-          );
-
-
-        registrosFiltrados =
-          [...registros];
-
-
-        cargarOpcionesFiltros();
-
-        paginaActual = 1;
-
-        renderTabla();
-
-
-        cambiarEstado(
-          "Conectado",
-          "online"
-        );
-
-
-        mostrarMensaje(
-          "Información cargada correctamente.",
-          "success"
-        );
-
-
-      } catch (error) {
-
-        console.error(
-          error
-        );
-
-
-        registros = [];
-
-        registrosFiltrados = [];
-
-
-        renderTabla();
-
-
-        cambiarEstado(
-          "Error de conexión",
-          "error"
-        );
-
-
-        mostrarMensaje(
-          error.message ||
-          "No fue posible cargar los registros.",
-          "error"
-        );
-
-      } finally {
-
-        mostrarLoading(
-          false
-        );
-
-      }
-
-    }
-
-
-    function extraerRegistros(
-      respuesta
-    ) {
-
-      if (
-        Array.isArray(respuesta)
-      ) {
-
-        return respuesta;
-
-      }
-
-
-      const posibles =
-        [
-          respuesta.data,
-          respuesta.registros,
-          respuesta.rows,
-          respuesta.result,
-          respuesta.items
-        ];
-
-
-      for (
-        const elemento of posibles
-      ) {
-
-        if (
-          Array.isArray(elemento)
-        ) {
-
-          return elemento;
-
         }
 
       }
 
 
-      return [];
+      window[callbackName] =
+        function(data) {
 
-    }
+          if (terminado) {
+            return;
+          }
 
+          terminado = true;
 
-    /* =========================================================
-       NORMALIZACIÓN
-       ========================================================= */
-
-    function obtener(
-      objeto,
-      nombres,
-      defecto = ""
-    ) {
-
-      if (!objeto) {
-        return defecto;
-      }
-
-
-      for (
-        const nombre of nombres
-      ) {
-
-        if (
-          Object.prototype.hasOwnProperty.call(
-            objeto,
-            nombre
-          )
-        ) {
-
-          const valor =
-            objeto[nombre];
-
+          limpiar();
 
           if (
-            valor !== null &&
-            valor !== undefined
+            data &&
+            data.ok === false
           ) {
 
-            return valor;
-
-          }
-
-        }
-
-      }
-
-
-      return defecto;
-
-    }
-
-
-    function texto(
-      valor
-    ) {
-
-      if (
-        valor === null ||
-        valor === undefined
-      ) {
-
-        return "";
-
-      }
-
-
-      return String(valor);
-
-    }
-
-
-    function registroNormalizado(
-      r
-    ) {
-
-      return {
-
-        original: r,
-
-        consecutivo:
-          texto(
-            obtener(
-              r,
-              [
-                "consecutivo",
-                "CONSECUTIVO",
-                "id",
-                "ID"
-              ]
-            )
-          ),
-
-        fecha:
-          texto(
-            obtener(
-              r,
-              [
-                "fecha",
-                "FECHA",
-                "Fecha"
-              ]
-            )
-          ),
-
-        radicado:
-          texto(
-            obtener(
-              r,
-              [
-                "radicado",
-                "RADICADO",
-                "Radicado"
-              ]
-            )
-          ),
-
-        placa:
-          texto(
-            obtener(
-              r,
-              [
-                "placa",
-                "PLACA",
-                "Placa"
-              ]
-            )
-          ),
-
-        documento:
-          texto(
-            obtener(
-              r,
-              [
-                "documento",
-                "DOCUMENTO",
-                "cedula",
-                "CEDULA"
-              ]
-            )
-          ),
-
-        propietario:
-          texto(
-            obtener(
-              r,
-              [
-                "propietario",
-                "PROPIETARIO",
-                "Propietario"
-              ]
-            )
-          ),
-
-        tramite:
-          texto(
-            obtener(
-              r,
-              [
-                "tramite",
-                "TRAMITE",
-                "TRÁMITE",
-                "tipoTramite"
-              ]
-            )
-          ),
-
-        estado:
-          texto(
-            obtener(
-              r,
-              [
-                "estado",
-                "ESTADO",
-                "Estado"
-              ]
-            )
-          ),
-
-        tipo:
-          texto(
-            obtener(
-              r,
-              [
-                "tipo",
-                "TIPO",
-                "Tipo"
-              ]
-            )
-          ),
-
-        fechaDevolucion:
-          texto(
-            obtener(
-              r,
-              [
-                "fechaDevolucion",
-                "FECHA_DEVOLUCION",
-                "fecha_devolucion"
-              ]
-            )
-          ),
-
-        fechaLimite:
-          texto(
-            obtener(
-              r,
-              [
-                "fechaLimite",
-                "FECHA_LIMITE",
-                "fecha_limite"
-              ]
-            )
-          ),
-
-        funcionario:
-          texto(
-            obtener(
-              r,
-              [
-                "funcionario",
-                "FUNCIONARIO",
-                "Funcionario"
-              ]
-            )
-          ),
-
-        telefono:
-          texto(
-            obtener(
-              r,
-              [
-                "telefono",
-                "TELEFONO",
-                "TELÉFONO"
-              ]
-            )
-          ),
-
-        motivo:
-          texto(
-            obtener(
-              r,
-              [
-                "motivo",
-                "MOTIVO",
-                "motivoDevolucion",
-                "MOTIVO_DEVOLUCION"
-              ]
-            )
-          ),
-
-        observaciones:
-          texto(
-            obtener(
-              r,
-              [
-                "observaciones",
-                "OBSERVACIONES",
-                "observacion",
-                "OBSERVACION"
-              ]
-            )
-          )
-
-      };
-
-    }
-
-
-    /* =========================================================
-       FILTROS
-       ========================================================= */
-
-    function cargarOpcionesFiltros() {
-
-      const estados =
-        new Set();
-
-      const tipos =
-        new Set();
-
-
-      registros.forEach(
-        function(r) {
-
-          const n =
-            registroNormalizado(r);
-
-
-          if (n.estado) {
-
-            estados.add(
-              n.estado
+            reject(
+              new Error(
+                data.error ||
+                "Error reportado por Apps Script."
+              )
             );
 
+            return;
+
           }
 
+          resolve(data);
 
-          if (n.tipo) {
+        };
 
-            tipos.add(
-              n.tipo
+
+      script.onerror =
+        function() {
+
+          if (terminado) {
+            return;
+          }
+
+          terminado = true;
+
+          limpiar();
+
+          reject(
+            new Error(
+              "No fue posible cargar la respuesta JSONP de Apps Script."
+            )
+          );
+
+        };
+
+
+      const query =
+        new URLSearchParams();
+
+
+      query.set(
+        "action",
+        action
+      );
+
+
+      query.set(
+        "callback",
+        callbackName
+      );
+
+
+      Object.keys(
+        params || {}
+      ).forEach(
+        function(key) {
+
+          const valor =
+            params[key];
+
+          if (
+            valor !== undefined &&
+            valor !== null
+          ) {
+
+            query.set(
+              key,
+              String(valor)
             );
 
           }
@@ -2155,1355 +1502,1802 @@
       );
 
 
-      llenarSelect(
-        "estadoFilter",
-        estados
+      script.src =
+        API_URL +
+        "?" +
+        query.toString();
+
+
+      document
+        .head
+        .appendChild(script);
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   CARGAR DATOS INICIALES
+   ========================================================= */
+
+async function cargarDatosIniciales() {
+
+  try {
+
+    const respuesta =
+      await jsonpRequest(
+        "getInitialData",
+        {}
       );
 
 
-      llenarSelect(
-        "tipoFilter",
-        tipos
+    funcionarios =
+      Array.isArray(
+        respuesta.funcionarios
+      )
+        ? respuesta.funcionarios
+        : [];
+
+
+    motivos =
+      Array.isArray(
+        respuesta.motivos
+      )
+        ? respuesta.motivos
+        : [];
+
+
+    devoluciones =
+      Array.isArray(
+        respuesta.devoluciones
+      )
+        ? respuesta.devoluciones
+        : [];
+
+
+    cargarFuncionarios();
+
+    cargarMotivos();
+
+    renderizarDevoluciones();
+
+
+    if (
+      respuesta.advertencias &&
+      respuesta.advertencias.length
+    ) {
+
+      mostrarAlerta(
+        respuesta.mensaje +
+        " Advertencias: " +
+        respuesta.advertencias.join(
+          " "
+        ),
+        "info"
       );
 
+    } else {
 
-      llenarSelect(
-        "f_estado",
-        estados,
-        "Seleccione"
+      mostrarAlerta(
+        respuesta.mensaje ||
+        "Datos cargados correctamente.",
+        "success"
       );
 
     }
 
+  } catch (error) {
 
-    function llenarSelect(
-      id,
-      valores,
-      primeraOpcion = "Todos"
-    ) {
+    console.error(error);
 
-      const select =
-        document.getElementById(id);
+    throw error;
 
+  }
 
-      if (!select) {
-        return;
-      }
+}
 
 
-      select.innerHTML = "";
+/* =========================================================
+   FUNCIONARIOS
+   ========================================================= */
 
+function cargarFuncionarios() {
+
+  const select =
+    $("funcionario");
+
+
+  select.innerHTML =
+    "";
+
+
+  const optionInicial =
+    document.createElement(
+      "option"
+    );
+
+  optionInicial.value =
+    "";
+
+  optionInicial.textContent =
+    "Seleccione funcionario";
+
+  select.appendChild(
+    optionInicial
+  );
+
+
+  funcionarios.forEach(
+    function(nombre) {
 
       const option =
         document.createElement(
           "option"
         );
 
-
-      option.value = "";
+      option.value =
+        nombre;
 
       option.textContent =
-        primeraOpcion;
-
+        nombre;
 
       select.appendChild(
         option
       );
 
+    }
+  );
 
-      Array.from(valores)
-        .sort(
-          function(a, b) {
+}
 
-            return String(a)
-              .localeCompare(
-                String(b),
-                "es",
-                {
-                  sensitivity: "base"
-                }
-              );
 
-          }
-        )
-        .forEach(
-          function(valor) {
+/* =========================================================
+   MOTIVOS
+   ========================================================= */
 
-            const o =
-              document.createElement(
-                "option"
-              );
+function cargarMotivos() {
 
-            o.value = valor;
+  const select =
+    $("motivo");
 
-            o.textContent = valor;
 
-            select.appendChild(o);
+  select.innerHTML =
+    "";
 
-          }
+
+  const optionInicial =
+    document.createElement(
+      "option"
+    );
+
+  optionInicial.value =
+    "";
+
+  optionInicial.textContent =
+    "Seleccione motivo";
+
+  select.appendChild(
+    optionInicial
+  );
+
+
+  motivos.forEach(
+    function(nombre) {
+
+      const option =
+        document.createElement(
+          "option"
         );
+
+      option.value =
+        nombre;
+
+      option.textContent =
+        nombre;
+
+      select.appendChild(
+        option
+      );
 
     }
+  );
+
+}
 
 
-    function aplicarFiltros() {
+/* =========================================================
+   AGREGAR DETALLE
+   ========================================================= */
 
-      const textoBusqueda =
-        document
-          .getElementById(
-            "searchInput"
-          )
-          .value
-          .trim()
-          .toLowerCase();
+function agregarDetalle() {
+
+  const motivo =
+    $("motivo").value.trim();
 
 
-      const estado =
-        document
-          .getElementById(
-            "estadoFilter"
-          )
-          .value
-          .trim()
-          .toLowerCase();
+  const observacion =
+    $("detalleObservacion")
+      .value
+      .trim();
 
 
-      const tipo =
-        document
-          .getElementById(
-            "tipoFilter"
-          )
-          .value
-          .trim()
-          .toLowerCase();
+  if (!motivo) {
+
+    mostrarAlerta(
+      "Seleccione un motivo antes de agregarlo.",
+      "error"
+    );
+
+    $("motivo").focus();
+
+    return;
+
+  }
 
 
-      registrosFiltrados =
-        registros.filter(
-          function(r) {
+  const existe =
+    detalles.some(
+      function(item) {
 
-            const n =
-              registroNormalizado(r);
-
-
-            const textoCompleto =
-              (
-                n.consecutivo +
-                " " +
-                n.fecha +
-                " " +
-                n.radicado +
-                " " +
-                n.placa +
-                " " +
-                n.documento +
-                " " +
-                n.propietario +
-                " " +
-                n.tramite +
-                " " +
-                n.estado +
-                " " +
-                n.tipo
-              )
-              .toLowerCase();
-
-
-            const cumpleTexto =
-              !textoBusqueda ||
-              textoCompleto.includes(
-                textoBusqueda
-              );
-
-
-            const cumpleEstado =
-              !estado ||
-              n.estado.toLowerCase() ===
-                estado;
-
-
-            const cumpleTipo =
-              !tipo ||
-              n.tipo.toLowerCase() ===
-                tipo;
-
-
-            return (
-              cumpleTexto &&
-              cumpleEstado &&
-              cumpleTipo
-            );
-
-          }
+        return (
+          item.motivo
+            .toLowerCase()
+            ===
+          motivo.toLowerCase()
         );
-
-
-      paginaActual = 1;
-
-      renderTabla();
-
-    }
-
-
-    function limpiarFiltros() {
-
-      document
-        .getElementById(
-          "searchInput"
-        )
-        .value = "";
-
-
-      document
-        .getElementById(
-          "estadoFilter"
-        )
-        .value = "";
-
-
-      document
-        .getElementById(
-          "tipoFilter"
-        )
-        .value = "";
-
-
-      registrosFiltrados =
-        [...registros];
-
-
-      paginaActual = 1;
-
-      renderTabla();
-
-    }
-
-
-    /* =========================================================
-       TABLA MAESTRA
-       ========================================================= */
-
-    function renderTabla() {
-
-      const tbody =
-        document.getElementById(
-          "masterBody"
-        );
-
-
-      const empty =
-        document.getElementById(
-          "emptyMaster"
-        );
-
-
-      tbody.innerHTML = "";
-
-
-      const total =
-        registrosFiltrados.length;
-
-
-      if (!total) {
-
-        empty.classList.remove(
-          "hidden"
-        );
-
-
-        document.getElementById(
-          "paginationInfo"
-        ).textContent =
-          "0 registros";
-
-
-        actualizarPaginacion();
-
-        return;
 
       }
+    );
 
 
-      empty.classList.add(
-        "hidden"
+  if (existe) {
+
+    mostrarAlerta(
+      "Ese motivo ya fue agregado.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  detalles.push({
+
+    motivo:
+      motivo,
+
+    observacion:
+      observacion
+
+  });
+
+
+  renderizarDetalles();
+
+  limpiarDetalle();
+
+}
+
+
+/* =========================================================
+   RENDER DETALLES
+   ========================================================= */
+
+function renderizarDetalles() {
+
+  const tbody =
+    $("tablaDetalles");
+
+
+  tbody.innerHTML =
+    "";
+
+
+  if (
+    detalles.length === 0
+  ) {
+
+    tbody.innerHTML =
+      `
+      <tr>
+        <td
+          colspan="4"
+          class="empty-row"
+        >
+          No hay motivos agregados.
+        </td>
+      </tr>
+      `;
+
+    return;
+
+  }
+
+
+  detalles.forEach(
+    function(item, index) {
+
+      const tr =
+        document.createElement(
+          "tr"
+        );
+
+
+      const tdNumero =
+        document.createElement(
+          "td"
+        );
+
+      tdNumero.textContent =
+        index + 1;
+
+
+      const tdMotivo =
+        document.createElement(
+          "td"
+        );
+
+      tdMotivo.textContent =
+        item.motivo;
+
+
+      const tdObservacion =
+        document.createElement(
+          "td"
+        );
+
+      tdObservacion.textContent =
+        item.observacion || "";
+
+
+      const tdAccion =
+        document.createElement(
+          "td"
+        );
+
+
+      const boton =
+        document.createElement(
+          "button"
+        );
+
+      boton.type =
+        "button";
+
+      boton.className =
+        "btn btn-danger btn-small";
+
+      boton.textContent =
+        "Eliminar";
+
+
+      boton.onclick =
+        function() {
+
+          eliminarDetalle(index);
+
+        };
+
+
+      tdAccion.appendChild(
+        boton
       );
 
 
-      const inicio =
-        (
-          paginaActual - 1
-        ) *
-        registrosPorPagina;
+      tr.appendChild(
+        tdNumero
+      );
 
+      tr.appendChild(
+        tdMotivo
+      );
 
-      const fin =
-        Math.min(
-          inicio +
-          registrosPorPagina,
-          total
-        );
+      tr.appendChild(
+        tdObservacion
+      );
 
-
-      const pagina =
-        registrosFiltrados.slice(
-          inicio,
-          fin
-        );
-
-
-      pagina.forEach(
-        function(r) {
-
-          const n =
-            registroNormalizado(r);
-
-
-          const tr =
-            document.createElement(
-              "tr"
-            );
-
-
-          if (
-            registroSeleccionado &&
-            registroSeleccionado.original ===
-              r
-          ) {
-
-            tr.classList.add(
-              "selected"
-            );
-
-          }
-
-
-          tr.innerHTML = `
-
-            <td>${escapeHTML(n.consecutivo)}</td>
-
-            <td>${escapeHTML(n.fecha)}</td>
-
-            <td>${escapeHTML(n.radicado)}</td>
-
-            <td>${escapeHTML(n.placa)}</td>
-
-            <td>${escapeHTML(n.propietario)}</td>
-
-            <td>${escapeHTML(n.tramite)}</td>
-
-            <td>${escapeHTML(n.estado)}</td>
-
-            <td>
-              <button
-                type="button"
-                class="btn-primary btn-detail"
-              >
-                Ver
-              </button>
-            </td>
-
-          `;
-
-
-          tr.addEventListener(
-            "click",
-            function(e) {
-
-              if (
-                e.target.closest(
-                  "button"
-                )
-              ) {
-
-                e.stopPropagation();
-
-              }
-
-
-              seleccionarRegistro(r);
-
-            }
-          );
-
-
-          tbody.appendChild(
-            tr
-          );
-
-        }
+      tr.appendChild(
+        tdAccion
       );
 
 
-      document.getElementById(
-        "paginationInfo"
-      ).textContent =
-        `Mostrando ${inicio + 1}-${fin} de ${total} registros`;
-
-
-      actualizarPaginacion();
+      tbody.appendChild(
+        tr
+      );
 
     }
+  );
+
+}
 
 
-    function actualizarPaginacion() {
+/* =========================================================
+   ELIMINAR DETALLE
+   ========================================================= */
 
-      const totalPaginas =
-        Math.max(
-          1,
-          Math.ceil(
-            registrosFiltrados.length /
-            registrosPorPagina
-          )
+function eliminarDetalle(index) {
+
+  if (
+    index < 0 ||
+    index >= detalles.length
+  ) {
+    return;
+  }
+
+
+  detalles.splice(
+    index,
+    1
+  );
+
+
+  renderizarDetalles();
+
+}
+
+
+/* =========================================================
+   LIMPIAR DETALLE
+   ========================================================= */
+
+function limpiarDetalle() {
+
+  $("motivo").value =
+    "";
+
+  $("detalleObservacion").value =
+    "";
+
+}
+
+
+/* =========================================================
+   GUARDAR FORMULARIO
+   ========================================================= */
+
+async function guardarFormulario() {
+
+  const funcionario =
+    $("funcionario")
+      .value
+      .trim();
+
+
+  const placa =
+    $("placa")
+      .value
+      .trim()
+      .toUpperCase();
+
+
+  const documento =
+    $("documento")
+      .value
+      .trim();
+
+
+  const ciudadano =
+    $("ciudadano")
+      .value
+      .trim()
+      .toUpperCase();
+
+
+  const observacion =
+    $("observacion")
+      .value
+      .trim();
+
+
+  if (!funcionario) {
+
+    mostrarAlerta(
+      "Debe seleccionar un funcionario.",
+      "error"
+    );
+
+    $("funcionario").focus();
+
+    return;
+
+  }
+
+
+  if (!documento) {
+
+    mostrarAlerta(
+      "Debe ingresar el documento.",
+      "error"
+    );
+
+    $("documento").focus();
+
+    return;
+
+  }
+
+
+  if (!ciudadano) {
+
+    mostrarAlerta(
+      "Debe ingresar el ciudadano.",
+      "error"
+    );
+
+    $("ciudadano").focus();
+
+    return;
+
+  }
+
+
+  if (
+    detalles.length === 0
+  ) {
+
+    mostrarAlerta(
+      "Debe agregar por lo menos un motivo.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const payload = {
+
+    master: {
+
+      funcionario:
+        funcionario,
+
+      placa:
+        placa,
+
+      documento:
+        documento,
+
+      ciudadano:
+        ciudadano,
+
+      observacion:
+        observacion
+
+    },
+
+    detalles:
+      detalles
+
+  };
+
+
+  const datosJSON =
+    JSON.stringify(
+      payload
+    );
+
+
+  mostrarLoader(
+    "Guardando devolución..."
+  );
+
+
+  $("btnGuardar").disabled =
+    true;
+
+
+  try {
+
+    let respuesta;
+
+
+    try {
+
+      respuesta =
+        await guardarPOST(
+          datosJSON
         );
 
+    } catch (errorPOST) {
 
-      document.getElementById(
-        "btnPrev"
-      ).disabled =
-        paginaActual <= 1;
-
-
-      document.getElementById(
-        "btnNext"
-      ).disabled =
-        paginaActual >= totalPaginas;
-
-    }
+      console.warn(
+        "POST falló. Intentando GET + JSONP...",
+        errorPOST
+      );
 
 
-    function paginaAnterior() {
-
-      if (
-        paginaActual > 1
-      ) {
-
-        paginaActual--;
-
-        renderTabla();
-
-      }
-
-    }
-
-
-    function paginaSiguiente() {
-
-      const totalPaginas =
-        Math.max(
-          1,
-          Math.ceil(
-            registrosFiltrados.length /
-            registrosPorPagina
-          )
+      respuesta =
+        await jsonpRequest(
+          "guardarDevolucion",
+          {
+            data:
+              datosJSON
+          }
         );
 
-
-      if (
-        paginaActual < totalPaginas
-      ) {
-
-        paginaActual++;
-
-        renderTabla();
-
-      }
-
     }
 
 
-    /* =========================================================
-       SELECCIONAR MAESTRO
-       ========================================================= */
-
-    async function seleccionarRegistro(
-      registro
+    if (
+      !respuesta ||
+      respuesta.ok === false
     ) {
 
-      registroSeleccionado =
-        registroNormalizado(
-          registro
-        );
-
-
-      renderTabla();
-
-
-      mostrarLoading(
-        true,
-        "Consultando detalle..."
+      throw new Error(
+        respuesta &&
+        respuesta.error
+          ? respuesta.error
+          : "No fue posible guardar la devolución."
       );
-
-
-      try {
-
-        const respuesta =
-          await llamarAPI(
-            "getDetalleDevolucion",
-            {
-              consecutivo:
-                registroSeleccionado.consecutivo,
-
-              radicado:
-                registroSeleccionado.radicado,
-
-              placa:
-                registroSeleccionado.placa
-            }
-          );
-
-
-        if (
-          respuesta &&
-          respuesta.success === false
-        ) {
-
-          throw new Error(
-            respuesta.message ||
-            "No fue posible consultar el detalle."
-          );
-
-        }
-
-
-        detalleActual =
-          respuesta &&
-          respuesta.data
-            ? respuesta.data
-            : respuesta;
-
-
-        if (
-          Array.isArray(
-            detalleActual
-          )
-        ) {
-
-          detalleActual =
-            detalleActual[0] ||
-            registro;
-
-        }
-
-
-        mostrarDetalle(
-          detalleActual
-        );
-
-
-      } catch (error) {
-
-        console.error(
-          error
-        );
-
-
-        mostrarMensaje(
-          error.message ||
-          "No fue posible consultar el detalle.",
-          "error"
-        );
-
-
-        mostrarDetalle(
-          registro
-        );
-
-      } finally {
-
-        mostrarLoading(
-          false
-        );
-
-      }
 
     }
 
 
-    /* =========================================================
-       DETALLE
-       ========================================================= */
-
-    function mostrarDetalle(
-      data
-    ) {
-
-      const n =
-        registroNormalizado(
-          data
-        );
+    const id =
+      respuesta.id;
 
 
-      detalleActual =
-        data;
+    $("nuevoId")
+      .textContent =
+      "Consecutivo: " +
+      id;
 
 
-      document.getElementById(
-        "detailEmpty"
-      ).classList.add(
-        "hidden"
-      );
-
-
-      document.getElementById(
-        "detailContent"
-      ).classList.remove(
-        "hidden"
-      );
-
-
-      establecerTexto(
-        "d_consecutivo",
-        n.consecutivo
-      );
-
-      establecerTexto(
-        "d_fecha",
-        n.fecha
-      );
-
-      establecerTexto(
-        "d_radicado",
-        n.radicado
-      );
-
-      establecerTexto(
-        "d_estado",
-        n.estado
-      );
-
-      establecerTexto(
-        "d_placa",
-        n.placa
-      );
-
-      establecerTexto(
-        "d_documento",
-        n.documento
-      );
-
-      establecerTexto(
-        "d_propietario",
-        n.propietario
-      );
-
-      establecerTexto(
-        "d_tramite",
-        n.tramite
-      );
-
-      establecerTexto(
-        "d_fechaDevolucion",
-        n.fechaDevolucion
-      );
-
-      establecerTexto(
-        "d_fechaLimite",
-        n.fechaLimite
-      );
-
-      establecerTexto(
-        "d_funcionario",
-        n.funcionario
-      );
-
-      establecerTexto(
-        "d_telefono",
-        n.telefono
-      );
-
-      establecerTexto(
-        "d_motivo",
-        n.motivo
-      );
-
-      establecerTexto(
-        "d_observaciones",
-        n.observaciones
-      );
-
-
-      document
-        .getElementById(
-          "detailSection"
-        )
-        .scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
-
-    }
-
-
-    function establecerTexto(
+    mostrarAlerta(
+      "Devolución guardada correctamente. " +
+      "Consecutivo: " +
       id,
-      valor
+      "success"
+    );
+
+
+    nuevoFormulario(
+      false
+    );
+
+
+    await cargarDatosIniciales();
+
+
+    $("nuevoId")
+      .textContent =
+      "Consecutivo: " +
+      id;
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    mostrarAlerta(
+      "Error al guardar: " +
+      error.message,
+      "error"
+    );
+
+  } finally {
+
+    $("btnGuardar").disabled =
+      false;
+
+    ocultarLoader();
+
+  }
+
+}
+
+
+/* =========================================================
+   POST
+   ========================================================= */
+
+async function guardarPOST(
+  datosJSON
+) {
+
+  const respuesta =
+    await fetch(
+      API_URL,
+      {
+        method:
+          "POST",
+
+        headers: {
+
+          "Content-Type":
+            "text/plain;charset=utf-8"
+
+        },
+
+        body:
+          JSON.stringify({
+
+            action:
+              "guardarDevolucion",
+
+            data:
+              datosJSON
+
+          })
+
+      }
+    );
+
+
+  if (!respuesta.ok) {
+
+    throw new Error(
+      "HTTP " +
+      respuesta.status
+    );
+
+  }
+
+
+  const texto =
+    await respuesta.text();
+
+
+  let datos;
+
+
+  try {
+
+    datos =
+      JSON.parse(
+        texto
+      );
+
+  } catch (error) {
+
+    throw new Error(
+      "Apps Script devolvió una respuesta que no es JSON."
+    );
+
+  }
+
+
+  return datos;
+
+}
+
+
+/* =========================================================
+   NUEVO FORMULARIO
+   ========================================================= */
+
+function nuevoFormulario(
+  mostrarMensaje = true
+) {
+
+  $("funcionario").value =
+    "";
+
+  $("placa").value =
+    "";
+
+  $("documento").value =
+    "";
+
+  $("ciudadano").value =
+    "";
+
+  $("observacion").value =
+    "";
+
+  limpiarDetalle();
+
+
+  detalles =
+    [];
+
+
+  renderizarDetalles();
+
+
+  $("nuevoId")
+    .textContent =
+    "Nuevo consecutivo";
+
+
+  if (
+    mostrarMensaje
+  ) {
+
+    mostrarAlerta(
+      "Formulario preparado para una nueva devolución.",
+      "info"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   DEVOLUCIONES
+   ========================================================= */
+
+function renderizarDevoluciones(
+  lista = devoluciones
+) {
+
+  const tbody =
+    $("tablaDevoluciones");
+
+
+  tbody.innerHTML =
+    "";
+
+
+  if (
+    !lista ||
+    lista.length === 0
+  ) {
+
+    tbody.innerHTML =
+      `
+      <tr>
+        <td
+          colspan="7"
+          class="empty-row"
+        >
+          No existen devoluciones registradas.
+        </td>
+      </tr>
+      `;
+
+    return;
+
+  }
+
+
+  lista.forEach(
+    function(item) {
+
+      const tr =
+        document.createElement(
+          "tr"
+        );
+
+
+      agregarCelda(
+        tr,
+        item.consecutivo
+      );
+
+      agregarCelda(
+        tr,
+        item.fecha
+      );
+
+      agregarCelda(
+        tr,
+        item.funcionario
+      );
+
+      agregarCelda(
+        tr,
+        item.placa
+      );
+
+      agregarCelda(
+        tr,
+        item.documento
+      );
+
+      agregarCelda(
+        tr,
+        item.ciudadano
+      );
+
+
+      const td =
+        document.createElement(
+          "td"
+        );
+
+
+      const btnDetalle =
+        document.createElement(
+          "button"
+        );
+
+      btnDetalle.type =
+        "button";
+
+      btnDetalle.className =
+        "btn btn-info btn-small";
+
+      btnDetalle.textContent =
+        "Detalle";
+
+
+      btnDetalle.onclick =
+        function() {
+
+          verDetalle(
+            item.consecutivo
+          );
+
+        };
+
+
+      const btnPDF =
+        document.createElement(
+          "button"
+        );
+
+      btnPDF.type =
+        "button";
+
+      btnPDF.className =
+        "btn btn-success btn-small";
+
+      btnPDF.style.marginLeft =
+        "5px";
+
+      btnPDF.textContent =
+        "PDF";
+
+
+      btnPDF.onclick =
+        function() {
+
+          generarPDF(
+            item.consecutivo
+          );
+
+        };
+
+
+      td.appendChild(
+        btnDetalle
+      );
+
+      td.appendChild(
+        btnPDF
+      );
+
+
+      tr.appendChild(
+        td
+      );
+
+
+      tbody.appendChild(
+        tr
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   AGREGAR CELDA
+   ========================================================= */
+
+function agregarCelda(
+  tr,
+  valor
+) {
+
+  const td =
+    document.createElement(
+      "td"
+    );
+
+  td.textContent =
+    valor === null ||
+    valor === undefined
+      ? ""
+      : String(valor);
+
+  tr.appendChild(
+    td
+  );
+
+}
+
+
+/* =========================================================
+   FILTRAR DEVOLUCIONES
+   ========================================================= */
+
+function filtrarDevoluciones() {
+
+  const texto =
+    $("buscar")
+      .value
+      .trim()
+      .toLowerCase();
+
+
+  if (!texto) {
+
+    renderizarDevoluciones();
+
+    return;
+
+  }
+
+
+  const filtradas =
+    devoluciones.filter(
+      function(item) {
+
+        const contenido =
+          [
+
+            item.consecutivo,
+            item.fecha,
+            item.funcionario,
+            item.placa,
+            item.documento,
+            item.ciudadano,
+            item.observacion
+
+          ]
+          .join(" ")
+          .toLowerCase();
+
+
+        return contenido
+          .includes(texto);
+
+      }
+    );
+
+
+  renderizarDevoluciones(
+    filtradas
+  );
+
+}
+
+
+/* =========================================================
+   VER DETALLE
+   ========================================================= */
+
+async function verDetalle(
+  id
+) {
+
+  mostrarLoader(
+    "Consultando detalle..."
+  );
+
+
+  try {
+
+    const respuesta =
+      await jsonpRequest(
+        "getDetalleDevolucion",
+        {
+          id:
+            id
+        }
+      );
+
+
+    const lista =
+      respuesta.detalles || [];
+
+
+    let html =
+      "";
+
+
+    html +=
+      `
+      <div class="grid grid-3">
+
+        <div class="form-group">
+          <label>Consecutivo</label>
+          <input
+            value="${escapeHTML(id)}"
+            readonly
+          >
+        </div>
+
+      </div>
+
+      <div
+        class="table-wrapper"
+        style="margin-top:20px;"
+      >
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>#</th>
+              <th>Motivo</th>
+              <th>Observación</th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+      `;
+
+
+    if (
+      lista.length === 0
     ) {
 
-      const elemento =
-        document.getElementById(id);
-
-
-      if (elemento) {
-
-        elemento.textContent =
-          valor || "—";
-
-      }
-
-    }
-
-
-    /* =========================================================
-       EDICIÓN
-       ========================================================= */
-
-    function abrirEdicion() {
-
-      if (!detalleActual) {
-
-        mostrarMensaje(
-          "Primero seleccione un registro.",
-          "info"
-        );
-
-        return;
-
-      }
-
-
-      const n =
-        registroNormalizado(
-          detalleActual
-        );
-
-
-      document.getElementById(
-        "f_consecutivo"
-      ).value =
-        n.consecutivo;
-
-
-      document.getElementById(
-        "f_fecha"
-      ).value =
-        n.fecha;
-
-
-      document.getElementById(
-        "f_radicado"
-      ).value =
-        n.radicado;
-
-
-      document.getElementById(
-        "f_placa"
-      ).value =
-        n.placa;
-
-
-      document.getElementById(
-        "f_documento"
-      ).value =
-        n.documento;
-
-
-      document.getElementById(
-        "f_propietario"
-      ).value =
-        n.propietario;
-
-
-      document.getElementById(
-        "f_tramite"
-      ).value =
-        n.tramite;
-
-
-      document.getElementById(
-        "f_estado"
-      ).value =
-        n.estado;
-
-
-      document.getElementById(
-        "f_fechaDevolucion"
-      ).value =
-        n.fechaDevolucion;
-
-
-      document.getElementById(
-        "f_fechaLimite"
-      ).value =
-        n.fechaLimite;
-
-
-      document.getElementById(
-        "f_funcionario"
-      ).value =
-        n.funcionario;
-
-
-      document.getElementById(
-        "f_telefono"
-      ).value =
-        n.telefono;
-
-
-      document.getElementById(
-        "f_motivo"
-      ).value =
-        n.motivo;
-
-
-      document.getElementById(
-        "f_observaciones"
-      ).value =
-        n.observaciones;
-
-
-      modoEdicion = true;
-
-
-      document.getElementById(
-        "editSection"
-      ).classList.remove(
-        "hidden"
-      );
-
-
-      document.getElementById(
-        "editSection"
-      ).scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
-
-    }
-
-
-    function cerrarEdicion() {
-
-      modoEdicion = false;
-
-
-      document.getElementById(
-        "editSection"
-      ).classList.add(
-        "hidden"
-      );
-
-    }
-
-
-    /* =========================================================
-       GUARDAR
-       ========================================================= */
-
-    function obtenerDatosFormulario() {
-
-      return {
-
-        consecutivo:
-          document.getElementById(
-            "f_consecutivo"
-          ).value.trim(),
-
-        fecha:
-          document.getElementById(
-            "f_fecha"
-          ).value.trim(),
-
-        radicado:
-          document.getElementById(
-            "f_radicado"
-          ).value.trim(),
-
-        placa:
-          document.getElementById(
-            "f_placa"
-          ).value
-          .trim()
-          .toUpperCase(),
-
-        documento:
-          document.getElementById(
-            "f_documento"
-          ).value.trim(),
-
-        propietario:
-          document.getElementById(
-            "f_propietario"
-          ).value.trim(),
-
-        tramite:
-          document.getElementById(
-            "f_tramite"
-          ).value.trim(),
-
-        estado:
-          document.getElementById(
-            "f_estado"
-          ).value.trim(),
-
-        fechaDevolucion:
-          document.getElementById(
-            "f_fechaDevolucion"
-          ).value.trim(),
-
-        fechaLimite:
-          document.getElementById(
-            "f_fechaLimite"
-          ).value.trim(),
-
-        funcionario:
-          document.getElementById(
-            "f_funcionario"
-          ).value.trim(),
-
-        telefono:
-          document.getElementById(
-            "f_telefono"
-          ).value.trim(),
-
-        motivo:
-          document.getElementById(
-            "f_motivo"
-          ).value.trim(),
-
-        observaciones:
-          document.getElementById(
-            "f_observaciones"
-          ).value.trim()
-
-      };
-
-    }
-
-
-    async function guardarFormulario(
-      e
-    ) {
-
-      e.preventDefault();
-
-      await guardarCambios();
-
-    }
-
-
-    async function guardarDesdeDetalle() {
-
-      abrirEdicion();
-
-    }
-
-
-    async function guardarCambios() {
-
-      const datos =
-        obtenerDatosFormulario();
-
-
-      if (!datos.consecutivo) {
-
-        mostrarMensaje(
-          "El registro no tiene consecutivo.",
-          "error"
-        );
-
-        return;
-
-      }
-
-
-      mostrarLoading(
-        true,
-        "Guardando cambios..."
-      );
-
-
-      try {
-
-        const respuesta =
-          await llamarAPI(
-            "guardarDevolucion",
-            datos,
-            60000
-          );
-
-
-        console.log(
-          "Respuesta guardar:",
-          respuesta
-        );
-
-
-        if (
-          respuesta &&
-          respuesta.success === false
-        ) {
-
-          throw new Error(
-            respuesta.message ||
-            "El servidor rechazó el registro."
-          );
-
-        }
-
-
-        mostrarMensaje(
-          respuesta?.message ||
-          "Cambios guardados correctamente.",
-          "success"
-        );
-
-
-        cerrarEdicion();
-
-
-        await cargarDatosIniciales();
-
-
-        const encontrado =
-          registros.find(
-            function(r) {
-
-              const n =
-                registroNormalizado(r);
-
-              return (
-                n.consecutivo ===
-                datos.consecutivo
-              );
-
-            }
-          );
-
-
-        if (encontrado) {
-
-          seleccionarRegistro(
-            encontrado
-          );
-
-        }
-
-
-      } catch (error) {
-
-        console.error(
-          error
-        );
-
-
-        mostrarMensaje(
-          error.message ||
-          "No fue posible guardar los cambios.",
-          "error"
-        );
-
-      } finally {
-
-        mostrarLoading(
-          false
-        );
-
-      }
-
-    }
-
-
-    /* =========================================================
-       PDF
-       ========================================================= */
-
-    async function generarPDF() {
-
-      if (!detalleActual) {
-
-        mostrarMensaje(
-          "Primero seleccione un registro.",
-          "info"
-        );
-
-        return;
-
-      }
-
-
-      const n =
-        registroNormalizado(
-          detalleActual
-        );
-
-
-      mostrarLoading(
-        true,
-        "Generando PDF..."
-      );
-
-
-      try {
-
-        const respuesta =
-          await llamarAPI(
-            "generarPDF",
-            {
-              consecutivo:
-                n.consecutivo,
-
-              radicado:
-                n.radicado,
-
-              placa:
-                n.placa
-            },
-            60000
-          );
-
-
-        console.log(
-          "Respuesta PDF:",
-          respuesta
-        );
-
-
-        if (
-          respuesta &&
-          respuesta.success === false
-        ) {
-
-          throw new Error(
-            respuesta.message ||
-            "No fue posible generar el PDF."
-          );
-
-        }
-
-
-        const url =
-          respuesta?.url ||
-          respuesta?.pdfUrl ||
-          respuesta?.fileUrl ||
-          respuesta?.data?.url ||
-          respuesta?.data?.pdfUrl;
-
-
-        if (url) {
-
-          window.open(
-            url,
-            "_blank"
-          );
-
-          mostrarMensaje(
-            "PDF generado correctamente.",
-            "success"
-          );
-
-        } else {
-
-          mostrarModal(
-            "PDF generado",
+      html +=
+        `
+        <tr>
+          <td
+            colspan="3"
+            class="empty-row"
+          >
+            No existen detalles registrados.
+          </td>
+        </tr>
+        `;
+
+    } else {
+
+      lista.forEach(
+        function(item) {
+
+          html +=
             `
-              <p>
-                El servidor informó que el PDF
-                fue generado correctamente.
-              </p>
+            <tr>
 
-              <br>
+              <td>
+                ${escapeHTML(item.nro)}
+              </td>
 
-              <pre style="
-                white-space:pre-wrap;
-                word-break:break-word;
-                background:#f8f9fb;
-                padding:12px;
-                border-radius:6px;
-              ">${escapeHTML(
-                JSON.stringify(
-                  respuesta,
-                  null,
-                  2
-                )
-              )}</pre>
-            `
-          );
+              <td>
+                ${escapeHTML(item.motivo)}
+              </td>
+
+              <td>
+                ${escapeHTML(item.observacion)}
+              </td>
+
+            </tr>
+            `;
 
         }
+      );
+
+    }
 
 
-      } catch (error) {
+    html +=
+      `
+          </tbody>
 
-        console.error(
-          error
-        );
+        </table>
+
+      </div>
+
+      <div class="actions">
+
+        <button
+          class="btn btn-secondary"
+          onclick="cerrarModal()"
+        >
+          Cerrar
+        </button>
+
+        <button
+          class="btn btn-success"
+          onclick="cerrarModal(); generarPDF('${escapeJS(id)}')"
+        >
+          Generar PDF
+        </button>
+
+      </div>
+      `;
 
 
-        mostrarMensaje(
-          error.message ||
-          "No fue posible generar el PDF.",
-          "error"
-        );
+    $("contenidoDetalle")
+      .innerHTML =
+      html;
 
-      } finally {
 
-        mostrarLoading(
-          false
-        );
+    $("modalDetalle")
+      .classList
+      .add("show");
+
+
+  } catch (error) {
+
+    mostrarAlerta(
+      "Error consultando detalle: " +
+      error.message,
+      "error"
+    );
+
+  } finally {
+
+    ocultarLoader();
+
+  }
+
+}
+
+
+/* =========================================================
+   CERRAR MODAL
+   ========================================================= */
+
+function cerrarModal() {
+
+  $("modalDetalle")
+    .classList
+    .remove("show");
+
+}
+
+
+/* =========================================================
+   GENERAR PDF
+   ========================================================= */
+
+async function generarPDF(
+  id
+) {
+
+  mostrarLoader(
+    "Generando PDF..."
+  );
+
+
+  try {
+
+    const respuesta =
+      await jsonpRequest(
+        "generarPDF",
+        {
+          id:
+            id
+        }
+      );
+
+
+    if (
+      !respuesta ||
+      !respuesta.ok
+    ) {
+
+      throw new Error(
+        respuesta &&
+        respuesta.error
+          ? respuesta.error
+          : "No fue posible generar el PDF."
+      );
+
+    }
+
+
+    if (
+      !respuesta.base64
+    ) {
+
+      throw new Error(
+        "Apps Script no devolvió el archivo PDF."
+      );
+
+    }
+
+
+    descargarBase64(
+      respuesta.base64,
+      respuesta.filename ||
+      ("Devolucion_" + id + ".pdf"),
+      "application/pdf"
+    );
+
+
+    mostrarAlerta(
+      "PDF generado correctamente.",
+      "success"
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    mostrarAlerta(
+      "Error al generar PDF: " +
+      error.message,
+      "error"
+    );
+
+  } finally {
+
+    ocultarLoader();
+
+  }
+
+}
+
+
+/* =========================================================
+   DESCARGAR BASE64
+   ========================================================= */
+
+function descargarBase64(
+  base64,
+  nombre,
+  tipo
+) {
+
+  const byteCharacters =
+    atob(base64);
+
+
+  const byteArrays =
+    [];
+
+
+  const sliceSize =
+    1024;
+
+
+  for (
+    let offset = 0;
+    offset < byteCharacters.length;
+    offset += sliceSize
+  ) {
+
+    const slice =
+      byteCharacters.slice(
+        offset,
+        offset + sliceSize
+      );
+
+
+    const byteNumbers =
+      new Array(
+        slice.length
+      );
+
+
+    for (
+      let i = 0;
+      i < slice.length;
+      i++
+    ) {
+
+      byteNumbers[i] =
+        slice.charCodeAt(i);
+
+    }
+
+
+    const byteArray =
+      new Uint8Array(
+        byteNumbers
+      );
+
+
+    byteArrays.push(
+      byteArray
+    );
+
+  }
+
+
+  const blob =
+    new Blob(
+      byteArrays,
+      {
+        type:
+          tipo
+      }
+    );
+
+
+  const url =
+    URL.createObjectURL(
+      blob
+    );
+
+
+  const enlace =
+    document.createElement(
+      "a"
+    );
+
+
+  enlace.href =
+    url;
+
+  enlace.download =
+    nombre;
+
+  document.body
+    .appendChild(
+      enlace
+    );
+
+  enlace.click();
+
+  enlace.remove();
+
+
+  setTimeout(
+    function() {
+
+      URL.revokeObjectURL(
+        url
+      );
+
+    },
+    1000
+  );
+
+}
+
+
+/* =========================================================
+   DIAGNÓSTICO
+   ========================================================= */
+
+async function mostrarDiagnostico() {
+
+  mostrarLoader(
+    "Ejecutando diagnóstico..."
+  );
+
+
+  try {
+
+    const respuesta =
+      await jsonpRequest(
+        "diagnostico",
+        {}
+      );
+
+
+    const elemento =
+      $("diagnostico");
+
+
+    elemento.textContent =
+      JSON.stringify(
+        respuesta,
+        null,
+        2
+      );
+
+
+    elemento.classList
+      .add("show");
+
+
+    if (
+      respuesta.ok
+    ) {
+
+      mostrarAlerta(
+        "Diagnóstico ejecutado correctamente.",
+        "success"
+      );
+
+    } else {
+
+      mostrarAlerta(
+        "El diagnóstico detectó problemas.",
+        "error"
+      );
+
+    }
+
+  } catch (error) {
+
+    $("diagnostico")
+      .textContent =
+      error.message;
+
+
+    $("diagnostico")
+      .classList
+      .add("show");
+
+
+    mostrarAlerta(
+      "Error en diagnóstico: " +
+      error.message,
+      "error"
+    );
+
+  } finally {
+
+    ocultarLoader();
+
+  }
+
+}
+
+
+/* =========================================================
+   ALERTA
+   ========================================================= */
+
+function mostrarAlerta(
+  mensaje,
+  tipo
+) {
+
+  const alerta =
+    $("alert");
+
+
+  alerta.className =
+    "alert ";
+
+
+  if (
+    tipo === "success"
+  ) {
+
+    alerta.classList
+      .add(
+        "alert-success"
+      );
+
+  } else if (
+    tipo === "error"
+  ) {
+
+    alerta.classList
+      .add(
+        "alert-error"
+      );
+
+  } else {
+
+    alerta.classList
+      .add(
+        "alert-info"
+      );
+
+  }
+
+
+  alerta.textContent =
+    mensaje;
+
+
+  alerta.classList
+    .add("show");
+
+
+  clearTimeout(
+    alerta._timer
+  );
+
+
+  alerta._timer =
+    setTimeout(
+      function() {
+
+        alerta.classList
+          .remove("show");
+
+      },
+      6000
+    );
+
+}
+
+
+/* =========================================================
+   LOADER
+   ========================================================= */
+
+function mostrarLoader(
+  texto
+) {
+
+  $("loaderText")
+    .textContent =
+    texto ||
+    "Procesando...";
+
+
+  $("loader")
+    .classList
+    .add("show");
+
+}
+
+
+function ocultarLoader() {
+
+  $("loader")
+    .classList
+    .remove("show");
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+   ========================================================= */
+
+function escapeHTML(
+  valor
+) {
+
+  return String(
+    valor === null ||
+    valor === undefined
+      ? ""
+      : valor
+  )
+  .replace(
+    /&/g,
+    "&amp;"
+  )
+  .replace(
+    /</g,
+    "&lt;"
+  )
+  .replace(
+    />/g,
+    "&gt;"
+  )
+  .replace(
+    /"/g,
+    "&quot;"
+  )
+  .replace(
+    /'/g,
+    "&#039;"
+  );
+
+}
+
+
+/* =========================================================
+   ESCAPE JAVASCRIPT
+   ========================================================= */
+
+function escapeJS(
+  valor
+) {
+
+  return String(
+    valor === null ||
+    valor === undefined
+      ? ""
+      : valor
+  )
+  .replace(
+    /\\/g,
+    "\\\\"
+  )
+  .replace(
+    /'/g,
+    "\\'"
+  )
+  .replace(
+    /"/g,
+    '\\"'
+  )
+  .replace(
+    /\r/g,
+    "\\r"
+  )
+  .replace(
+    /\n/g,
+    "\\n"
+  );
+
+}
+
+
+/* =========================================================
+   TECLAS
+   ========================================================= */
+
+$("placa")
+  .addEventListener(
+    "input",
+    function() {
+
+      this.value =
+        this.value
+          .toUpperCase()
+          .replace(
+            /\s/g,
+            ""
+          );
+
+    }
+  );
+
+
+$("ciudadano")
+  .addEventListener(
+    "input",
+    function() {
+
+      this.value =
+        this.value
+          .toUpperCase();
+
+    }
+  );
+
+
+$("documento")
+  .addEventListener(
+    "input",
+    function() {
+
+      this.value =
+        this.value
+          .replace(
+            /[^0-9A-Za-z\-]/g,
+            ""
+          );
+
+    }
+  );
+
+
+$("detalleObservacion")
+  .addEventListener(
+    "keydown",
+    function(event) {
+
+      if (
+        event.key === "Enter"
+      ) {
+
+        event.preventDefault();
+
+        agregarDetalle();
 
       }
 
     }
+  );
 
 
-    /* =========================================================
-       UTILIDADES
-       ========================================================= */
+/* =========================================================
+   CERRAR MODAL AL HACER CLICK FUERA
+   ========================================================= */
 
-    function mostrarLoading(
-      mostrar,
-      texto = "Procesando..."
-    ) {
+$("modalDetalle")
+  .addEventListener(
+    "click",
+    function(event) {
 
-      const loading =
-        document.getElementById(
-          "loading"
-        );
+      if (
+        event.target ===
+        $("modalDetalle")
+      ) {
 
-
-      document.getElementById(
-        "loadingText"
-      ).textContent =
-        texto;
-
-
-      if (mostrar) {
-
-        loading.classList.add(
-          "show"
-        );
-
-      } else {
-
-        loading.classList.remove(
-          "show"
-        );
+        cerrarModal();
 
       }
 
     }
+  );
 
 
-    function mostrarMensaje(
-      texto,
-      tipo = "info"
-    ) {
-
-      const elemento =
-        document.getElementById(
-          "message"
-        );
-
-
-      elemento.textContent =
-        texto;
-
-
-      elemento.className =
-        "message show " +
-        tipo;
-
-
-      clearTimeout(
-        window.__messageTimer
-      );
-
-
-      window.__messageTimer =
-        setTimeout(
-          function() {
-
-            elemento.classList.remove(
-              "show"
-            );
-
-          },
-          6000
-        );
-
-    }
-
-
-    function mostrarModal(
-      titulo,
-      contenido
-    ) {
-
-      document.getElementById(
-        "modalTitle"
-      ).textContent =
-        titulo;
-
-
-      document.getElementById(
-        "modalBody"
-      ).innerHTML =
-        contenido;
-
-
-      document.getElementById(
-        "modal"
-      ).classList.add(
-        "show"
-      );
-
-    }
-
-
-    function cerrarModal() {
-
-      document.getElementById(
-        "modal"
-      ).classList.remove(
-        "show"
-      );
-
-    }
-
-
-    function escapeHTML(
-      valor
-    ) {
-
-      return String(
-        valor ?? ""
-      )
-      .replace(
-        /&/g,
-        "&amp;"
-      )
-      .replace(
-        /</g,
-        "&lt;"
-      )
-      .replace(
-        />/g,
-        "&gt;"
-      )
-      .replace(
-        /"/g,
-        "&quot;"
-      )
-      .replace(
-        /'/g,
-        "&#039;"
-      );
-
-    }
-
-  </script>
+</script>
 
 </body>
 
 </html>
-```
