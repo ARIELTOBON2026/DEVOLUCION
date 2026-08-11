@@ -6,117 +6,39 @@
   <title>DEVOLUCIÓN DE TRÁMITES</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #f0f2f5;
-      color: #333;
-      padding: 20px;
-    }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #333; padding: 20px; }
     .container { max-width: 900px; margin: 0 auto; }
-    header {
-      background: #1a237e;
-      color: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      text-align: center;
-      margin-bottom: 25px;
-    }
+    header { background: #1a237e; color: #fff; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 25px; }
     header h1 { font-size: 1.4rem; margin-bottom: 5px; }
     header p { font-size: 0.85rem; opacity: 0.8; }
-    .card {
-      background: #fff;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    .card h2 {
-      font-size: 1.1rem;
-      margin-bottom: 15px;
-      color: #1a237e;
-      border-bottom: 2px solid #e8eaf6;
-      padding-bottom: 8px;
-    }
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-    }
+    .card { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .card h2 { font-size: 1.1rem; margin-bottom: 15px; color: #1a237e; border-bottom: 2px solid #e8eaf6; padding-bottom: 8px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
     .form-group { display: flex; flex-direction: column; }
     .form-group.full { grid-column: 1 / -1; }
-    .form-group label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      margin-bottom: 4px;
-      color: #555;
-    }
+    .form-group label { font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: #555; }
     .form-group label .req { color: #d32f2f; }
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      padding: 9px 12px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 0.9rem;
-      transition: border-color 0.2s;
+    .form-group input, .form-group select, .form-group textarea {
+      padding: 9px 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 0.9rem; transition: border-color 0.2s;
     }
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      outline: none;
-      border-color: #1a237e;
-    }
-    .form-group textarea { resize: vertical; min-height: 60px; }
-    .btn {
-      padding: 10px 18px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 600;
-      transition: opacity 0.2s;
-    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #1a237e; }
+    .btn { padding: 10px 18px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
     .btn:hover { opacity: 0.85; }
     .btn-primary { background: #1a237e; color: #fff; }
     .btn-secondary { background: #78909c; color: #fff; }
-    .btn-success { background: #2e7d32; color: #fff; }
     .btn-danger { background: #c62828; color: #fff; }
     .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
     .acciones { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
-    /* Tabla detalles */
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th, td { padding: 8px 10px; border: 1px solid #ddd; font-size: 0.82rem; text-align: left; }
     th { background: #e8eaf6; font-weight: 600; }
-    .estado-msg {
-      padding: 12px;
-      border-radius: 5px;
-      margin-top: 15px;
-      font-size: 0.85rem;
-      display: none;
-    }
+    .estado-msg { padding: 12px; border-radius: 5px; margin-top: 15px; font-size: 0.85rem; display: none; }
     .estado-msg.ok { background: #e8f5e9; color: #2e7d32; display: block; }
     .estado-msg.error { background: #ffebee; color: #c62828; display: block; }
     .estado-msg.info { background: #e3f2fd; color: #1565c0; display: block; }
-    .spinner {
-      display: inline-block;
-      width: 16px; height: 16px;
-      border: 2px solid #ccc;
-      border-top-color: #1a237e;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      margin-right: 6px;
-      vertical-align: middle;
-    }
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #ccc; border-top-color: #1a237e; border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 6px; vertical-align: middle; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .devolucion-item {
-      padding: 10px;
-      border-bottom: 1px solid #eee;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.85rem;
-    }
-    .devolucion-item:last-child { border-bottom: none; }
+    .devolucion-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
     footer { text-align: center; font-size: 0.75rem; color: #999; margin-top: 30px; }
   </style>
 </head>
@@ -127,15 +49,12 @@
     <p>Secretaría de Movilidad - La Ceja del Tambo</p>
   </header>
 
-  <!-- FORMULARIO PRINCIPAL -->
   <div class="card">
     <h2>Datos de la devolución</h2>
     <div class="form-grid">
       <div class="form-group">
         <label>Funcionario <span class="req">*</span></label>
-        <select id="selFuncionario">
-          <option value="">Cargando funcionarios...</option>
-        </select>
+        <select id="selFuncionario"><option value="">Cargando...</option></select>
       </div>
       <div class="form-group">
         <label>Fecha <span class="req">*</span></label>
@@ -143,372 +62,187 @@
       </div>
       <div class="form-group">
         <label>Placa <span class="req">*</span></label>
-        <input type="text" id="inpPlaca" placeholder="ABC123" maxlength="10">
+        <input type="text" id="inpPlaca" placeholder="ABC123">
       </div>
       <div class="form-group">
         <label>Documento</label>
-        <input type="text" id="inpDocumento" placeholder="Número de documento">
+        <input type="text" id="inpDocumento">
       </div>
       <div class="form-group">
         <label>Ciudadano <span class="req">*</span></label>
-        <input type="text" id="inpCiudadano" placeholder="Nombre del ciudadano">
-      </div>
-      <div class="form-group">
-        <label>Observación general</label>
-        <input type="text" id="inpObservacionGeneral" placeholder="Observación opcional">
+        <input type="text" id="inpCiudadano">
       </div>
     </div>
   </div>
 
-  <!-- DETALLES -->
   <div class="card">
     <h2>Detalle de la devolución</h2>
     <div class="form-grid">
       <div class="form-group">
         <label>Motivo <span class="req">*</span></label>
-        <select id="selMotivo">
-          <option value="">Cargando motivos...</option>
-        </select>
+        <select id="selMotivo"><option value="">Cargando...</option></select>
       </div>
       <div class="form-group">
-        <label>Observación del motivo</label>
-        <input type="text" id="inpObservacionMotivo" placeholder="Detalle opcional">
+        <label>Observación</label>
+        <input type="text" id="inpObservacionMotivo">
       </div>
     </div>
     <div class="acciones">
       <button class="btn btn-secondary btn-sm" onclick="agregarMotivo()">+ Agregar motivo</button>
     </div>
-    <table id="tablaDetalles">
-      <thead>
-        <tr><th>N°</th><th>Motivo</th><th>Observación</th><th></th></tr>
-      </thead>
+    <table>
+      <thead><tr><th>N°</th><th>Motivo</th><th>Observación</th><th></th></tr></thead>
       <tbody id="tbodyDetalles"></tbody>
     </table>
   </div>
 
-  <!-- ACCIONES -->
   <div class="card">
     <h2>Acciones</h2>
     <div class="acciones">
-      <button class="btn btn-primary" onclick="guardarDevolucion()">💾 Guardar devolución</button>
+      <button class="btn btn-primary" onclick="guardarDevolucion()">💾 Guardar</button>
       <button class="btn btn-secondary" onclick="limpiarFormulario()">🧹 Limpiar</button>
-      <button class="btn btn-success" onclick="cargarDatosIniciales()">🔄 Actualizar datos</button>
     </div>
     <div id="msgEstado" class="estado-msg"></div>
   </div>
 
-  <!-- ÚLTIMAS DEVOLUCIONES -->
   <div class="card">
     <h2>Últimas devoluciones</h2>
-    <div id="listaDevoluciones">Cargando devoluciones...</div>
+    <div id="listaDevoluciones">Cargando...</div>
   </div>
-
-  <footer>Sistema Maestro-Detalle de Devoluciones · Versión 3.1</footer>
 </div>
 
 <script>
-/***************************************************************
- * CONFIGURACIÓN - URL del Web App de Google Apps Script
- * ⚠️ REEMPLAZA con la URL de tu despliegue
- ***************************************************************/
+// ⚠️ TU URL REAL YA ESTÁ CONFIGURADA AQUÍ
 const URL_BACKEND = "https://script.google.com/macros/s/AKfycby6Mh9vYdH5-XOGz-4MMOleKLnQ7AC-XolAZwUYInm83NM8o9MmH0AhknNW__7apz5TwQ/exec";
 
-/***************************************************************
- * VARIABLES GLOBALES
- ***************************************************************/
 let listaFuncionarios = [];
 let listaMotivos = [];
 let listaDevoluciones = [];
 let detallesFormulario = [];
-let consecutivoActual = "";
 
-/***************************************************************
- * JSONP - Llamada al backend
- ***************************************************************/
 function llamarJSONP(params, callbackExito, callbackError) {
   const callbackName = "jsonpCallback_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
   params.callback = callbackName;
-
-  const queryString = Object.keys(params)
-    .map(k => encodeURIComponent(k) + "=" + encodeURIComponent(params[k]))
-    .join("&");
-
+  const queryString = Object.keys(params).map(k => encodeURIComponent(k) + "=" + encodeURIComponent(params[k])).join("&");
   const url = URL_BACKEND + "?" + queryString;
 
-  // Definir el callback global
   window[callbackName] = function(data) {
     delete window[callbackName];
     document.head.removeChild(script);
-    if (data && data.ok) {
-      if (callbackExito) callbackExito(data);
-    } else {
-      if (callbackError) callbackError(data);
-    }
+    if (data && data.ok) { if (callbackExito) callbackExito(data); } 
+    else { if (callbackError) callbackError(data); }
   };
 
-  // Crear script dinámico
   const script = document.createElement("script");
   script.src = url;
   script.onerror = function() {
     delete window[callbackName];
     document.head.removeChild(script);
-    if (callbackError) callbackError({ ok: false, error: "Error de conexión con el servidor." });
+    if (callbackError) callbackError({ ok: false, error: "Error de red o bloqueador de anuncios." });
   };
   document.head.appendChild(script);
 }
 
-/***************************************************************
- * CARGAR DATOS INICIALES (Funcionarios, Motivos, Devoluciones)
- ***************************************************************/
 function cargarDatosIniciales() {
-  mostrarEstado("info", '<span class="spinner"></span> Cargando datos...');
-
-  llamarJSONP(
-    { action: "getInitialData" },
-    function(data) {
-      listaFuncionarios = data.funcionarios || [];
-      listaMotivos = data.motivos || [];
-      listaDevoluciones = data.devoluciones || [];
-
-      llenarSelectFuncionarios();
-      llenarSelectMotivos();
-      renderDevoluciones();
-
-      mostrarEstado("ok", "✅ Datos cargados correctamente. (" +
-        listaFuncionarios.length + " funcionarios, " +
-        listaMotivos.length + " motivos, " +
-        listaDevoluciones.length + " devoluciones)");
-    },
-    function(err) {
-      mostrarEstado("error", "❌ Error al cargar datos: " + (err.error || "Desconocido"));
-    }
-  );
+  mostrarEstado("info", '<span class="spinner"></span> Conectando con el servidor...');
+  llamarJSONP({ action: "getInitialData" }, function(data) {
+    listaFuncionarios = data.funcionarios || [];
+    listaMotivos = data.motivos || [];
+    listaDevoluciones = data.devoluciones || [];
+    llenarSelectFuncionarios();
+    llenarSelectMotivos();
+    renderDevoluciones();
+    mostrarEstado("ok", "✅ Conectado. Datos cargados correctamente.");
+  }, function(err) {
+    mostrarEstado("error", "❌ Error al cargar datos: " + (err.error || "Desconocido"));
+  });
 }
 
-/***************************************************************
- * LLENAR SELECT DE FUNCIONARIOS
- ***************************************************************/
 function llenarSelectFuncionarios() {
   const sel = document.getElementById("selFuncionario");
-  sel.innerHTML = '<option value="">-- Seleccione funcionario --</option>';
-
-  if (listaFuncionarios.length === 0) {
-    sel.innerHTML = '<option value="">No hay funcionarios registrados</option>';
-    return;
-  }
-
-  listaFuncionarios.forEach(function(f) {
+  sel.innerHTML = '<option value="">-- Seleccione --</option>';
+  listaFuncionarios.forEach(f => {
     const opt = document.createElement("option");
-    opt.value = f.nombre;
-    opt.textContent = f.nombre + (f.codigo ? " (" + f.codigo + ")" : "");
+    opt.value = f.nombre; opt.textContent = f.nombre;
     sel.appendChild(opt);
   });
 }
 
-/***************************************************************
- * LLENAR SELECT DE MOTIVOS
- ***************************************************************/
 function llenarSelectMotivos() {
   const sel = document.getElementById("selMotivo");
-  sel.innerHTML = '<option value="">-- Seleccione motivo --</option>';
-
-  if (listaMotivos.length === 0) {
-    sel.innerHTML = '<option value="">No hay motivos registrados</option>';
-    return;
-  }
-
-  listaMotivos.forEach(function(m) {
+  sel.innerHTML = '<option value="">-- Seleccione --</option>';
+  listaMotivos.forEach(m => {
     const opt = document.createElement("option");
-    opt.value = m.motivo;
-    opt.textContent = m.motivo + (m.codigo ? " (" + m.codigo + ")" : "");
+    opt.value = m.motivo; opt.textContent = m.motivo;
     sel.appendChild(opt);
   });
 }
 
-/***************************************************************
- * AGREGAR MOTIVO AL DETALLE
- ***************************************************************/
 function agregarMotivo() {
   const motivo = document.getElementById("selMotivo").value;
-  const observacion = document.getElementById("inpObservacionMotivo").value.trim();
-
-  if (!motivo) {
-    mostrarEstado("error", "❌ Seleccione un motivo.");
-    return;
-  }
-
-  detallesFormulario.push({ motivo: motivo, observacion: observacion });
+  const obs = document.getElementById("inpObservacionMotivo").value.trim();
+  if (!motivo) { mostrarEstado("error", "Seleccione un motivo."); return; }
+  detallesFormulario.push({ motivo, observacion: obs });
   renderDetalles();
-
-  // Limpiar campos del motivo
   document.getElementById("selMotivo").value = "";
   document.getElementById("inpObservacionMotivo").value = "";
-  mostrarEstado("info", "Motivo agregado. Total: " + detallesFormulario.length);
 }
 
-/***************************************************************
- * RENDERIZAR TABLA DE DETALLES
- ***************************************************************/
 function renderDetalles() {
   const tbody = document.getElementById("tbodyDetalles");
   tbody.innerHTML = "";
-
-  detallesFormulario.forEach(function(d, i) {
-    const tr = document.createElement("tr");
-    tr.innerHTML =
-      "<td>" + (i + 1) + "</td>" +
-      "<td>" + escaparHTML(d.motivo) + "</td>" +
-      "<td>" + escaparHTML(d.observacion) + "</td>" +
-      '<td><button class="btn btn-danger btn-sm" onclick="quitarMotivo(' + i + ')">✕</button></td>';
-    tbody.appendChild(tr);
+  detallesFormulario.forEach((d, i) => {
+    tbody.innerHTML += `<tr><td>${i+1}</td><td>${d.motivo}</td><td>${d.observacion}</td><td><button class="btn btn-danger btn-sm" onclick="quitarMotivo(${i})">X</button></td></tr>`;
   });
 }
 
-function quitarMotivo(indice) {
-  detallesFormulario.splice(indice, 1);
-  renderDetalles();
-}
+function quitarMotivo(i) { detallesFormulario.splice(i, 1); renderDetalles(); }
 
-/***************************************************************
- * GUARDAR DEVOLUCIÓN
- ***************************************************************/
 function guardarDevolucion() {
   const fecha = document.getElementById("inpFecha").value;
   const funcionario = document.getElementById("selFuncionario").value;
   const placa = document.getElementById("inpPlaca").value.trim().toUpperCase();
-  const documento = document.getElementById("inpDocumento").value.trim();
   const ciudadano = document.getElementById("inpCiudadano").value.trim();
+  
+  if (!fecha || !funcionario || !placa || !ciudadano) { mostrarEstado("error", "Complete los campos obligatorios."); return; }
+  if (detallesFormulario.length === 0) { mostrarEstado("error", "Agregue al menos un motivo."); return; }
 
-  // Validaciones
-  if (!fecha) { mostrarEstado("error", "❌ La fecha es obligatoria."); return; }
-  if (!funcionario) { mostrarEstado("error", "❌ Seleccione un funcionario."); return; }
-  if (!placa) { mostrarEstado("error", "❌ La placa es obligatoria."); return; }
-  if (!ciudadano) { mostrarEstado("error", "❌ El ciudadano es obligatorio."); return; }
-  if (detallesFormulario.length === 0) {
-    mostrarEstado("error", "❌ Debe agregar al menos un motivo de devolución.");
-    return;
-  }
-
-  const datos = {
-    fecha: fecha,
-    funcionario: funcionario,
-    placa: placa,
-    documento: documento,
-    ciudadano: ciudadano,
-    detalles: detallesFormulario
-  };
-
-  mostrarEstado("info", '<span class="spinner"></span> Guardando devolución...');
-
-  // ⚠️ NOTA: El backend actual usa solo GET/JSONP.
-  // Para guardar, se necesita habilitar doPost o usar fetch.
-  // Aquí usamos fetch como POST JSON:
-  fetch(URL_BACKEND, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ action: "guardarDevolucion", datos: datos })
-  })
-  .then(function(res) { return res.json(); })
-  .then(function(data) {
-    if (data.ok) {
-      mostrarEstado("ok", "✅ " + data.mensaje + " Consecutivo: " + data.consecutivo);
-      consecutivoActual = data.consecutivo;
+  const datos = { fecha, funcionario, placa, ciudadano, detalles: detallesFormulario };
+  mostrarEstado("info", '<span class="spinner"></span> Guardando...');
+  
+  llamarJSONP({ action: "guardarDevolucion", datos: JSON.stringify(datos) }, function(res) {
+    if(res.ok) {
+      mostrarEstado("ok", "✅ Guardado! Consecutivo: " + res.consecutivo);
       limpiarFormulario();
       cargarDatosIniciales();
-    } else {
-      mostrarEstado("error", "❌ Error: " + (data.error || "Desconocido"));
-    }
-  })
-  .catch(function(err) {
-    mostrarEstado("error", "❌ Error de conexión: " + err.message);
-  });
+    } else { mostrarEstado("error", "Error: " + res.error); }
+  }, function(err) { mostrarEstado("error", "Error de red."); });
 }
 
-/***************************************************************
- * RENDERIZAR LISTA DE DEVOLUCIONES
- ***************************************************************/
 function renderDevoluciones() {
   const cont = document.getElementById("listaDevoluciones");
-
-  if (listaDevoluciones.length === 0) {
-    cont.innerHTML = "<p style='color:#999;font-size:0.85rem;'>No hay devoluciones registradas.</p>";
-    return;
-  }
-
-  let html = "";
-  // Mostrar las últimas 20
-  const ultimas = listaDevoluciones.slice(-20).reverse();
-  ultimas.forEach(function(d) {
-    html += '<div class="devolucion-item">' +
-      '<span><strong>#' + escaparHTML(d.consecutivo) + '</strong> - ' +
-      escaparHTML(d.fecha) + ' | ' + escaparHTML(d.ciudadano) + ' | Placa: ' + escaparHTML(d.placa) + '</span>' +
-      '<button class="btn btn-primary btn-sm" onclick="verDetalle(\'' + escaparHTML(d.consecutivo) + '\')">Ver</button>' +
-      '</div>';
-  });
-  cont.innerHTML = html;
+  if (listaDevoluciones.length === 0) { cont.innerHTML = "No hay devoluciones."; return; }
+  cont.innerHTML = listaDevoluciones.slice(-10).reverse().map(d => 
+    `<div class="devolucion-item"><span>#${d.consecutivo} - ${d.fecha} | ${d.ciudadano} | ${d.placa}</span></div>`
+  ).join("");
 }
 
-/***************************************************************
- * VER DETALLE DE UNA DEVOLUCIÓN
- ***************************************************************/
-function verDetalle(consecutivo) {
-  mostrarEstado("info", '<span class="spinner"></span> Cargando detalle #' + consecutivo + '...');
-
-  llamarJSONP(
-    { action: "getDetalleDevolucion", consecutivo: consecutivo },
-    function(data) {
-      let msg = "📋 Detalle #" + consecutivo + ":\n";
-      (data.detalles || []).forEach(function(d) {
-        msg += "  • " + d.motivo + (d.observacion ? " - " + d.observacion : "") + "\n";
-      });
-      alert(msg);
-      mostrarEstado("ok", "✅ Detalle cargado.");
-    },
-    function(err) {
-      mostrarEstado("error", "❌ " + (err.error || "Error"));
-    }
-  );
-}
-
-/***************************************************************
- * UTILIDADES
- ***************************************************************/
 function limpiarFormulario() {
-  document.getElementById("inpFecha").value = "";
+  document.getElementById("inpFecha").value = new Date().toISOString().split("T")[0];
   document.getElementById("selFuncionario").value = "";
   document.getElementById("inpPlaca").value = "";
   document.getElementById("inpDocumento").value = "";
   document.getElementById("inpCiudadano").value = "";
-  document.getElementById("inpObservacionGeneral").value = "";
-  document.getElementById("selMotivo").value = "";
-  document.getElementById("inpObservacionMotivo").value = "";
-  detallesFormulario = [];
-  renderDetalles();
+  detallesFormulario = []; renderDetalles();
 }
 
 function mostrarEstado(tipo, html) {
   const el = document.getElementById("msgEstado");
-  el.className = "estado-msg " + tipo;
-  el.innerHTML = html;
+  el.className = "estado-msg " + tipo; el.innerHTML = html;
 }
 
-function escaparHTML(str) {
-  return String(str || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-/***************************************************************
- * INICIALIZACIÓN AL CARGAR LA PÁGINA
- ***************************************************************/
 document.addEventListener("DOMContentLoaded", function() {
-  // Poner fecha de hoy por defecto
-  const hoy = new Date().toISOString().split("T")[0];
-  document.getElementById("inpFecha").value = hoy;
-
-  // Cargar datos
+  document.getElementById("inpFecha").value = new Date().toISOString().split("T")[0];
   cargarDatosIniciales();
 });
 </script>
