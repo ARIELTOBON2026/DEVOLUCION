@@ -1383,6 +1383,7 @@
 
             <input
               type="text"
+              class="numero-detalle"
               value="${contadorDetalles}"
               readonly>
 
@@ -1433,7 +1434,7 @@
             <button
               type="button"
               class="btn-eliminar"
-              onclick="eliminarDetalle(${contadorDetalles})">
+              onclick="eliminarDetalle('detalle_${contadorDetalles}')">
 
               Eliminar
 
@@ -1453,6 +1454,8 @@
       );
 
 
+      reordenarNumerosDetalle();
+
 
       console.log(
         "Detalle agregado:",
@@ -1465,17 +1468,17 @@
 
 
     /* =====================================================
-       ELIMINAR DETALLE
+       ELIMINAR DETALLE Y REORDENAR
        ===================================================== */
 
     function eliminarDetalle(
-      id
+      idElemento
     ) {
 
 
       const elemento =
         document.getElementById(
-          "detalle_" + id
+          idElemento
         );
 
 
@@ -1483,8 +1486,29 @@
 
         elemento.remove();
 
+        reordenarNumerosDetalle();
+
       }
 
+
+    }
+
+
+    function reordenarNumerosDetalle() {
+
+      const inputs =
+        document.querySelectorAll(
+          "#contenedorDetalles .numero-detalle"
+        );
+
+
+      inputs.forEach(
+        function (input, index) {
+
+          input.value = index + 1;
+
+        }
+      );
 
     }
 
@@ -1760,7 +1784,7 @@
 
 
     /* =====================================================
-       GENERAR PDF
+       GENERAR Y DESCARGAR PDF (CORREGIDO BASE64)
        ===================================================== */
 
     async function generarPDF() {
@@ -1811,23 +1835,53 @@
 
 
 
-        if (
-          resultado.url
-        ) {
+        /* DESCARGA MEDIANTE BASE64 DECORADO */
 
-          window.open(
-            resultado.url,
-            "_blank"
+        if (resultado.base64) {
+
+          const nombreArchivo =
+            resultado.filename ||
+            ("Devolucion_" + id + ".pdf");
+
+
+          const enlaceDescarga =
+            document.createElement("a");
+
+
+          enlaceDescarga.href =
+            "data:application/pdf;base64," +
+            resultado.base64;
+
+
+          enlaceDescarga.download =
+            nombreArchivo;
+
+
+          document.body.appendChild(
+            enlaceDescarga
+          );
+
+
+          enlaceDescarga.click();
+
+
+          document.body.removeChild(
+            enlaceDescarga
+          );
+
+
+          mostrarEstado(
+            "PDF descargado correctamente.",
+            "ok"
+          );
+
+        } else {
+
+          throw new Error(
+            "El servidor no devolvió el archivo PDF en base64."
           );
 
         }
-
-
-
-        mostrarEstado(
-          "PDF generado correctamente.",
-          "ok"
-        );
 
 
       }
