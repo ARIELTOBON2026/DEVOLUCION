@@ -38,14 +38,14 @@
     .estado-msg.info { background: #e3f2fd; color: #1565c0; display: block; }
     .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #ccc; border-top-color: #1a237e; border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 6px; vertical-align: middle; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .devolucion-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-align: center; font-size: 0.85rem; }
+    .devolucion-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
     footer { text-align: center; font-size: 0.75rem; color: #999; margin-top: 30px; }
   </style>
 </head>
 <body>
 <div class="container">
   <header>
-    <h1>DEVOLUCIÓN DE TRÁMITES V1</h1>
+    <h1>DEVOLUCIÓN DE TRÁMITES</h1>
     <p>Secretaría de Movilidad - La Ceja del Tambo</p>
   </header>
 
@@ -80,7 +80,9 @@
     <div class="form-grid">
       <div class="form-group">
         <label>Motivo <span class="req">*</span></label>
-        <select id="selMotivo"><option value="">Cargando...</option></select>
+        <!-- Cambiado a Input autocompletado -->
+        <input type="text" id="inpMotivo" list="dlMotivos" placeholder="Escriba para buscar motivo...">
+        <datalist id="dlMotivos"></datalist>
       </div>
       <div class="form-group">
         <label>Observación</label>
@@ -119,10 +121,8 @@ let listaMotivos = [];
 let listaDevoluciones = [];
 let detallesFormulario = [];
 
-// Reemplazo de JSONP por Fetch Estándar (Evita bloqueos de caché y extensiones)
 async function ejecutarPeticion(params) {
   const url = new URL(URL_BACKEND);
-  // Prevenir caché agregando un timestamp único
   params._nocache = Date.now();
   Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
 
@@ -148,7 +148,7 @@ function cargarDatosIniciales() {
         listaMotivos = data.motivos || [];
         listaDevoluciones = data.devoluciones || [];
         llenarSelectFuncionarios();
-        llenarSelectMotivos();
+        llenarDatalistMotivos();
         renderDevoluciones();
         mostrarEstado("ok", "✅ Conectado. Datos cargados correctamente.");
       } else {
@@ -156,7 +156,7 @@ function cargarDatosIniciales() {
       }
     })
     .catch(err => {
-      mostrarEstado("error", "❌ Error de conexión: Comprueba si tienes un bloqueador de anuncios activo o limpia las cookies.");
+      mostrarEstado("error", "❌ Error de conexión al servidor.");
       console.error(err);
     });
 }
@@ -172,24 +172,25 @@ function llenarSelectFuncionarios() {
   });
 }
 
-function llenarSelectMotivos() {
-  const sel = document.getElementById("selMotivo");
-  sel.innerHTML = '<option value="">-- Seleccione --</option>';
+// Carga las opciones dentro del datalist para filtrar en tiempo real
+function llenarDatalistMotivos() {
+  const dl = document.getElementById("dlMotivos");
+  dl.innerHTML = "";
   listaMotivos.forEach(m => {
     const opt = document.createElement("option");
-    opt.value = m.motivo; 
-    opt.textContent = m.motivo;
-    sel.appendChild(opt);
+    opt.value = m.motivo;
+    dl.appendChild(opt);
   });
 }
 
 function agregarMotivo() {
-  const motivo = document.getElementById("selMotivo").value;
+  const motivo = document.getElementById("inpMotivo").value.trim();
   const obs = document.getElementById("inpObservacionMotivo").value.trim();
-  if (!motivo) { mostrarEstado("error", "Seleccione un motivo."); return; }
+  if (!motivo) { mostrarEstado("error", "Seleccione o escriba un motivo."); return; }
+  
   detallesFormulario.push({ motivo, observacion: obs });
   renderDetalles();
-  document.getElementById("selMotivo").value = "";
+  document.getElementById("inpMotivo").value = "";
   document.getElementById("inpObservacionMotivo").value = "";
 }
 
@@ -242,6 +243,7 @@ function renderDevoluciones() {
 function limpiarFormulario() {
   document.getElementById("inpFecha").value = new Date().toISOString().split("T")[0];
   document.getElementById("selFuncionario").value = "";
+  document.getElementById("inpMotivo").value = "";
   document.getElementById("inpPlaca").value = "";
   document.getElementById("inpDocumento").value = "";
   document.getElementById("inpCiudadano").value = "";
