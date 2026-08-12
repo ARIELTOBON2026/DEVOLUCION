@@ -18,6 +18,7 @@
     .form-group.full { grid-column: 1 / -1; }
     .form-group label { font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: #555; }
     .form-group label .req { color: #d32f2f; }
+    .form-group .hint { font-size: 0.72rem; color: #1565c0; margin-top: 3px; font-weight: 500; }
     .form-group input, .form-group select, .form-group textarea {
       padding: 9px 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 0.9rem; transition: all 0.2s;
     }
@@ -45,7 +46,7 @@
     .autocomplete-list {
       position: absolute; z-index: 1000; left: 0; right: 0; top: 100%;
       background: #fff; border: 1px solid #ccc; border-top: none;
-      border-radius: 0 0 5px 5px; max-height: 220px; overflow-y: auto;
+      border-radius: 0 0 5px 5px; max-height: 250px; overflow-y: auto;
       box-shadow: 0 4px 10px rgba(0,0,0,0.12); display: none;
     }
     .autocomplete-item {
@@ -53,7 +54,8 @@
       border-bottom: 1px solid #eee;
     }
     .autocomplete-item:hover, .autocomplete-item.active { background: #e8eaf6; }
-    .autocomplete-empty { padding: 9px 12px; color: #777; font-size: 0.82rem; }
+    .autocomplete-empty { padding: 9px 12px; color: #777; font-size: 0.82rem; font-style: italic; }
+    .autocomplete-counter { padding: 6px 12px; background: #f5f5f5; color: #666; font-size: 0.72rem; border-bottom: 1px solid #eee; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -89,9 +91,11 @@
       <div class="form-group full">
         <label>Trámite <span class="req">*</span></label>
         <div class="autocomplete-wrap">
-          <input type="text" id="inpTramite" placeholder="Escriba para buscar trámite..." autocomplete="off">
+          <input type="text" id="inpTramite" list="dlTramites" placeholder="Escriba o haga clic para ver trámites..." autocomplete="off">
+          <datalist id="dlTramites"></datalist>
           <div id="listaTramites" class="autocomplete-list"></div>
         </div>
+        <span id="hintTramites" class="hint">⏳ Esperando carga de trámites...</span>
       </div>
     </div>
   </div>
@@ -127,7 +131,6 @@
     <div id="msgEstado" class="estado-msg"></div>
   </div>
 
-  <!-- ✅ NUEVA TARJETA: BÚSQUEDA POR PLACA -->
   <div class="card">
     <h2>🔍 Búsqueda de devoluciones por placa</h2>
     <div class="form-grid">
@@ -192,16 +195,24 @@ function cargarDatosIniciales() {
       if (data && data.ok) {
         listaFuncionarios = data.funcionarios || [];
         listaMotivos = data.motivos || [];
+        // ✅ IMPORTANTE: Cargar trámites desde la hoja TRAMITES
         listaTramites = data.tramites || [];
+        console.log("✅ Trámites cargados:", listaTramites.length, listaTramites);
+
         llenarSelectFuncionarios();
         llenarDatalistMotivos();
-        mostrarEstado("ok", "✅ Conectado. Datos cargados correctamente.");
+        llenarDatalistTramites();   // ✅ NUEVO: datalist de respaldo
+        actualizarHintTramites();   // ✅ NUEVO: indicador visual
+
+        mostrarEstado("ok", `✅ Conectado. ${listaTramites.length} trámites cargados correctamente.`);
       } else {
         mostrarEstado("error", "❌ Error al cargar datos: " + (data.error || "Respuesta no válida"));
+        document.getElementById("hintTramites").textContent = "❌ No se pudieron cargar los trámites.";
       }
     })
     .catch(err => {
       mostrarEstado("error", "❌ Error de conexión al servidor.");
+      document.getElementById("hintTramites").textContent = "❌ Sin conexión al servidor.";
       console.error(err);
     });
 }
@@ -226,32 +237,72 @@ function llenarDatalistMotivos() {
   });
 }
 
+// ✅ NUEVA FUNCIÓN: Llenar datalist de respaldo para TRÁMITES
+function llenarDatalistTramites() {
+  const dl = document.getElementById("dlTramites");
+  dl.innerHTML = "";
+  listaTramites.forEach(t => {
+    const opt = document.createElement("option");
+    opt.value = t.tramite;
+    dl.appendChild(opt);
+  });
+}
+
+// ✅ NUEVA FUNCIÓN: Indicador visual de carga
+function actualizarHintTramites() {
+  const hint = document.getElementById("hintTramites");
+  if (listaTramites.length > 0) {
+    hint.textContent = `✅ ${listaTramites.length} trámites disponibles. Haga clic en el campo para verlos.`;
+    hint.style.color = "#2e7d32";
+  } else {
+    hint.textContent = "⚠️ La hoja TRAMITES está vacía o no se cargó. Verifique el backend.";
+    hint.style.color = "#c62828";
+  }
+}
+
 // ==========================================
-// AUTOCOMPLETADO DE TRÁMITES
+// AUTOCOMPLETADO DE TRÁMITES (MEJORADO)
 // ==========================================
 function normalizarTextoFront(valor) {
   return String(valor || "")
     .normalize("NFD")
-    .replace(/[\\u0300-\\u036f]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")  // ✅ Regex corregida
     .toLowerCase()
     .trim();
 }
 
+// ✅ MEJORADO: muestra sugerencias incluso con campo vacío
 function mostrarSugerenciasTramites() {
   const input = document.getElementById("inpTramite");
   const lista = document.getElementById("listaTramites");
   const texto = normalizarTextoFront(input.value);
 
+  // Si no hay trámites cargados, mostrar mensaje
+  if (!listaTramites || listaTramites.length === 0) {
+    lista.innerHTML = '<div class="autocomplete-empty">No hay trámites cargados en el sistema.</div>';
+    lista.style.display = "block";
+    return;
+  }
+
+  // Filtrar trámites (si está vacío, muestra todos)
   const filtrados = listaTramites.filter(t => {
     const valor = normalizarTextoFront(t.tramite);
     return !texto || valor.includes(texto);
-  }).slice(0, 30);
+  }).slice(0, 50);
 
   lista.innerHTML = "";
   indiceTramiteActivo = -1;
 
+  // Contador
+  const counter = document.createElement("div");
+  counter.className = "autocomplete-counter";
+  counter.textContent = texto
+    ? `${filtrados.length} de ${listaTramites.length} trámites coinciden`
+    : `${listaTramites.length} trámites disponibles`;
+  lista.appendChild(counter);
+
   if (!filtrados.length) {
-    lista.innerHTML = '<div class="autocomplete-empty">No se encontraron trámites.</div>';
+    lista.innerHTML += '<div class="autocomplete-empty">No se encontraron trámites con ese texto.</div>';
     lista.style.display = "block";
     return;
   }
@@ -260,10 +311,13 @@ function mostrarSugerenciasTramites() {
     const item = document.createElement("div");
     item.className = "autocomplete-item";
     item.textContent = t.tramite;
-    item.addEventListener("mousedown", function(ev) {
+    // ✅ CORRECCIÓN: usa pointerdown para evitar el problema del blur
+    item.addEventListener("pointerdown", function(ev) {
       ev.preventDefault();
       input.value = t.tramite;
+      input.classList.remove('invalid');
       lista.style.display = "none";
+      input.focus();
     });
     lista.appendChild(item);
   });
@@ -272,10 +326,11 @@ function mostrarSugerenciasTramites() {
 }
 
 function ocultarSugerenciasTramites() {
+  // ✅ Retraso para permitir que el click en un item se registre
   setTimeout(() => {
     const lista = document.getElementById("listaTramites");
     if (lista) lista.style.display = "none";
-  }, 150);
+  }, 200);
 }
 
 function manejarTecladoTramites(ev) {
@@ -291,7 +346,7 @@ function manejarTecladoTramites(ev) {
     indiceTramiteActivo = Math.max(indiceTramiteActivo - 1, 0);
   } else if (ev.key === "Enter" && indiceTramiteActivo >= 0) {
     ev.preventDefault();
-    items[indiceTramiteActivo].dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    items[indiceTramiteActivo].dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
     return;
   } else if (ev.key === "Escape") {
     lista.style.display = "none";
@@ -359,27 +414,16 @@ function guardarDevolucion() {
 
   const botones = document.querySelectorAll('.acciones .btn');
   botones.forEach(btn => btn.disabled = true);
-
   mostrarEstado("info", '<span class="spinner"></span> Guardando y generando PDF oficial...');
 
   ejecutarPeticion({ action: "guardarDevolucion", datos: JSON.stringify(datos) })
     .then(res => {
       if (res.ok) {
         mostrarEstado("ok", "✅ Guardado exitosamente! Consecutivo: " + res.consecutivo + ". Descargando PDF...");
-
         const nombreArchivo = `Devolucion_${res.consecutivo}_${datos.placa}.pdf`;
-
-        if (res.pdfBase64) {
-          descargarPDFDesdeBase64(res.pdfBase64, nombreArchivo);
-        } else if (res.pdfDownloadUrl) {
-          descargarPDFDesdeURL(res.pdfDownloadUrl, nombreArchivo);
-        }
-
-        setTimeout(() => {
-          limpiarFormulario();
-          cargarDatosIniciales();
-        }, 500);
-
+        if (res.pdfBase64) descargarPDFDesdeBase64(res.pdfBase64, nombreArchivo);
+        else if (res.pdfDownloadUrl) descargarPDFDesdeURL(res.pdfDownloadUrl, nombreArchivo);
+        setTimeout(() => { limpiarFormulario(); cargarDatosIniciales(); }, 500);
       } else {
         mostrarEstado("error", "Error al guardar: " + res.error);
       }
@@ -393,9 +437,6 @@ function guardarDevolucion() {
     });
 }
 
-// ==========================================
-// DESCARGA DE PDF SIN CERRAR LA PÁGINA
-// ==========================================
 function descargarPDFDesdeBase64(base64, filename) {
   try {
     const byteCharacters = atob(base64);
@@ -405,7 +446,6 @@ function descargarPDFDesdeBase64(base64, filename) {
     }
     const byteArray = new Uint8Array(byteNumbers);
     const blob = new Blob([byteArray], { type: 'application/pdf' });
-
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -413,7 +453,6 @@ function descargarPDFDesdeBase64(base64, filename) {
     a.style.display = "none";
     document.body.appendChild(a);
     a.click();
-
     setTimeout(() => {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
@@ -432,21 +471,17 @@ function descargarPDFDesdeURL(url, filename) {
   a.style.display = "none";
   document.body.appendChild(a);
   a.click();
-
   setTimeout(() => {
     if (document.body.contains(a)) document.body.removeChild(a);
   }, 1000);
 }
 
 // ==========================================
-// ✅ BÚSQUEDA POR PLACA
+// BÚSQUEDA POR PLACA
 // ==========================================
 function buscarPorPlaca() {
   const placa = document.getElementById("inpBuscarPlaca").value.trim().toUpperCase();
-  if (!placa) {
-    mostrarEstadoBusqueda("error", "❌ Ingrese una placa para buscar.");
-    return;
-  }
+  if (!placa) { mostrarEstadoBusqueda("error", "❌ Ingrese una placa para buscar."); return; }
 
   mostrarEstadoBusqueda("info", '<span class="spinner"></span> Buscando devoluciones para la placa <b>' + placa + '</b>...');
 
@@ -472,109 +507,4 @@ function buscarPorPlaca() {
 
 function renderResultados(resultados) {
   resultadosBusqueda = resultados;
-  const tbody = document.getElementById("tbodyResultados");
-  tbody.innerHTML = "";
-
-  resultados.forEach((r, i) => {
-    const motivos = (r.detalles || []).map((d, j) =>
-      (j + 1) + ". " + d.motivo + (d.observacion ? " <i>(" + d.observacion + ")</i>" : "")
-    ).join("<br>");
-
-    const botonPDF = r.pdfUrl
-      ? '<button class="btn btn-secondary btn-sm" onclick="verPDFResultado(' + i + ')">📄 Ver</button>'
-      : '—';
-
-    tbody.innerHTML += `
-      <tr>
-        <td>${r.consecutivo}</td>
-        <td>${r.fecha}</td>
-        <td><b>${r.placa}</b></td>
-        <td>${r.ciudadano}</td>
-        <td>${r.funcionario}</td>
-        <td>${r.tramite || ""}</td>
-        <td>${motivos}</td>
-        <td>${botonPDF}</td>
-      </tr>`;
-  });
-
-  document.getElementById("contResultados").style.display = "block";
-}
-
-function verPDFResultado(i) {
-  const r = resultadosBusqueda[i];
-  if (r && r.pdfUrl) {
-    // Abre el PDF en una pestaña nueva; la página actual permanece abierta
-    window.open(r.pdfUrl, "_blank", "noopener,noreferrer");
-  }
-}
-
-function limpiarBusqueda() {
-  document.getElementById("inpBuscarPlaca").value = "";
-  document.getElementById("tbodyResultados").innerHTML = "";
-  document.getElementById("contResultados").style.display = "none";
-  resultadosBusqueda = [];
-  const el = document.getElementById("msgBusqueda");
-  el.className = "estado-msg";
-  el.innerHTML = "";
-  document.getElementById("inpBuscarPlaca").focus();
-}
-
-function mostrarEstadoBusqueda(tipo, html) {
-  const el = document.getElementById("msgBusqueda");
-  el.className = "estado-msg " + tipo;
-  el.innerHTML = html;
-}
-
-// ==========================================
-// UTILIDADES DEL FORMULARIO
-// ==========================================
-function limpiarFormulario() {
-  document.getElementById("inpFecha").value = new Date().toISOString().split("T")[0];
-  document.getElementById("selFuncionario").value = "";
-  document.getElementById("inpMotivo").value = "";
-  document.getElementById("inpPlaca").value = "";
-  document.getElementById("inpDocumento").value = "";
-  document.getElementById("inpCiudadano").value = "";
-  document.getElementById("inpTramite").value = "";
-  document.getElementById("listaTramites").style.display = "none";
-  detallesFormulario = [];
-  renderDetalles();
-  document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
-}
-
-function mostrarEstado(tipo, html) {
-  const el = document.getElementById("msgEstado");
-  el.className = "estado-msg " + tipo;
-  el.innerHTML = html;
-}
-
-// ==========================================
-// INICIALIZACIÓN
-// ==========================================
-document.addEventListener("DOMContentLoaded", function() {
-  document.getElementById("inpFecha").value = new Date().toISOString().split("T")[0];
-
-  const camposReq = ['inpFecha', 'selFuncionario', 'inpPlaca', 'inpCiudadano', 'inpTramite'];
-  camposReq.forEach(id => {
-    const el = document.getElementById(id);
-    el.addEventListener('input', () => el.classList.remove('invalid'));
-    el.addEventListener('change', () => el.classList.remove('invalid'));
-  });
-
-  // Autocompletado de TRÁMITES mientras se escribe.
-  const inpTramite = document.getElementById("inpTramite");
-  inpTramite.addEventListener("input", mostrarSugerenciasTramites);
-  inpTramite.addEventListener("focus", mostrarSugerenciasTramites);
-  inpTramite.addEventListener("blur", ocultarSugerenciasTramites);
-  inpTramite.addEventListener("keydown", manejarTecladoTramites);
-
-  // Buscar con tecla Enter en el campo de búsqueda
-  document.getElementById("inpBuscarPlaca").addEventListener("keydown", function(ev) {
-    if (ev.key === "Enter") buscarPorPlaca();
-  });
-
-  cargarDatosIniciales();
-});
-</script>
-</body>
-</html>
+  const tbody =
