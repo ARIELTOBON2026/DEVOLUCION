@@ -32,7 +32,7 @@
     .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
     .acciones { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { padding: 8px 10px; border: 1px solid #ddd; font-size: 0.82rem; text-align: left; }
+    th, td { padding: 8px 10px; border: 1px solid #ddd; font-size: 0.82rem; text-align: left; vertical-align: top; }
     th { background: #e8eaf6; font-weight: 600; }
     .estado-msg { padding: 12px; border-radius: 5px; margin-top: 15px; font-size: 0.85rem; display: none; }
     .estado-msg.ok { background: #e8f5e9; color: #2e7d32; display: block; }
@@ -40,6 +40,7 @@
     .estado-msg.info { background: #e3f2fd; color: #1565c0; display: block; }
     .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #ccc; border-top-color: #1a237e; border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 6px; vertical-align: middle; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    .tabla-resultados { overflow-x: auto; }
   </style>
 </head>
 <body>
@@ -62,7 +63,7 @@
       </div>
       <div class="form-group full">
         <label>Placa <span class="req">*</span></label>
-        <input type="text" id="inpPlaca" placeholder="ABC123">
+        <input type="text" id="inpPlaca" placeholder="ABC123" style="text-transform: uppercase;">
       </div>
       <div class="form-group">
         <label>Documento</label>
@@ -105,17 +106,47 @@
     </div>
     <div id="msgEstado" class="estado-msg"></div>
   </div>
+
+  <!-- ✅ NUEVA TARJETA: BÚSQUEDA POR PLACA -->
+  <div class="card">
+    <h2>🔍 Búsqueda de devoluciones por placa</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Placa a buscar</label>
+        <input type="text" id="inpBuscarPlaca" placeholder="Ej: ABC123" style="text-transform: uppercase;">
+      </div>
+      <div class="form-group">
+        <label>&nbsp;</label>
+        <div class="acciones" style="margin-top:0;">
+          <button class="btn btn-success" onclick="buscarPorPlaca()">🔍 Buscar</button>
+          <button class="btn btn-secondary" onclick="limpiarBusqueda()">🧹 Limpiar</button>
+        </div>
+      </div>
+    </div>
+    <div id="msgBusqueda" class="estado-msg"></div>
+    <div id="contResultados" class="tabla-resultados" style="display:none;">
+      <table>
+        <thead>
+          <tr>
+            <th>Consec.</th><th>Fecha</th><th>Placa</th><th>Ciudadano</th><th>Funcionario</th><th>Motivos</th><th>PDF</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyResultados"></tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <script>
 // ==========================================
 // CONFIGURACIÓN
 // ==========================================
-const URL_BACKEND = "https://script.google.com/macros/s/AKfycbxL_cIA-5pAoBoMqZybWcvY_n8brN-SOz0BkKXfU-7RW2q484SYuvYibdG-HEV3qSk-Kw/exec";
+const URL_BACKEND = "https://script.google.com/macros/s/AKfycbx0mIdv9c-w4FNT1ig6unYGV4kkS_T20Bepb_O7-c7YuC3ZaAKkezySDws59E43Iv9K4A/exec";
 
 let listaFuncionarios = [];
 let listaMotivos = [];
 let detallesFormulario = [];
+let resultadosBusqueda = [];
 
 // ==========================================
 // PETICIÓN AL BACKEND
@@ -196,10 +227,9 @@ function renderDetalles() {
 function quitarMotivo(i) { detallesFormulario.splice(i, 1); renderDetalles(); }
 
 // ==========================================
-// GUARDAR DEVOLUCIÓN (CORREGIDO)
+// GUARDAR DEVOLUCIÓN
 // ==========================================
 function guardarDevolucion() {
-  // Validación visual de campos obligatorios
   let valid = true;
   const camposReq = ['inpFecha', 'selFuncionario', 'inpPlaca', 'inpCiudadano'];
   camposReq.forEach(id => {
@@ -226,7 +256,6 @@ function guardarDevolucion() {
     detalles: detallesFormulario
   };
 
-  // Bloquear botones para evitar doble clic
   const botones = document.querySelectorAll('.acciones .btn');
   botones.forEach(btn => btn.disabled = true);
 
@@ -239,16 +268,12 @@ function guardarDevolucion() {
 
         const nombreArchivo = `Devolucion_${res.consecutivo}_${datos.placa}.pdf`;
 
-        // ✅ MÉTODO PRINCIPAL: Descargar desde base64 (NUNCA cierra la página)
         if (res.pdfBase64) {
           descargarPDFDesdeBase64(res.pdfBase64, nombreArchivo);
-        }
-        // ✅ MÉTODO DE RESPALDO: Descargar desde URL sin cerrar la página
-        else if (res.pdfDownloadUrl) {
+        } else if (res.pdfDownloadUrl) {
           descargarPDFDesdeURL(res.pdfDownloadUrl, nombreArchivo);
         }
 
-        // Limpiar formulario y recargar datos
         setTimeout(() => {
           limpiarFormulario();
           cargarDatosIniciales();
@@ -268,8 +293,7 @@ function guardarDevolucion() {
 }
 
 // ==========================================
-// DESCARGA DE PDF - MÉTODO PRINCIPAL (BASE64)
-// ✅ Este método NUNCA cierra la página porque no navega a ninguna URL
+// DESCARGA DE PDF SIN CERRAR LA PÁGINA
 // ==========================================
 function descargarPDFDesdeBase64(base64, filename) {
   try {
@@ -293,19 +317,12 @@ function descargarPDFDesdeBase64(base64, filename) {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     }, 1000);
-
   } catch (err) {
     console.error("Error descargando desde base64:", err);
-    mostrarEstado("error", "Error al descargar PDF. Intentando método alternativo...");
   }
 }
 
-// ==========================================
-// DESCARGA DE PDF - MÉTODO DE RESPALDO (URL)
-// ✅ Usa enlace con download + iframe oculto. No cierra la página.
-// ==========================================
 function descargarPDFDesdeURL(url, filename) {
-  // Método 1: Enlace con atributo download (fuerza descarga sin navegar)
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
@@ -316,28 +333,98 @@ function descargarPDFDesdeURL(url, filename) {
   a.click();
 
   setTimeout(() => {
-    if (document.body.contains(a)) {
-      document.body.removeChild(a);
-    }
+    if (document.body.contains(a)) document.body.removeChild(a);
   }, 1000);
-
-  // Método 2 (respaldo): iframe oculto que no cierra la página
-  setTimeout(() => {
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = url;
-    document.body.appendChild(iframe);
-
-    setTimeout(() => {
-      if (document.body.contains(iframe)) {
-        document.body.removeChild(iframe);
-      }
-    }, 60000);
-  }, 500);
 }
 
 // ==========================================
-// LIMPIAR FORMULARIO
+// ✅ BÚSQUEDA POR PLACA
+// ==========================================
+function buscarPorPlaca() {
+  const placa = document.getElementById("inpBuscarPlaca").value.trim().toUpperCase();
+  if (!placa) {
+    mostrarEstadoBusqueda("error", "❌ Ingrese una placa para buscar.");
+    return;
+  }
+
+  mostrarEstadoBusqueda("info", '<span class="spinner"></span> Buscando devoluciones para la placa <b>' + placa + '</b>...');
+
+  ejecutarPeticion({ action: "buscarPorPlaca", placa: placa })
+    .then(res => {
+      if (res.ok) {
+        if (!res.resultados || res.resultados.length === 0) {
+          mostrarEstadoBusqueda("error", "Sin resultados: no se encontraron devoluciones para la placa <b>" + placa + "</b>.");
+          document.getElementById("contResultados").style.display = "none";
+        } else {
+          mostrarEstadoBusqueda("ok", "✅ Se encontraron " + res.resultados.length + " devolución(es) para la placa <b>" + placa + "</b>.");
+          renderResultados(res.resultados);
+        }
+      } else {
+        mostrarEstadoBusqueda("error", "❌ Error en la búsqueda: " + (res.error || ""));
+      }
+    })
+    .catch(err => {
+      mostrarEstadoBusqueda("error", "❌ Error de conexión al buscar.");
+      console.error(err);
+    });
+}
+
+function renderResultados(resultados) {
+  resultadosBusqueda = resultados;
+  const tbody = document.getElementById("tbodyResultados");
+  tbody.innerHTML = "";
+
+  resultados.forEach((r, i) => {
+    const motivos = (r.detalles || []).map((d, j) =>
+      (j + 1) + ". " + d.motivo + (d.observacion ? " <i>(" + d.observacion + ")</i>" : "")
+    ).join("<br>");
+
+    const botonPDF = r.pdfUrl
+      ? '<button class="btn btn-secondary btn-sm" onclick="verPDFResultado(' + i + ')">📄 Ver</button>'
+      : '—';
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${r.consecutivo}</td>
+        <td>${r.fecha}</td>
+        <td><b>${r.placa}</b></td>
+        <td>${r.ciudadano}</td>
+        <td>${r.funcionario}</td>
+        <td>${motivos}</td>
+        <td>${botonPDF}</td>
+      </tr>`;
+  });
+
+  document.getElementById("contResultados").style.display = "block";
+}
+
+function verPDFResultado(i) {
+  const r = resultadosBusqueda[i];
+  if (r && r.pdfUrl) {
+    // Abre el PDF en una pestaña nueva; la página actual permanece abierta
+    window.open(r.pdfUrl, "_blank", "noopener,noreferrer");
+  }
+}
+
+function limpiarBusqueda() {
+  document.getElementById("inpBuscarPlaca").value = "";
+  document.getElementById("tbodyResultados").innerHTML = "";
+  document.getElementById("contResultados").style.display = "none";
+  resultadosBusqueda = [];
+  const el = document.getElementById("msgBusqueda");
+  el.className = "estado-msg";
+  el.innerHTML = "";
+  document.getElementById("inpBuscarPlaca").focus();
+}
+
+function mostrarEstadoBusqueda(tipo, html) {
+  const el = document.getElementById("msgBusqueda");
+  el.className = "estado-msg " + tipo;
+  el.innerHTML = html;
+}
+
+// ==========================================
+// UTILIDADES DEL FORMULARIO
 // ==========================================
 function limpiarFormulario() {
   document.getElementById("inpFecha").value = new Date().toISOString().split("T")[0];
@@ -362,12 +449,19 @@ function mostrarEstado(tipo, html) {
 // ==========================================
 document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("inpFecha").value = new Date().toISOString().split("T")[0];
+
   const camposReq = ['inpFecha', 'selFuncionario', 'inpPlaca', 'inpCiudadano'];
   camposReq.forEach(id => {
     const el = document.getElementById(id);
     el.addEventListener('input', () => el.classList.remove('invalid'));
     el.addEventListener('change', () => el.classList.remove('invalid'));
   });
+
+  // Buscar con tecla Enter en el campo de búsqueda
+  document.getElementById("inpBuscarPlaca").addEventListener("keydown", function(ev) {
+    if (ev.key === "Enter") buscarPorPlaca();
+  });
+
   cargarDatosIniciales();
 });
 </script>
