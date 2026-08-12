@@ -1,510 +1,2556 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DEVOLUCIÓN DE TRÁMITES</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #333; padding: 20px; }
-    .container { max-width: 900px; margin: 0 auto; }
-    header { background: #1a237e; color: #fff; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 25px; }
-    header h1 { font-size: 1.4rem; margin-bottom: 5px; }
-    header p { font-size: 0.85rem; opacity: 0.8; }
-    .card { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    .card h2 { font-size: 1.1rem; margin-bottom: 15px; color: #1a237e; border-bottom: 2px solid #e8eaf6; padding-bottom: 8px; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    .form-group { display: flex; flex-direction: column; }
-    .form-group.full { grid-column: 1 / -1; }
-    .form-group label { font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: #555; }
-    .form-group label .req { color: #d32f2f; }
-    .form-group .hint { font-size: 0.72rem; color: #1565c0; margin-top: 3px; font-weight: 500; }
-    .form-group input, .form-group select, .form-group textarea {
-      padding: 9px 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 0.9rem; transition: all 0.2s;
-    }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #1a237e; }
-    .invalid { border-color: #d32f2f !important; background-color: #ffebee !important; }
-    .btn { padding: 10px 18px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: opacity 0.2s; }
-    .btn:hover:not(:disabled) { opacity: 0.85; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-success { background: #2e7d32; color: #fff; }
-    .btn-secondary { background: #78909c; color: #fff; }
-    .btn-danger { background: #c62828; color: #fff; }
-    .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
-    .acciones { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { padding: 8px 10px; border: 1px solid #ddd; font-size: 0.82rem; text-align: left; vertical-align: top; }
-    th { background: #e8eaf6; font-weight: 600; }
-    .estado-msg { padding: 12px; border-radius: 5px; margin-top: 15px; font-size: 0.85rem; display: none; }
-    .estado-msg.ok { background: #e8f5e9; color: #2e7d32; display: block; }
-    .estado-msg.error { background: #ffebee; color: #c62828; display: block; }
-    .estado-msg.info { background: #e3f2fd; color: #1565c0; display: block; }
-    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #ccc; border-top-color: #1a237e; border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 6px; vertical-align: middle; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .tabla-resultados { overflow-x: auto; }
-    .autocomplete-wrap { position: relative; }
-    .autocomplete-list {
-      position: absolute; z-index: 1000; left: 0; right: 0; top: 100%;
-      background: #fff; border: 1px solid #ccc; border-top: none;
-      border-radius: 0 0 5px 5px; max-height: 250px; overflow-y: auto;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.12); display: none;
-    }
-    .autocomplete-item {
-      padding: 9px 12px; cursor: pointer; font-size: 0.88rem;
-      border-bottom: 1px solid #eee;
-    }
-    .autocomplete-item:hover, .autocomplete-item.active { background: #e8eaf6; }
-    .autocomplete-empty { padding: 9px 12px; color: #777; font-size: 0.82rem; font-style: italic; }
-    .autocomplete-counter { padding: 6px 12px; background: #f5f5f5; color: #666; font-size: 0.72rem; border-bottom: 1px solid #eee; font-weight: 600; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Sistema Maestro-Detalle de Devoluciones - Secretaría de Movilidad - La Ceja del Tambo">
+<title>DEVOLUCIÓN DE TRÁMITES</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  font-family:'Segoe UI',Arial,sans-serif;
+  background:#f0f2f5;
+  color:#333;
+  padding:20px;
+}
+
+.container{
+  max-width:1100px;
+  margin:0 auto;
+}
+
+header{
+  background:#1a237e;
+  color:#fff;
+  padding:20px;
+  border-radius:8px;
+  text-align:center;
+  margin-bottom:25px;
+}
+
+header h1{
+  font-size:1.4rem;
+  margin-bottom:5px;
+}
+
+header p{
+  font-size:.85rem;
+  opacity:.85;
+}
+
+.card{
+  background:#fff;
+  border-radius:8px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+.card h2{
+  font-size:1.1rem;
+  margin-bottom:15px;
+  color:#1a237e;
+  border-bottom:2px solid #e8eaf6;
+  padding-bottom:8px;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+}
+
+.form-group{
+  display:flex;
+  flex-direction:column;
+}
+
+.form-group.full{
+  grid-column:1/-1;
+}
+
+.form-group label{
+  font-size:.8rem;
+  font-weight:600;
+  margin-bottom:4px;
+  color:#555;
+}
+
+.req{
+  color:#d32f2f;
+}
+
+.hint{
+  font-size:.72rem;
+  color:#1565c0;
+  margin-top:4px;
+  font-weight:500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea{
+  padding:9px 12px;
+  border:1px solid #ccc;
+  border-radius:5px;
+  font-size:.9rem;
+  transition:.2s;
+  background:#fff;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+  outline:none;
+  border-color:#1a237e;
+  box-shadow:0 0 0 2px rgba(26,35,126,.08);
+}
+
+.invalid{
+  border-color:#d32f2f!important;
+  background:#ffebee!important;
+}
+
+.btn{
+  padding:10px 18px;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+  font-size:.85rem;
+  font-weight:600;
+  transition:opacity .2s;
+}
+
+.btn:hover:not(:disabled){
+  opacity:.85;
+}
+
+.btn:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+.btn-success{
+  background:#2e7d32;
+  color:#fff;
+}
+
+.btn-secondary{
+  background:#78909c;
+  color:#fff;
+}
+
+.btn-danger{
+  background:#c62828;
+  color:#fff;
+}
+
+.btn-sm{
+  padding:6px 12px;
+  font-size:.78rem;
+}
+
+.acciones{
+  display:flex;
+  gap:10px;
+  margin-top:15px;
+  flex-wrap:wrap;
+}
+
+.estado-msg{
+  padding:12px;
+  border-radius:5px;
+  margin-top:15px;
+  font-size:.85rem;
+  display:none;
+}
+
+.estado-msg.ok{
+  background:#e8f5e9;
+  color:#2e7d32;
+  display:block;
+}
+
+.estado-msg.error{
+  background:#ffebee;
+  color:#c62828;
+  display:block;
+}
+
+.estado-msg.info{
+  background:#e3f2fd;
+  color:#1565c0;
+  display:block;
+}
+
+.spinner{
+  display:inline-block;
+  width:16px;
+  height:16px;
+  border:2px solid #ccc;
+  border-top-color:#1a237e;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+  margin-right:6px;
+  vertical-align:middle;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg);}
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+}
+
+th,td{
+  padding:8px 10px;
+  border:1px solid #ddd;
+  font-size:.82rem;
+  text-align:left;
+  vertical-align:top;
+}
+
+th{
+  background:#e8eaf6;
+  font-weight:600;
+}
+
+.tabla-resultados{
+  overflow-x:auto;
+}
+
+.autocomplete-wrap{
+  position:relative;
+}
+
+.autocomplete-list{
+  position:absolute;
+  z-index:1000;
+  left:0;
+  right:0;
+  top:100%;
+  background:#fff;
+  border:1px solid #ccc;
+  border-top:none;
+  border-radius:0 0 5px 5px;
+  max-height:250px;
+  overflow-y:auto;
+  box-shadow:0 4px 10px rgba(0,0,0,.12);
+  display:none;
+}
+
+.autocomplete-item{
+  padding:9px 12px;
+  cursor:pointer;
+  font-size:.88rem;
+  border-bottom:1px solid #eee;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.active{
+  background:#e8eaf6;
+}
+
+.autocomplete-empty{
+  padding:9px 12px;
+  color:#777;
+  font-size:.82rem;
+  font-style:italic;
+}
+
+.autocomplete-counter{
+  padding:6px 12px;
+  background:#f5f5f5;
+  color:#666;
+  font-size:.72rem;
+  border-bottom:1px solid #eee;
+  font-weight:600;
+}
+
+.estado-conexion{
+  font-size:.75rem;
+  margin-top:8px;
+}
+
+.badge{
+  display:inline-block;
+  padding:3px 8px;
+  border-radius:12px;
+  font-size:.7rem;
+  font-weight:600;
+}
+
+.badge-ok{
+  background:#e8f5e9;
+  color:#2e7d32;
+}
+
+.badge-error{
+  background:#ffebee;
+  color:#c62828;
+}
+
+.badge-info{
+  background:#e3f2fd;
+  color:#1565c0;
+}
+
+@media(max-width:700px){
+  body{
+    padding:10px;
+  }
+
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .form-group.full{
+    grid-column:auto;
+  }
+
+  header h1{
+    font-size:1.15rem;
+  }
+
+  .card{
+    padding:15px;
+  }
+}
+</style>
+
 </head>
+
 <body>
+
 <div class="container">
-  <header>
-    <h1>DEVOLUCIÓN DE TRÁMITES</h1>
-    <p>Secretaría de Movilidad - La Ceja del Tambo</p>
-  </header>
 
-  <div class="card">
-    <h2>Datos de la devolución</h2>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Funcionario <span class="req">*</span></label>
-        <select id="selFuncionario"><option value="">Cargando...</option></select>
-      </div>
-      <div class="form-group">
-        <label>Fecha <span class="req">*</span></label>
-        <input type="date" id="inpFecha">
-      </div>
-      <div class="form-group full">
-        <label>Placa <span class="req">*</span></label>
-        <input type="text" id="inpPlaca" placeholder="ABC123" style="text-transform: uppercase;">
-      </div>
-      <div class="form-group">
-        <label>Documento</label>
-        <input type="text" id="inpDocumento" placeholder="C.C. / NIT">
-      </div>
-      <div class="form-group">
-        <label>Ciudadano <span class="req">*</span></label>
-        <input type="text" id="inpCiudadano" placeholder="Nombre completo">
-      </div>
-      <div class="form-group full">
-        <label>Trámite <span class="req">*</span></label>
-        <div class="autocomplete-wrap">
-          <input type="text" id="inpTramite" list="dlTramites" placeholder="Escriba o haga clic para ver trámites..." autocomplete="off">
-          <datalist id="dlTramites"></datalist>
-          <div id="listaTramites" class="autocomplete-list"></div>
-        </div>
-        <span id="hintTramites" class="hint">⏳ Esperando carga de trámites...</span>
-      </div>
-    </div>
+<header>
+  <h1>DEVOLUCIÓN DE TRÁMITES</h1>
+  <p>Secretaría de Movilidad - La Ceja del Tambo</p>
+  <div id="estadoConexion" class="estado-conexion">
+    <span class="badge badge-info">Conectando...</span>
   </div>
+</header>
 
-  <div class="card">
-    <h2>Detalle de la devolución</h2>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Motivo <span class="req">*</span></label>
-        <input type="text" id="inpMotivo" list="dlMotivos" placeholder="Escriba para buscar motivo...">
-        <datalist id="dlMotivos"></datalist>
-      </div>
-      <div class="form-group">
-        <label>Observación</label>
-        <input type="text" id="inpObservacionMotivo">
-      </div>
-    </div>
-    <div class="acciones">
-      <button class="btn btn-secondary btn-sm" onclick="agregarMotivo()">+ Agregar motivo</button>
-    </div>
-    <table>
-      <thead><tr><th>N°</th><th>Motivo</th><th>Observación</th><th></th></tr></thead>
-      <tbody id="tbodyDetalles"></tbody>
-    </table>
-  </div>
+<!-- =====================================================
+     DATOS DE LA DEVOLUCIÓN
+===================================================== -->
 
-  <div class="card">
-    <h2>Acciones</h2>
-    <div class="acciones">
-      <button class="btn btn-success" onclick="guardarDevolucion()">📄 Guardar y Generar PDF</button>
-      <button class="btn btn-secondary" onclick="limpiarFormulario()">🧹 Limpiar</button>
-    </div>
-    <div id="msgEstado" class="estado-msg"></div>
-  </div>
+<div class="card">
 
-  <div class="card">
-    <h2>🔍 Búsqueda de devoluciones por placa</h2>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Placa a buscar</label>
-        <input type="text" id="inpBuscarPlaca" placeholder="Ej: ABC123" style="text-transform: uppercase;">
-      </div>
-      <div class="form-group">
-        <label>&nbsp;</label>
-        <div class="acciones" style="margin-top:0;">
-          <button class="btn btn-success" onclick="buscarPorPlaca()">🔍 Buscar</button>
-          <button class="btn btn-secondary" onclick="limpiarBusqueda()">🧹 Limpiar</button>
-        </div>
-      </div>
-    </div>
-    <div id="msgBusqueda" class="estado-msg"></div>
-    <div id="contResultados" class="tabla-resultados" style="display:none;">
-      <table>
-        <thead>
-          <tr>
-            <th>Consec.</th><th>Fecha</th><th>Placa</th><th>Ciudadano</th><th>Funcionario</th><th>Trámite</th><th>Motivos</th><th>PDF</th>
-          </tr>
-        </thead>
-        <tbody id="tbodyResultados"></tbody>
-      </table>
-    </div>
-  </div>
+<h2>Datos de la devolución</h2>
+
+<div class="form-grid">
+
+<div class="form-group">
+
+<label>
+Funcionario <span class="req">*</span>
+</label>
+
+<select id="selFuncionario">
+<option value="">Cargando...</option>
+</select>
+
+</div>
+
+<div class="form-group">
+
+<label>
+Fecha <span class="req">*</span>
+</label>
+
+<input
+type="date"
+id="inpFecha"
+
+>
+
+</div>
+
+<div class="form-group full">
+
+<label>
+Placa <span class="req">*</span>
+</label>
+
+<input
+type="text"
+id="inpPlaca"
+placeholder="ABC123"
+maxlength="10"
+style="text-transform:uppercase;"
+
+>
+
+</div>
+
+<div class="form-group">
+
+<label>
+Documento
+</label>
+
+<input
+type="text"
+id="inpDocumento"
+placeholder="C.C. / NIT"
+
+>
+
+</div>
+
+<div class="form-group">
+
+<label>
+Ciudadano <span class="req">*</span>
+</label>
+
+<input
+type="text"
+id="inpCiudadano"
+placeholder="Nombre completo"
+
+>
+
+</div>
+
+<div class="form-group full">
+
+<label>
+Trámite <span class="req">*</span>
+</label>
+
+<div class="autocomplete-wrap">
+
+<input
+type="text"
+id="inpTramite"
+placeholder="Escriba o haga clic para ver trámites..."
+autocomplete="off"
+
+>
+
+<datalist id="dlTramites"></datalist>
+
+<div
+id="listaTramites"
+class="autocomplete-list">
+</div>
+
+</div>
+
+<span
+id="hintTramites"
+class="hint">
+⏳ Esperando carga de trámites... </span>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- =====================================================
+     DETALLE
+===================================================== -->
+
+<div class="card">
+
+<h2>Detalle de la devolución</h2>
+
+<div class="form-grid">
+
+<div class="form-group">
+
+<label>
+Motivo <span class="req">*</span>
+</label>
+
+<input
+type="text"
+id="inpMotivo"
+list="dlMotivos"
+placeholder="Escriba para buscar motivo..."
+autocomplete="off"
+
+>
+
+<datalist id="dlMotivos"></datalist>
+
+</div>
+
+<div class="form-group">
+
+<label>
+Observación
+</label>
+
+<input
+type="text"
+id="inpObservacionMotivo"
+
+>
+
+</div>
+
+</div>
+
+<div class="acciones">
+
+<button
+class="btn btn-secondary btn-sm"
+onclick="agregarMotivo()">
+
+* Agregar motivo
+
+  </button>
+
+</div>
+
+<div class="tabla-resultados">
+
+<table>
+
+<thead>
+
+<tr>
+<th>N°</th>
+<th>Motivo</th>
+<th>Observación</th>
+<th>Acción</th>
+</tr>
+
+</thead>
+
+<tbody id="tbodyDetalles"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<!-- =====================================================
+     ACCIONES
+===================================================== -->
+
+<div class="card">
+
+<h2>Acciones</h2>
+
+<div class="acciones">
+
+<button
+class="btn btn-success"
+onclick="guardarDevolucion()">
+📄 Guardar y Generar PDF </button>
+
+<button
+class="btn btn-secondary"
+onclick="limpiarFormulario()">
+🧹 Limpiar </button>
+
+</div>
+
+<div id="msgEstado" class="estado-msg"></div>
+
+</div>
+
+<!-- =====================================================
+     BÚSQUEDA
+===================================================== -->
+
+<div class="card">
+
+<h2>🔍 Búsqueda de devoluciones por placa</h2>
+
+<div class="form-grid">
+
+<div class="form-group">
+
+<label>
+Placa a buscar
+</label>
+
+<input
+type="text"
+id="inpBuscarPlaca"
+placeholder="Ej: ABC123"
+maxlength="10"
+style="text-transform:uppercase;"
+
+>
+
+</div>
+
+<div class="form-group">
+
+<label> </label>
+
+<div class="acciones" style="margin-top:0;">
+
+<button
+class="btn btn-success"
+onclick="buscarPorPlaca()">
+🔍 Buscar </button>
+
+<button
+class="btn btn-secondary"
+onclick="limpiarBusqueda()">
+🧹 Limpiar </button>
+
+</div>
+
+</div>
+
+</div>
+
+<div
+id="msgBusqueda"
+class="estado-msg">
+</div>
+
+<div
+id="contResultados"
+class="tabla-resultados"
+style="display:none;"
+>
+
+<table>
+
+<thead>
+
+<tr>
+<th>Consec.</th>
+<th>Fecha</th>
+<th>Placa</th>
+<th>Ciudadano</th>
+<th>Funcionario</th>
+<th>Trámite</th>
+<th>Motivos</th>
+<th>PDF</th>
+</tr>
+
+</thead>
+
+<tbody id="tbodyResultados"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
 </div>
 
 <script>
-// ==========================================
-// CONFIGURACIÓN
-// ==========================================
-const URL_BACKEND = "https://script.google.com/macros/s/AKfycbxd3XgNOGV5XvK21V54PfmLu14oLkQdADR9N2D3ByBr4I1CWCLhcYjHKCI7uQ0Yk_m1fg/exec";
+
+/* =====================================================
+   CONFIGURACIÓN
+===================================================== */
+
+const URL_BACKEND =
+"https://script.google.com/macros/s/AKfycbxd3XgNOGV5XvK21V54PfmLu14oLkQdADR9N2D3ByBr4I1CWCLhcYjHKCI7uQ0Yk_m1fg/exec";
+
 
 let listaFuncionarios = [];
 let listaMotivos = [];
 let listaTramites = [];
+
 let detallesFormulario = [];
 let resultadosBusqueda = [];
+
 let indiceTramiteActivo = -1;
 
-// ==========================================
-// PETICIÓN AL BACKEND
-// ==========================================
-async function ejecutarPeticion(params) {
-  const url = new URL(URL_BACKEND);
-  params._nocache = Date.now();
-  Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
-  const response = await fetch(url.toString(), { method: "GET", redirect: "follow" });
-  if (!response.ok) throw new Error("Error en el servidor: " + response.statusText);
-  return await response.json();
+
+/* =====================================================
+   ESTADO
+===================================================== */
+
+function mostrarEstado(tipo,mensaje){
+
+const el =
+document.getElementById("msgEstado");
+
+if(!el)return;
+
+el.className =
+"estado-msg " + tipo;
+
+el.innerHTML = mensaje;
+
 }
 
-// ==========================================
-// CARGAR DATOS INICIALES
-// ==========================================
-function cargarDatosIniciales() {
-  mostrarEstado("info", '<span class="spinner"></span> Conectando con el servidor...');
-  ejecutarPeticion({ action: "getInitialData" })
-    .then(data => {
-      if (data && data.ok) {
-        listaFuncionarios = data.funcionarios || [];
-        listaMotivos = data.motivos || [];
-        // ✅ IMPORTANTE: Cargar trámites desde la hoja TRAMITES
-        listaTramites = data.tramites || [];
-        console.log("✅ Trámites cargados:", listaTramites.length, listaTramites);
 
-        llenarSelectFuncionarios();
-        llenarDatalistMotivos();
-        llenarDatalistTramites();   // ✅ NUEVO: datalist de respaldo
-        actualizarHintTramites();   // ✅ NUEVO: indicador visual
+function mostrarEstadoBusqueda(tipo,mensaje){
 
-        mostrarEstado("ok", `✅ Conectado. ${listaTramites.length} trámites cargados correctamente.`);
-      } else {
-        mostrarEstado("error", "❌ Error al cargar datos: " + (data.error || "Respuesta no válida"));
-        document.getElementById("hintTramites").textContent = "❌ No se pudieron cargar los trámites.";
-      }
-    })
-    .catch(err => {
-      mostrarEstado("error", "❌ Error de conexión al servidor.");
-      document.getElementById("hintTramites").textContent = "❌ Sin conexión al servidor.";
-      console.error(err);
-    });
+const el =
+document.getElementById("msgBusqueda");
+
+if(!el)return;
+
+el.className =
+"estado-msg " + tipo;
+
+el.innerHTML = mensaje;
+
 }
 
-function llenarSelectFuncionarios() {
-  const sel = document.getElementById("selFuncionario");
-  sel.innerHTML = '<option value="">-- Seleccione --</option>';
-  listaFuncionarios.forEach(f => {
-    const opt = document.createElement("option");
-    opt.value = f.nombre; opt.textContent = f.nombre;
-    sel.appendChild(opt);
-  });
+
+function actualizarEstadoConexion(tipo,texto){
+
+const el =
+document.getElementById("estadoConexion");
+
+if(!el)return;
+
+let clase="badge-info";
+
+if(tipo==="ok")
+clase="badge-ok";
+
+if(tipo==="error")
+clase="badge-error";
+
+el.innerHTML =
+'<span class="badge '+clase+'">'+
+texto+
+'</span>';
+
 }
 
-function llenarDatalistMotivos() {
-  const dl = document.getElementById("dlMotivos");
-  dl.innerHTML = "";
-  listaMotivos.forEach(m => {
-    const opt = document.createElement("option");
-    opt.value = m.motivo;
-    dl.appendChild(opt);
-  });
+
+/* =====================================================
+   JSONP
+   IMPORTANTE:
+   NO UTILIZAR FETCH
+===================================================== */
+
+function ejecutarPeticion(params){
+
+return new Promise((resolve,reject)=>{
+
+const callbackName =
+"jsonpCallback_" +
+Date.now() +
+"_" +
+Math.floor(Math.random()*100000);
+
+
+const script =
+document.createElement("script");
+
+
+let terminado=false;
+
+
+window[callbackName]=function(data){
+
+terminado=true;
+
+try{
+
+resolve(data);
+
+}
+finally{
+
+delete window[callbackName];
+
+if(script.parentNode){
+
+script.parentNode.removeChild(script);
+
 }
 
-// ✅ NUEVA FUNCIÓN: Llenar datalist de respaldo para TRÁMITES
-function llenarDatalistTramites() {
-  const dl = document.getElementById("dlTramites");
-  dl.innerHTML = "";
-  listaTramites.forEach(t => {
-    const opt = document.createElement("option");
-    opt.value = t.tramite;
-    dl.appendChild(opt);
-  });
 }
 
-// ✅ NUEVA FUNCIÓN: Indicador visual de carga
-function actualizarHintTramites() {
-  const hint = document.getElementById("hintTramites");
-  if (listaTramites.length > 0) {
-    hint.textContent = `✅ ${listaTramites.length} trámites disponibles. Haga clic en el campo para verlos.`;
-    hint.style.color = "#2e7d32";
-  } else {
-    hint.textContent = "⚠️ La hoja TRAMITES está vacía o no se cargó. Verifique el backend.";
-    hint.style.color = "#c62828";
-  }
+};
+
+
+script.onerror=function(){
+
+if(terminado)return;
+
+delete window[callbackName];
+
+if(script.parentNode){
+
+script.parentNode.removeChild(script);
+
 }
 
-// ==========================================
-// AUTOCOMPLETADO DE TRÁMITES (MEJORADO)
-// ==========================================
-function normalizarTextoFront(valor) {
-  return String(valor || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")  // ✅ Regex corregida
-    .toLowerCase()
-    .trim();
+reject(
+new Error(
+"No fue posible cargar la respuesta JSONP de Apps Script."
+)
+);
+
+};
+
+
+const query =
+new URLSearchParams();
+
+
+Object.keys(params).forEach(key=>{
+
+let valor=params[key];
+
+if(valor===undefined ||
+   valor===null){
+
+valor="";
+
 }
 
-// ✅ MEJORADO: muestra sugerencias incluso con campo vacío
-function mostrarSugerenciasTramites() {
-  const input = document.getElementById("inpTramite");
-  const lista = document.getElementById("listaTramites");
-  const texto = normalizarTextoFront(input.value);
+query.append(
+key,
+String(valor)
+);
 
-  // Si no hay trámites cargados, mostrar mensaje
-  if (!listaTramites || listaTramites.length === 0) {
-    lista.innerHTML = '<div class="autocomplete-empty">No hay trámites cargados en el sistema.</div>';
-    lista.style.display = "block";
-    return;
-  }
+});
 
-  // Filtrar trámites (si está vacío, muestra todos)
-  const filtrados = listaTramites.filter(t => {
-    const valor = normalizarTextoFront(t.tramite);
-    return !texto || valor.includes(texto);
-  }).slice(0, 50);
 
-  lista.innerHTML = "";
-  indiceTramiteActivo = -1;
+query.append(
+"callback",
+callbackName
+);
 
-  // Contador
-  const counter = document.createElement("div");
-  counter.className = "autocomplete-counter";
-  counter.textContent = texto
-    ? `${filtrados.length} de ${listaTramites.length} trámites coinciden`
-    : `${listaTramites.length} trámites disponibles`;
-  lista.appendChild(counter);
 
-  if (!filtrados.length) {
-    lista.innerHTML += '<div class="autocomplete-empty">No se encontraron trámites con ese texto.</div>';
-    lista.style.display = "block";
-    return;
-  }
+query.append(
+"_nocache",
+Date.now()
+);
 
-  filtrados.forEach(t => {
-    const item = document.createElement("div");
-    item.className = "autocomplete-item";
-    item.textContent = t.tramite;
-    // ✅ CORRECCIÓN: usa pointerdown para evitar el problema del blur
-    item.addEventListener("pointerdown", function(ev) {
-      ev.preventDefault();
-      input.value = t.tramite;
-      input.classList.remove('invalid');
-      lista.style.display = "none";
-      input.focus();
-    });
-    lista.appendChild(item);
-  });
 
-  lista.style.display = "block";
+script.src =
+URL_BACKEND +
+"?" +
+query.toString();
+
+
+document.head.appendChild(script);
+
+
+/* TIMEOUT */
+
+setTimeout(()=>{
+
+if(terminado)return;
+
+delete window[callbackName];
+
+if(script.parentNode){
+
+script.parentNode.removeChild(script);
+
 }
 
-function ocultarSugerenciasTramites() {
-  // ✅ Retraso para permitir que el click en un item se registre
-  setTimeout(() => {
-    const lista = document.getElementById("listaTramites");
-    if (lista) lista.style.display = "none";
-  }, 200);
+reject(
+new Error(
+"Tiempo de espera agotado al conectar con Apps Script."
+)
+);
+
+},20000);
+
+});
+
 }
 
-function manejarTecladoTramites(ev) {
-  const lista = document.getElementById("listaTramites");
-  const items = Array.from(lista.querySelectorAll(".autocomplete-item"));
-  if (lista.style.display !== "block" || !items.length) return;
 
-  if (ev.key === "ArrowDown") {
-    ev.preventDefault();
-    indiceTramiteActivo = Math.min(indiceTramiteActivo + 1, items.length - 1);
-  } else if (ev.key === "ArrowUp") {
-    ev.preventDefault();
-    indiceTramiteActivo = Math.max(indiceTramiteActivo - 1, 0);
-  } else if (ev.key === "Enter" && indiceTramiteActivo >= 0) {
-    ev.preventDefault();
-    items[indiceTramiteActivo].dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
-    return;
-  } else if (ev.key === "Escape") {
-    lista.style.display = "none";
-    return;
-  } else {
-    return;
-  }
+/* =====================================================
+   CARGAR DATOS INICIALES
+===================================================== */
 
-  items.forEach((item, i) => item.classList.toggle("active", i === indiceTramiteActivo));
+function cargarDatosIniciales(){
+
+mostrarEstado(
+"info",
+'<span class="spinner"></span>'+
+' Conectando con Apps Script...'
+);
+
+actualizarEstadoConexion(
+"info",
+"Conectando..."
+);
+
+
+ejecutarPeticion({
+
+action:"getInitialData"
+
+})
+
+
+.then(data=>{
+
+console.log(
+"RESPUESTA getInitialData:",
+data
+);
+
+
+if(data && data.ok){
+
+listaFuncionarios =
+Array.isArray(data.funcionarios)
+? data.funcionarios
+: [];
+
+
+listaMotivos =
+Array.isArray(data.motivos)
+? data.motivos
+: [];
+
+
+listaTramites =
+Array.isArray(data.tramites)
+? data.tramites
+: [];
+
+
+console.log(
+"FUNCIONARIOS:",
+listaFuncionarios
+);
+
+
+console.log(
+"MOTIVOS:",
+listaMotivos
+);
+
+
+console.log(
+"TRAMITES:",
+listaTramites
+);
+
+
+/* CARGAR MENÚS */
+
+llenarSelectFuncionarios();
+
+llenarDatalistMotivos();
+
+llenarDatalistTramites();
+
+actualizarHintTramites();
+
+
+actualizarEstadoConexion(
+"ok",
+"Conectado"
+);
+
+
+mostrarEstado(
+"ok",
+"✅ Datos cargados correctamente. "+
+listaFuncionarios.length+
+" funcionarios, "+
+listaMotivos.length+
+" motivos y "+
+listaTramites.length+
+" trámites."
+);
+
+
 }
 
-// ==========================================
-// GESTIÓN DE MOTIVOS
-// ==========================================
-function agregarMotivo() {
-  const motivo = document.getElementById("inpMotivo").value.trim();
-  const obs = document.getElementById("inpObservacionMotivo").value.trim();
-  if (!motivo) { mostrarEstado("error", "Seleccione o escriba un motivo."); return; }
-  detallesFormulario.push({ motivo, observacion: obs });
-  renderDetalles();
-  document.getElementById("inpMotivo").value = "";
-  document.getElementById("inpObservacionMotivo").value = "";
+else{
+
+actualizarEstadoConexion(
+"error",
+"Error de datos"
+);
+
+
+mostrarEstado(
+"error",
+"❌ Error al cargar datos: "+
+(
+data && data.error
+? data.error
+: "Respuesta no válida"
+)
+);
+
+
+document.getElementById(
+"hintTramites"
+).textContent =
+"❌ No se pudieron cargar los trámites.";
+
 }
 
-function renderDetalles() {
-  const tbody = document.getElementById("tbodyDetalles");
-  tbody.innerHTML = "";
-  detallesFormulario.forEach((d, i) => {
-    tbody.innerHTML += `<tr><td>${i+1}</td><td>${d.motivo}</td><td>${d.observacion}</td><td><button class="btn btn-danger btn-sm" onclick="quitarMotivo(${i})">X</button></td></tr>`;
-  });
+})
+
+
+.catch(err=>{
+
+console.error(
+"ERROR:",
+err
+);
+
+
+actualizarEstadoConexion(
+"error",
+"Sin conexión"
+);
+
+
+mostrarEstado(
+"error",
+"❌ No fue posible cargar los datos desde Apps Script.<br>"+
+err.message
+);
+
+
+document.getElementById(
+"hintTramites"
+).textContent =
+"❌ Sin conexión con Apps Script.";
+
+});
+
 }
 
-function quitarMotivo(i) { detallesFormulario.splice(i, 1); renderDetalles(); }
 
-// ==========================================
-// GUARDAR DEVOLUCIÓN
-// ==========================================
-function guardarDevolucion() {
-  let valid = true;
-  const camposReq = ['inpFecha', 'selFuncionario', 'inpPlaca', 'inpCiudadano', 'inpTramite'];
-  camposReq.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el.value.trim()) { el.classList.add('invalid'); valid = false; }
-    else { el.classList.remove('invalid'); }
-  });
+/* =====================================================
+   FUNCIONARIOS
+===================================================== */
 
-  if (!valid) {
-    mostrarEstado("error", "Por favor complete los campos obligatorios marcados en rojo.");
-    return;
-  }
-  if (detallesFormulario.length === 0) {
-    mostrarEstado("error", "Agregue al menos un motivo a la lista.");
-    return;
-  }
+function llenarSelectFuncionarios(){
 
-  const datos = {
-    fecha: document.getElementById("inpFecha").value,
-    funcionario: document.getElementById("selFuncionario").value,
-    placa: document.getElementById("inpPlaca").value.trim().toUpperCase(),
-    documento: document.getElementById("inpDocumento").value.trim(),
-    ciudadano: document.getElementById("inpCiudadano").value.trim(),
-    tramite: document.getElementById("inpTramite").value.trim(),
-    detalles: detallesFormulario
-  };
+const select =
+document.getElementById(
+"selFuncionario"
+);
 
-  const botones = document.querySelectorAll('.acciones .btn');
-  botones.forEach(btn => btn.disabled = true);
-  mostrarEstado("info", '<span class="spinner"></span> Guardando y generando PDF oficial...');
+select.innerHTML =
+'<option value="">-- Seleccione --</option>';
 
-  ejecutarPeticion({ action: "guardarDevolucion", datos: JSON.stringify(datos) })
-    .then(res => {
-      if (res.ok) {
-        mostrarEstado("ok", "✅ Guardado exitosamente! Consecutivo: " + res.consecutivo + ". Descargando PDF...");
-        const nombreArchivo = `Devolucion_${res.consecutivo}_${datos.placa}.pdf`;
-        if (res.pdfBase64) descargarPDFDesdeBase64(res.pdfBase64, nombreArchivo);
-        else if (res.pdfDownloadUrl) descargarPDFDesdeURL(res.pdfDownloadUrl, nombreArchivo);
-        setTimeout(() => { limpiarFormulario(); cargarDatosIniciales(); }, 500);
-      } else {
-        mostrarEstado("error", "Error al guardar: " + res.error);
-      }
-    })
-    .catch(err => {
-      mostrarEstado("error", "Error de red al guardar los datos.");
-      console.error(err);
-    })
-    .finally(() => {
-      botones.forEach(btn => btn.disabled = false);
-    });
+
+listaFuncionarios.forEach(f=>{
+
+let nombre="";
+
+
+if(typeof f==="string"){
+
+nombre=f;
+
 }
 
-function descargarPDFDesdeBase64(base64, filename) {
-  try {
-    const byteCharacters = atob(base64);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: 'application/pdf' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.style.display = "none";
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    }, 1000);
-  } catch (err) {
-    console.error("Error descargando desde base64:", err);
-  }
+else if(f){
+
+nombre =
+f.nombre ||
+f.funcionario ||
+f.NOMBRE ||
+f.FUNCIONARIO ||
+"";
+
 }
 
-function descargarPDFDesdeURL(url, filename) {
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.target = "_self";
-  a.rel = "noopener noreferrer";
-  a.style.display = "none";
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => {
-    if (document.body.contains(a)) document.body.removeChild(a);
-  }, 1000);
+
+if(!nombre)return;
+
+
+const option =
+document.createElement("option");
+
+
+option.value=nombre;
+
+option.textContent=nombre;
+
+
+select.appendChild(option);
+
+});
+
 }
 
-// ==========================================
-// BÚSQUEDA POR PLACA
-// ==========================================
-function buscarPorPlaca() {
-  const placa = document.getElementById("inpBuscarPlaca").value.trim().toUpperCase();
-  if (!placa) { mostrarEstadoBusqueda("error", "❌ Ingrese una placa para buscar."); return; }
 
-  mostrarEstadoBusqueda("info", '<span class="spinner"></span> Buscando devoluciones para la placa <b>' + placa + '</b>...');
+/* =====================================================
+   MOTIVOS
+===================================================== */
 
-  ejecutarPeticion({ action: "buscarPorPlaca", placa: placa })
-    .then(res => {
-      if (res.ok) {
-        if (!res.resultados || res.resultados.length === 0) {
-          mostrarEstadoBusqueda("error", "Sin resultados: no se encontraron devoluciones para la placa <b>" + placa + "</b>.");
-          document.getElementById("contResultados").style.display = "none";
-        } else {
-          mostrarEstadoBusqueda("ok", "✅ Se encontraron " + res.resultados.length + " devolución(es) para la placa <b>" + placa + "</b>.");
-          renderResultados(res.resultados);
-        }
-      } else {
-        mostrarEstadoBusqueda("error", "❌ Error en la búsqueda: " + (res.error || ""));
-      }
-    })
-    .catch(err => {
-      mostrarEstadoBusqueda("error", "❌ Error de conexión al buscar.");
-      console.error(err);
-    });
+function llenarDatalistMotivos(){
+
+const dl =
+document.getElementById(
+"dlMotivos"
+);
+
+dl.innerHTML="";
+
+
+listaMotivos.forEach(m=>{
+
+let motivo="";
+
+
+if(typeof m==="string"){
+
+motivo=m;
+
 }
 
-function renderResultados(resultados) {
-  resultadosBusqueda = resultados;
-  const tbody =
+else if(m){
+
+motivo =
+m.motivo ||
+m.MOTIVO ||
+m.nombre ||
+m.descripcion ||
+"";
+
+}
+
+
+if(!motivo)return;
+
+
+const option =
+document.createElement("option");
+
+option.value=motivo;
+
+dl.appendChild(option);
+
+});
+
+}
+
+
+/* =====================================================
+   TRÁMITES
+===================================================== */
+
+function llenarDatalistTramites(){
+
+const dl =
+document.getElementById(
+"dlTramites"
+);
+
+dl.innerHTML="";
+
+
+listaTramites.forEach(t=>{
+
+let tramite="";
+
+
+if(typeof t==="string"){
+
+tramite=t;
+
+}
+
+else if(t){
+
+tramite =
+t.tramite ||
+t.TRAMITE ||
+t.nombre ||
+t.descripcion ||
+"";
+
+}
+
+
+if(!tramite)return;
+
+
+const option =
+document.createElement("option");
+
+option.value=tramite;
+
+dl.appendChild(option);
+
+});
+
+}
+
+
+function actualizarHintTramites(){
+
+const hint =
+document.getElementById(
+"hintTramites"
+);
+
+
+if(listaTramites.length>0){
+
+hint.textContent =
+"✅ "+
+listaTramites.length+
+" trámites disponibles. Haga clic en el campo para verlos.";
+
+hint.style.color="#2e7d32";
+
+}
+
+else{
+
+hint.textContent =
+"⚠️ No hay trámites cargados. Verifique la hoja TRAMITES.";
+
+hint.style.color="#c62828";
+
+}
+
+}
+
+
+/* =====================================================
+   NORMALIZAR TEXTO
+===================================================== */
+
+function normalizarTextoFront(valor){
+
+return String(valor||"")
+.normalize("NFD")
+.replace(/[\u0300-\u036f]/g,"")
+.toLowerCase()
+.trim();
+
+}
+
+
+/* =====================================================
+   AUTOCOMPLETADO TRÁMITES
+===================================================== */
+
+function obtenerNombreTramite(obj){
+
+if(typeof obj==="string")
+return obj;
+
+
+return obj &&
+(
+obj.tramite ||
+obj.TRAMITE ||
+obj.nombre ||
+obj.descripcion ||
+""
+);
+
+}
+
+
+function mostrarSugerenciasTramites(){
+
+const input =
+document.getElementById(
+"inpTramite"
+);
+
+const lista =
+document.getElementById(
+"listaTramites"
+);
+
+
+const texto =
+normalizarTextoFront(
+input.value
+);
+
+
+if(!listaTramites ||
+listaTramites.length===0){
+
+lista.innerHTML =
+'<div class="autocomplete-empty">'+
+'No hay trámites cargados en el sistema.'+
+'</div>';
+
+lista.style.display="block";
+
+return;
+
+}
+
+
+const filtrados =
+listaTramites
+.filter(t=>{
+
+const valor =
+normalizarTextoFront(
+obtenerNombreTramite(t)
+);
+
+return !texto ||
+valor.includes(texto);
+
+})
+.slice(0,50);
+
+
+lista.innerHTML="";
+
+indiceTramiteActivo=-1;
+
+
+const counter =
+document.createElement("div");
+
+counter.className=
+"autocomplete-counter";
+
+counter.textContent =
+texto
+? filtrados.length+
+" de "+
+listaTramites.length+
+" trámites coinciden"
+: listaTramites.length+
+" trámites disponibles";
+
+
+lista.appendChild(counter);
+
+
+if(!filtrados.length){
+
+lista.innerHTML +=
+'<div class="autocomplete-empty">'+
+"No se encontraron trámites."+
+"</div>";
+
+lista.style.display="block";
+
+return;
+
+}
+
+
+filtrados.forEach(t=>{
+
+const nombre =
+obtenerNombreTramite(t);
+
+
+const item =
+document.createElement("div");
+
+
+item.className=
+"autocomplete-item";
+
+
+item.textContent=
+nombre;
+
+
+item.addEventListener(
+"pointerdown",
+function(ev){
+
+ev.preventDefault();
+
+input.value=nombre;
+
+input.classList.remove(
+"invalid"
+);
+
+lista.style.display="none";
+
+input.focus();
+
+}
+);
+
+
+lista.appendChild(item);
+
+});
+
+
+lista.style.display="block";
+
+}
+
+
+/* =====================================================
+   OCULTAR TRÁMITES
+===================================================== */
+
+function ocultarSugerenciasTramites(){
+
+setTimeout(()=>{
+
+const lista =
+document.getElementById(
+"listaTramites"
+);
+
+if(lista){
+
+lista.style.display="none";
+
+}
+
+},200);
+
+}
+
+
+/* =====================================================
+   TECLADO TRÁMITES
+===================================================== */
+
+function manejarTecladoTramites(ev){
+
+const lista =
+document.getElementById(
+"listaTramites"
+);
+
+
+const items =
+Array.from(
+lista.querySelectorAll(
+".autocomplete-item"
+)
+);
+
+
+if(
+lista.style.display!=="block" ||
+!items.length
+){
+
+return;
+
+}
+
+
+if(ev.key==="ArrowDown"){
+
+ev.preventDefault();
+
+indiceTramiteActivo =
+Math.min(
+indiceTramiteActivo+1,
+items.length-1
+);
+
+}
+
+
+else if(ev.key==="ArrowUp"){
+
+ev.preventDefault();
+
+indiceTramiteActivo =
+Math.max(
+indiceTramiteActivo-1,
+0
+);
+
+}
+
+
+else if(
+ev.key==="Enter" &&
+indiceTramiteActivo>=0
+){
+
+ev.preventDefault();
+
+items[
+indiceTramiteActivo
+].dispatchEvent(
+new PointerEvent(
+"pointerdown",
+{bubbles:true}
+)
+);
+
+return;
+
+}
+
+
+else if(ev.key==="Escape"){
+
+lista.style.display="none";
+
+return;
+
+}
+
+
+else{
+
+return;
+
+}
+
+
+items.forEach(
+(item,i)=>{
+
+item.classList.toggle(
+"active",
+i===indiceTramiteActivo
+);
+
+});
+
+}
+
+
+/* =====================================================
+   MOTIVOS
+===================================================== */
+
+function agregarMotivo(){
+
+const motivo =
+document.getElementById(
+"inpMotivo"
+).value.trim();
+
+
+const obs =
+document.getElementById(
+"inpObservacionMotivo"
+).value.trim();
+
+
+if(!motivo){
+
+mostrarEstado(
+"error",
+"❌ Seleccione o escriba un motivo."
+);
+
+return;
+
+}
+
+
+detallesFormulario.push({
+
+motivo:motivo,
+
+observacion:obs
+
+});
+
+
+renderDetalles();
+
+
+document.getElementById(
+"inpMotivo"
+).value="";
+
+
+document.getElementById(
+"inpObservacionMotivo"
+).value="";
+
+}
+
+
+function renderDetalles(){
+
+const tbody =
+document.getElementById(
+"tbodyDetalles"
+);
+
+
+tbody.innerHTML="";
+
+
+detallesFormulario.forEach(
+(d,i)=>{
+
+const tr =
+document.createElement("tr");
+
+
+tr.innerHTML=
+"<td>"+
+(i+1)+
+"</td>"+
+"<td>"+
+escaparHTML(d.motivo)+
+"</td>"+
+"<td>"+
+escaparHTML(d.observacion)+
+"</td>"+
+"<td>"+
+'<button class="btn btn-danger btn-sm" '+
+'onclick="quitarMotivo('+i+')">'+
+"X"+
+"</button>"+
+"</td>";
+
+
+tbody.appendChild(tr);
+
+});
+
+}
+
+
+function quitarMotivo(i){
+
+detallesFormulario.splice(
+i,
+1
+);
+
+renderDetalles();
+
+}
+
+
+/* =====================================================
+   GUARDAR DEVOLUCIÓN
+===================================================== */
+
+function guardarDevolucion(){
+
+let valid=true;
+
+
+const camposReq=[
+"inpFecha",
+"selFuncionario",
+"inpPlaca",
+"inpCiudadano",
+"inpTramite"
+];
+
+
+camposReq.forEach(id=>{
+
+const el =
+document.getElementById(id);
+
+
+if(!el.value.trim()){
+
+el.classList.add(
+"invalid"
+);
+
+valid=false;
+
+}
+
+else{
+
+el.classList.remove(
+"invalid"
+);
+
+}
+
+});
+
+
+if(!valid){
+
+mostrarEstado(
+"error",
+"❌ Complete los campos obligatorios."
+);
+
+return;
+
+}
+
+
+if(detallesFormulario.length===0){
+
+mostrarEstado(
+"error",
+"❌ Agregue al menos un motivo."
+);
+
+return;
+
+}
+
+
+const datos={
+
+fecha:
+document.getElementById(
+"inpFecha"
+).value,
+
+funcionario:
+document.getElementById(
+"selFuncionario"
+).value,
+
+placa:
+document.getElementById(
+"inpPlaca"
+).value
+.trim()
+.toUpperCase(),
+
+documento:
+document.getElementById(
+"inpDocumento"
+).value.trim(),
+
+ciudadano:
+document.getElementById(
+"inpCiudadano"
+).value.trim(),
+
+tramite:
+document.getElementById(
+"inpTramite"
+).value.trim(),
+
+detalles:
+detallesFormulario
+
+};
+
+
+const botones =
+document.querySelectorAll(
+".acciones .btn"
+);
+
+
+botones.forEach(
+btn=>btn.disabled=true
+);
+
+
+mostrarEstado(
+"info",
+'<span class="spinner"></span>'+
+" Guardando y generando PDF..."
+);
+
+
+ejecutarPeticion({
+
+action:
+"guardarDevolucion",
+
+datos:
+JSON.stringify(datos)
+
+})
+
+
+.then(res=>{
+
+console.log(
+"RESPUESTA GUARDAR:",
+res
+);
+
+
+if(res && res.ok){
+
+mostrarEstado(
+"ok",
+"✅ Guardado exitosamente. "+
+"Consecutivo: "+
+res.consecutivo
+);
+
+
+const nombreArchivo =
+"Devolucion_"+
+res.consecutivo+
+"_"+datos.placa+
+".pdf";
+
+
+if(res.pdfBase64){
+
+descargarPDFDesdeBase64(
+res.pdfBase64,
+nombreArchivo
+);
+
+}
+
+else if(res.pdfDownloadUrl){
+
+descargarPDFDesdeURL(
+res.pdfDownloadUrl,
+nombreArchivo
+);
+
+}
+
+
+setTimeout(()=>{
+
+limpiarFormulario();
+
+cargarDatosIniciales();
+
+},1000);
+
+}
+
+else{
+
+mostrarEstado(
+"error",
+"❌ Error al guardar: "+
+(
+res && res.error
+? res.error
+: "Respuesta no válida"
+)
+);
+
+}
+
+})
+
+
+.catch(err=>{
+
+console.error(
+"ERROR GUARDANDO:",
+err
+);
+
+
+mostrarEstado(
+"error",
+"❌ Error de conexión al guardar.<br>"+
+err.message
+);
+
+})
+
+
+.finally(()=>{
+
+botones.forEach(
+btn=>btn.disabled=false
+);
+
+});
+
+}
+
+
+/* =====================================================
+   DESCARGAR PDF BASE64
+===================================================== */
+
+function descargarPDFDesdeBase64(
+base64,
+filename
+){
+
+try{
+
+const byteCharacters =
+atob(base64);
+
+
+const byteNumbers =
+new Array(
+byteCharacters.length
+);
+
+
+for(
+let i=0;
+i<byteCharacters.length;
+i++
+){
+
+byteNumbers[i] =
+byteCharacters.charCodeAt(i);
+
+}
+
+
+const byteArray =
+new Uint8Array(
+byteNumbers
+);
+
+
+const blob =
+new Blob(
+[byteArray],
+{type:"application/pdf"}
+);
+
+
+const url =
+window.URL.createObjectURL(
+blob
+);
+
+
+const a =
+document.createElement("a");
+
+
+a.href=url;
+
+a.download=filename;
+
+a.style.display="none";
+
+
+document.body.appendChild(a);
+
+a.click();
+
+
+setTimeout(()=>{
+
+window.URL.revokeObjectURL(
+url
+);
+
+if(document.body.contains(a)){
+
+document.body.removeChild(a);
+
+}
+
+},1000);
+
+
+}
+
+catch(err){
+
+console.error(
+"Error PDF:",
+err
+);
+
+}
+
+}
+
+
+/* =====================================================
+   DESCARGAR PDF URL
+===================================================== */
+
+function descargarPDFDesdeURL(
+url,
+filename
+){
+
+const a =
+document.createElement("a");
+
+
+a.href=url;
+
+a.download=filename;
+
+a.target="_blank";
+
+a.rel="noopener noreferrer";
+
+a.style.display="none";
+
+
+document.body.appendChild(a);
+
+a.click();
+
+
+setTimeout(()=>{
+
+if(document.body.contains(a)){
+
+document.body.removeChild(a);
+
+}
+
+},1000);
+
+}
+
+
+/* =====================================================
+   BÚSQUEDA POR PLACA
+===================================================== */
+
+function buscarPorPlaca(){
+
+const placa =
+document.getElementById(
+"inpBuscarPlaca"
+).value
+.trim()
+.toUpperCase();
+
+
+if(!placa){
+
+mostrarEstadoBusqueda(
+"error",
+"❌ Ingrese una placa."
+);
+
+return;
+
+}
+
+
+mostrarEstadoBusqueda(
+"info",
+'<span class="spinner"></span>'+
+" Buscando devoluciones para "+
+"<b>"+escaparHTML(placa)+"</b>..."
+);
+
+
+ejecutarPeticion({
+
+action:"buscarPorPlaca",
+
+placa:placa
+
+})
+
+
+.then(res=>{
+
+console.log(
+"RESPUESTA BUSQUEDA:",
+res
+);
+
+
+if(res && res.ok){
+
+if(
+!res.resultados ||
+res.resultados.length===0
+){
+
+mostrarEstadoBusqueda(
+"error",
+"Sin resultados para la placa "+
+"<b>"+
+escaparHTML(placa)+
+"</b>."
+);
+
+document.getElementById(
+"contResultados"
+).style.display="none";
+
+}
+
+else{
+
+mostrarEstadoBusqueda(
+"ok",
+"✅ Se encontraron "+
+res.resultados.length+
+" devolución(es)."
+);
+
+renderResultados(
+res.resultados
+);
+
+}
+
+}
+
+else{
+
+mostrarEstadoBusqueda(
+"error",
+"❌ Error en la búsqueda: "+
+(
+res && res.error
+? res.error
+: "Respuesta no válida"
+)
+);
+
+}
+
+})
+
+
+.catch(err=>{
+
+console.error(
+"ERROR BUSQUEDA:",
+err
+);
+
+
+mostrarEstadoBusqueda(
+"error",
+"❌ Error de conexión.<br>"+
+err.message
+);
+
+});
+
+}
+
+
+/* =====================================================
+   RESULTADOS
+===================================================== */
+
+function renderResultados(
+resultados
+){
+
+resultadosBusqueda =
+resultados || [];
+
+
+const tbody =
+document.getElementById(
+"tbodyResultados"
+);
+
+
+tbody.innerHTML="";
+
+
+resultadosBusqueda.forEach(
+(r,i)=>{
+
+const tr =
+document.createElement("tr");
+
+
+const consecutivo =
+r.consecutivo ||
+r.id ||
+r.ID ||
+"";
+
+
+const fecha =
+r.fecha ||
+r.FECHA ||
+"";
+
+
+const placa =
+r.placa ||
+r.PLACA ||
+"";
+
+
+const ciudadano =
+r.ciudadano ||
+r.CIUDADANO ||
+"";
+
+
+const funcionario =
+r.funcionario ||
+r.FUNCIONARIO ||
+"";
+
+
+const tramite =
+r.tramite ||
+r.TRAMITE ||
+"";
+
+
+const motivos =
+r.motivos ||
+r.MOTIVOS ||
+"";
+
+
+let pdf="";
+
+
+const pdfUrl =
+r.pdfDownloadUrl ||
+r.pdfUrl ||
+r.PDF ||
+"";
+
+
+if(pdfUrl){
+
+pdf =
+'<a href="'+
+escaparAtributo(pdfUrl)+
+'" target="_blank" rel="noopener noreferrer">'+
+"📄 PDF"+
+"</a>";
+
+}
+
+else{
+
+pdf="—";
+
+}
+
+
+tr.innerHTML=
+"<td>"+escaparHTML(consecutivo)+"</td>"+
+"<td>"+escaparHTML(fecha)+"</td>"+
+"<td>"+escaparHTML(placa)+"</td>"+
+"<td>"+escaparHTML(ciudadano)+"</td>"+
+"<td>"+escaparHTML(funcionario)+"</td>"+
+"<td>"+escaparHTML(tramite)+"</td>"+
+"<td>"+escaparHTML(motivos)+"</td>"+
+"<td>"+pdf+"</td>";
+
+
+tbody.appendChild(tr);
+
+});
+
+
+document.getElementById(
+"contResultados"
+).style.display="block";
+
+}
+
+
+/* =====================================================
+   LIMPIAR FORMULARIO
+===================================================== */
+
+function limpiarFormulario(){
+
+document.getElementById(
+"selFuncionario"
+).value="";
+
+
+document.getElementById(
+"inpPlaca"
+).value="";
+
+
+document.getElementById(
+"inpDocumento"
+).value="";
+
+
+document.getElementById(
+"inpCiudadano"
+).value="";
+
+
+document.getElementById(
+"inpTramite"
+).value="";
+
+
+document.getElementById(
+"inpMotivo"
+).value="";
+
+
+document.getElementById(
+"inpObservacionMotivo"
+).value="";
+
+
+detallesFormulario=[];
+
+renderDetalles();
+
+
+document
+.querySelectorAll(".invalid")
+.forEach(
+el=>el.classList.remove("invalid")
+);
+
+
+const fecha =
+document.getElementById(
+"inpFecha"
+);
+
+
+const hoy =
+new Date();
+
+
+const yyyy =
+hoy.getFullYear();
+
+
+const mm =
+String(
+hoy.getMonth()+1
+).padStart(2,"0");
+
+
+const dd =
+String(
+hoy.getDate()
+).padStart(2,"0");
+
+
+fecha.value =
+yyyy+"-"+mm+"-"+dd;
+
+
+mostrarEstado(
+"info",
+"Formulario limpiado."
+);
+
+}
+
+
+/* =====================================================
+   LIMPIAR BÚSQUEDA
+===================================================== */
+
+function limpiarBusqueda(){
+
+document.getElementById(
+"inpBuscarPlaca"
+).value="";
+
+
+document.getElementById(
+"tbodyResultados"
+).innerHTML="";
+
+
+document.getElementById(
+"contResultados"
+).style.display="none";
+
+
+document.getElementById(
+"msgBusqueda"
+).className=
+"estado-msg";
+
+
+document.getElementById(
+"msgBusqueda"
+).innerHTML="";
+
+}
+
+
+/* =====================================================
+   ESCAPAR HTML
+===================================================== */
+
+function escaparHTML(valor){
+
+return String(
+valor ?? ""
+)
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+
+function escaparAtributo(valor){
+
+return String(
+valor ?? ""
+)
+.replace(/&/g,"&amp;")
+.replace(/"/g,"&quot;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;");
+
+}
+
+
+/* =====================================================
+   EVENTOS
+===================================================== */
+
+document.addEventListener(
+"DOMContentLoaded",
+function(){
+
+console.log(
+"🚀 SISTEMA DEVOLUCIÓN DE TRÁMITES INICIADO"
+);
+
+
+/* FECHA */
+
+const fecha =
+document.getElementById(
+"inpFecha"
+);
+
+
+if(fecha){
+
+const hoy =
+new Date();
+
+
+const yyyy =
+hoy.getFullYear();
+
+
+const mm =
+String(
+hoy.getMonth()+1
+).padStart(2,"0");
+
+
+const dd =
+String(
+hoy.getDate()
+).padStart(2,"0");
+
+
+fecha.value =
+yyyy+"-"+mm+"-"+dd;
+
+}
+
+
+/* TRÁMITES */
+
+const inpTramite =
+document.getElementById(
+"inpTramite"
+);
+
+
+if(inpTramite){
+
+inpTramite.addEventListener(
+"focus",
+mostrarSugerenciasTramites
+);
+
+inpTramite.addEventListener(
+"input",
+mostrarSugerenciasTramites
+);
+
+inpTramite.addEventListener(
+"keydown",
+manejarTecladoTramites
+);
+
+inpTramite.addEventListener(
+"blur",
+ocultarSugerenciasTramites
+);
+
+}
+
+
+/* MAYÚSCULAS PLACA */
+
+const inpPlaca =
+document.getElementById(
+"inpPlaca"
+);
+
+
+if(inpPlaca){
+
+inpPlaca.addEventListener(
+"input",
+function(){
+
+this.value =
+this.value.toUpperCase();
+
+}
+);
+
+}
+
+
+/* MAYÚSCULAS PLACA BÚSQUEDA */
+
+const inpBuscarPlaca =
+document.getElementById(
+"inpBuscarPlaca"
+);
+
+
+if(inpBuscarPlaca){
+
+inpBuscarPlaca.addEventListener(
+"input",
+function(){
+
+this.value =
+this.value.toUpperCase();
+
+}
+);
+
+}
+
+
+/* CARGAR DATOS */
+
+cargarDatosIniciales();
+
+});
+
+</script>
+
+</body>
+</html>
