@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -81,6 +80,7 @@ header p{
   font-weight:600;
   margin-bottom:4px;
   color:#555;
+  cursor: pointer;
 }
 
 .req{
@@ -327,7 +327,6 @@ th{
   }
 }
 </style>
-
 </head>
 
 <body>
@@ -342,2215 +341,619 @@ th{
   </div>
 </header>
 
-<!-- =====================================================
-     DATOS DE LA DEVOLUCIÓN
-===================================================== -->
-
+<!-- DATOS DE LA DEVOLUCIÓN -->
 <div class="card">
-
-<h2>Datos de la devolución</h2>
-
-<div class="form-grid">
-
-<div class="form-group">
-
-<label>
-Funcionario <span class="req">*</span>
-</label>
-
-<select id="selFuncionario">
-<option value="">Cargando...</option>
-</select>
-
+  <h2>Datos de la devolución</h2>
+  <div class="form-grid">
+    <div class="form-group">
+      <label for="selFuncionario">Funcionario <span class="req">*</span></label>
+      <select id="selFuncionario"><option value="">Cargando...</option></select>
+    </div>
+    <div class="form-group">
+      <label for="inpFecha">Fecha <span class="req">*</span></label>
+      <input type="date" id="inpFecha">
+    </div>
+    <div class="form-group full">
+      <label for="inpPlaca">Placa <span class="req">*</span></label>
+      <input type="text" id="inpPlaca" placeholder="ABC123" maxlength="10" style="text-transform:uppercase;">
+    </div>
+    <div class="form-group">
+      <label for="inpDocumento">Documento</label>
+      <input type="text" id="inpDocumento" placeholder="C.C. / NIT">
+    </div>
+    <div class="form-group">
+      <label for="inpCiudadano">Ciudadano <span class="req">*</span></label>
+      <input type="text" id="inpCiudadano" placeholder="Nombre completo">
+    </div>
+    <div class="form-group full">
+      <label for="inpTramite">Trámite <span class="req">*</span></label>
+      <div class="autocomplete-wrap">
+        <input type="text" id="inpTramite" placeholder="Escriba o haga clic para ver trámites..." autocomplete="off">
+        <datalist id="dlTramites"></datalist>
+        <div id="listaTramites" class="autocomplete-list"></div>
+      </div>
+      <span id="hintTramites" class="hint">⏳ Esperando carga de trámites...</span>
+    </div>
+  </div>
 </div>
 
-<div class="form-group">
-
-<label>
-Fecha <span class="req">*</span>
-</label>
-
-<input
-type="date"
-id="inpFecha"
-
->
-
-</div>
-
-<div class="form-group full">
-
-<label>
-Placa <span class="req">*</span>
-</label>
-
-<input
-type="text"
-id="inpPlaca"
-placeholder="ABC123"
-maxlength="10"
-style="text-transform:uppercase;"
-
->
-
-</div>
-
-<div class="form-group">
-
-<label>
-Documento
-</label>
-
-<input
-type="text"
-id="inpDocumento"
-placeholder="C.C. / NIT"
-
->
-
-</div>
-
-<div class="form-group">
-
-<label>
-Ciudadano <span class="req">*</span>
-</label>
-
-<input
-type="text"
-id="inpCiudadano"
-placeholder="Nombre completo"
-
->
-
-</div>
-
-<div class="form-group full">
-
-<label>
-Trámite <span class="req">*</span>
-</label>
-
-<div class="autocomplete-wrap">
-
-<input
-type="text"
-id="inpTramite"
-placeholder="Escriba o haga clic para ver trámites..."
-autocomplete="off"
-
->
-
-<datalist id="dlTramites"></datalist>
-
-<div
-id="listaTramites"
-class="autocomplete-list">
-</div>
-
-</div>
-
-<span
-id="hintTramites"
-class="hint">
-⏳ Esperando carga de trámites... </span>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- =====================================================
-     DETALLE
-===================================================== -->
-
+<!-- DETALLE -->
 <div class="card">
-
-<h2>Detalle de la devolución</h2>
-
-<div class="form-grid">
-
-<div class="form-group">
-
-<label>
-Motivo <span class="req">*</span>
-</label>
-
-<input
-type="text"
-id="inpMotivo"
-list="dlMotivos"
-placeholder="Escriba para buscar motivo..."
-autocomplete="off"
-
->
-
-<datalist id="dlMotivos"></datalist>
-
+  <h2>Detalle de la devolución</h2>
+  <div class="form-grid">
+    <div class="form-group">
+      <label for="inpMotivo">Motivo <span class="req">*</span></label>
+      <input type="text" id="inpMotivo" list="dlMotivos" placeholder="Escriba para buscar motivo..." autocomplete="off">
+      <datalist id="dlMotivos"></datalist>
+    </div>
+    <div class="form-group">
+      <label for="inpObservacionMotivo">Observación</label>
+      <input type="text" id="inpObservacionMotivo">
+    </div>
+  </div>
+  <div class="acciones">
+    <button class="btn btn-secondary btn-sm" onclick="agregarMotivo()">+ Agregar motivo</button>
+  </div>
+  <div class="tabla-resultados">
+    <table>
+      <thead>
+        <tr><th>N°</th><th>Motivo</th><th>Observación</th><th>Acción</th></tr>
+      </thead>
+      <tbody id="tbodyDetalles"></tbody>
+    </table>
+  </div>
 </div>
 
-<div class="form-group">
-
-<label>
-Observación
-</label>
-
-<input
-type="text"
-id="inpObservacionMotivo"
-
->
-
-</div>
-
-</div>
-
-<div class="acciones">
-
-<button
-class="btn btn-secondary btn-sm"
-onclick="agregarMotivo()">
-
-* Agregar motivo
-
-  </button>
-
-</div>
-
-<div class="tabla-resultados">
-
-<table>
-
-<thead>
-
-<tr>
-<th>N°</th>
-<th>Motivo</th>
-<th>Observación</th>
-<th>Acción</th>
-</tr>
-
-</thead>
-
-<tbody id="tbodyDetalles"></tbody>
-
-</table>
-
-</div>
-
-</div>
-
-<!-- =====================================================
-     ACCIONES
-===================================================== -->
-
+<!-- ACCIONES -->
 <div class="card">
-
-<h2>Acciones</h2>
-
-<div class="acciones">
-
-<button
-class="btn btn-success"
-onclick="guardarDevolucion()">
-📄 Guardar y Generar PDF </button>
-
-<button
-class="btn btn-secondary"
-onclick="limpiarFormulario()">
-🧹 Limpiar </button>
-
+  <h2>Acciones</h2>
+  <div class="acciones">
+    <button class="btn btn-success" onclick="guardarDevolucion()">📄 Guardar y Generar PDF</button>
+    <button class="btn btn-secondary" onclick="limpiarFormulario()">🧹 Limpiar</button>
+  </div>
+  <div id="msgEstado" class="estado-msg"></div>
 </div>
 
-<div id="msgEstado" class="estado-msg"></div>
-
-</div>
-
-<!-- =====================================================
-     BÚSQUEDA
-===================================================== -->
-
+<!-- BÚSQUEDA -->
 <div class="card">
-
-<h2>🔍 Búsqueda de devoluciones por placa</h2>
-
-<div class="form-grid">
-
-<div class="form-group">
-
-<label>
-Placa a buscar
-</label>
-
-<input
-type="text"
-id="inpBuscarPlaca"
-placeholder="Ej: ABC123"
-maxlength="10"
-style="text-transform:uppercase;"
-
->
-
-</div>
-
-<div class="form-group">
-
-<label> </label>
-
-<div class="acciones" style="margin-top:0;">
-
-<button
-class="btn btn-success"
-onclick="buscarPorPlaca()">
-🔍 Buscar </button>
-
-<button
-class="btn btn-secondary"
-onclick="limpiarBusqueda()">
-🧹 Limpiar </button>
-
-</div>
-
-</div>
-
-</div>
-
-<div
-id="msgBusqueda"
-class="estado-msg">
-</div>
-
-<div
-id="contResultados"
-class="tabla-resultados"
-style="display:none;"
->
-
-<table>
-
-<thead>
-
-<tr>
-<th>Consec.</th>
-<th>Fecha</th>
-<th>Placa</th>
-<th>Ciudadano</th>
-<th>Funcionario</th>
-<th>Trámite</th>
-<th>Motivos</th>
-<th>PDF</th>
-</tr>
-
-</thead>
-
-<tbody id="tbodyResultados"></tbody>
-
-</table>
-
-</div>
-
+  <h2>🔍 Búsqueda de devoluciones por placa</h2>
+  <div class="form-grid">
+    <div class="form-group">
+      <label for="inpBuscarPlaca">Placa a buscar</label>
+      <input type="text" id="inpBuscarPlaca" placeholder="Ej: ABC123" maxlength="10" style="text-transform:uppercase;">
+    </div>
+    <div class="form-group">
+      <label>&nbsp;</label>
+      <div class="acciones" style="margin-top:0;">
+        <button class="btn btn-success" onclick="buscarPorPlaca()">🔍 Buscar</button>
+        <button class="btn btn-secondary" onclick="limpiarBusqueda()">🧹 Limpiar</button>
+      </div>
+    </div>
+  </div>
+  <div id="msgBusqueda" class="estado-msg"></div>
+  <div id="contResultados" class="tabla-resultados" style="display:none;">
+    <table>
+      <thead>
+        <tr>
+          <th>Consec.</th><th>Fecha</th><th>Placa</th><th>Ciudadano</th>
+          <th>Funcionario</th><th>Trámite</th><th>Motivos</th><th>PDF</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyResultados"></tbody>
+    </table>
+  </div>
 </div>
 
 </div>
 
 <script>
-
 /* =====================================================
    CONFIGURACIÓN
 ===================================================== */
-
-const URL_BACKEND =
-"https://script.google.com/macros/s/AKfycbxjoGJpyBvlk33nc34hV-VwjDjr5iEEFGV66-yD8T9Pi6QvreHm1pj60cdmeu3Kki9xWw/exec";
-
+const URL_BACKEND = "https://script.google.com/macros/s/AKfycbxjoGJpyBvlk33nc34hV-VwjDjr5iEEFGV66-yD8T9Pi6QvreHm1pj60cdmeu3Kki9xWw/exec";
 
 let listaFuncionarios = [];
 let listaMotivos = [];
 let listaTramites = [];
-
 let detallesFormulario = [];
 let resultadosBusqueda = [];
-
 let indiceTramiteActivo = -1;
 
+/* =====================================================
+   ESTADO Y MENSAJES
+===================================================== */
+function mostrarEstado(tipo, mensaje) {
+  const el = document.getElementById("msgEstado");
+  if (!el) return;
+  el.className = "estado-msg " + tipo;
+  el.innerHTML = mensaje;
+}
+
+function mostrarEstadoBusqueda(tipo, mensaje) {
+  const el = document.getElementById("msgBusqueda");
+  if (!el) return;
+  el.className = "estado-msg " + tipo;
+  el.innerHTML = mensaje;
+}
+
+function actualizarEstadoConexion(tipo, texto) {
+  const el = document.getElementById("estadoConexion");
+  if (!el) return;
+  let clase = "badge-info";
+  if (tipo === "ok") clase = "badge-ok";
+  if (tipo === "error") clase = "badge-error";
+  el.innerHTML = '<span class="badge ' + clase + '">' + texto + '</span>';
+}
 
 /* =====================================================
-   ESTADO
+   JSONP (SOLUCIÓN ANTI-CORS)
 ===================================================== */
+function ejecutarPeticion(params) {
+  return new Promise((resolve, reject) => {
+    const callbackName = "jsonpCallback_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
+    const script = document.createElement("script");
+    let terminado = false;
 
-function mostrarEstado(tipo,mensaje){
+    window[callbackName] = function(data) {
+      terminado = true;
+      try { resolve(data); }
+      finally {
+        delete window[callbackName];
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+    };
 
-const el =
-document.getElementById("msgEstado");
+    script.onerror = function() {
+      if (terminado) return;
+      delete window[callbackName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+      reject(new Error("No fue posible cargar la respuesta JSONP de Apps Script."));
+    };
 
-if(!el)return;
+    const query = new URLSearchParams();
+    Object.keys(params).forEach(key => {
+      let valor = params[key];
+      if (valor === undefined || valor === null) valor = "";
+      query.append(key, String(valor));
+    });
+    query.append("callback", callbackName);
+    query.append("_nocache", Date.now());
 
-el.className =
-"estado-msg " + tipo;
+    script.src = URL_BACKEND + "?" + query.toString();
+    document.head.appendChild(script);
 
-el.innerHTML = mensaje;
-
+    setTimeout(() => {
+      if (terminado) return;
+      delete window[callbackName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+      reject(new Error("Tiempo de espera agotado al conectar con Apps Script."));
+    }, 20000);
+  });
 }
-
-
-function mostrarEstadoBusqueda(tipo,mensaje){
-
-const el =
-document.getElementById("msgBusqueda");
-
-if(!el)return;
-
-el.className =
-"estado-msg " + tipo;
-
-el.innerHTML = mensaje;
-
-}
-
-
-function actualizarEstadoConexion(tipo,texto){
-
-const el =
-document.getElementById("estadoConexion");
-
-if(!el)return;
-
-let clase="badge-info";
-
-if(tipo==="ok")
-clase="badge-ok";
-
-if(tipo==="error")
-clase="badge-error";
-
-el.innerHTML =
-'<span class="badge '+clase+'">'+
-texto+
-'</span>';
-
-}
-
-
-/* =====================================================
-   JSONP
-   IMPORTANTE:
-   NO UTILIZAR FETCH
-===================================================== */
-
-function ejecutarPeticion(params){
-
-return new Promise((resolve,reject)=>{
-
-const callbackName =
-"jsonpCallback_" +
-Date.now() +
-"_" +
-Math.floor(Math.random()*100000);
-
-
-const script =
-document.createElement("script");
-
-
-let terminado=false;
-
-
-window[callbackName]=function(data){
-
-terminado=true;
-
-try{
-
-resolve(data);
-
-}
-finally{
-
-delete window[callbackName];
-
-if(script.parentNode){
-
-script.parentNode.removeChild(script);
-
-}
-
-}
-
-};
-
-
-script.onerror=function(){
-
-if(terminado)return;
-
-delete window[callbackName];
-
-if(script.parentNode){
-
-script.parentNode.removeChild(script);
-
-}
-
-reject(
-new Error(
-"No fue posible cargar la respuesta JSONP de Apps Script."
-)
-);
-
-};
-
-
-const query =
-new URLSearchParams();
-
-
-Object.keys(params).forEach(key=>{
-
-let valor=params[key];
-
-if(valor===undefined ||
-   valor===null){
-
-valor="";
-
-}
-
-query.append(
-key,
-String(valor)
-);
-
-});
-
-
-query.append(
-"callback",
-callbackName
-);
-
-
-query.append(
-"_nocache",
-Date.now()
-);
-
-
-script.src =
-URL_BACKEND +
-"?" +
-query.toString();
-
-
-document.head.appendChild(script);
-
-
-/* TIMEOUT */
-
-setTimeout(()=>{
-
-if(terminado)return;
-
-delete window[callbackName];
-
-if(script.parentNode){
-
-script.parentNode.removeChild(script);
-
-}
-
-reject(
-new Error(
-"Tiempo de espera agotado al conectar con Apps Script."
-)
-);
-
-},20000);
-
-});
-
-}
-
 
 /* =====================================================
    CARGAR DATOS INICIALES
 ===================================================== */
+function cargarDatosIniciales() {
+  mostrarEstado("info", '<span class="spinner"></span> Conectando con Apps Script...');
+  actualizarEstadoConexion("info", "Conectando...");
 
-function cargarDatosIniciales(){
+  ejecutarPeticion({ action: "getInitialData" })
+    .then(data => {
+      if (data && data.ok) {
+        listaFuncionarios = Array.isArray(data.funcionarios) ? data.funcionarios : [];
+        listaMotivos = Array.isArray(data.motivos) ? data.motivos : [];
+        listaTramites = Array.isArray(data.tramites) ? data.tramites : [];
 
-mostrarEstado(
-"info",
-'<span class="spinner"></span>'+
-' Conectando con Apps Script...'
-);
+        llenarSelectFuncionarios();
+        llenarDatalistMotivos();
+        llenarDatalistTramites();
+        actualizarHintTramites();
 
-actualizarEstadoConexion(
-"info",
-"Conectando..."
-);
-
-
-ejecutarPeticion({
-
-action:"getInitialData"
-
-})
-
-
-.then(data=>{
-
-console.log(
-"RESPUESTA getInitialData:",
-data
-);
-
-
-if(data && data.ok){
-
-listaFuncionarios =
-Array.isArray(data.funcionarios)
-? data.funcionarios
-: [];
-
-
-listaMotivos =
-Array.isArray(data.motivos)
-? data.motivos
-: [];
-
-
-listaTramites =
-Array.isArray(data.tramites)
-? data.tramites
-: [];
-
-
-console.log(
-"FUNCIONARIOS:",
-listaFuncionarios
-);
-
-
-console.log(
-"MOTIVOS:",
-listaMotivos
-);
-
-
-console.log(
-"TRAMITES:",
-listaTramites
-);
-
-
-/* CARGAR MENÚS */
-
-llenarSelectFuncionarios();
-
-llenarDatalistMotivos();
-
-llenarDatalistTramites();
-
-actualizarHintTramites();
-
-
-actualizarEstadoConexion(
-"ok",
-"Conectado"
-);
-
-
-mostrarEstado(
-"ok",
-"✅ Datos cargados correctamente. "+
-listaFuncionarios.length+
-" funcionarios, "+
-listaMotivos.length+
-" motivos y "+
-listaTramites.length+
-" trámites."
-);
-
-
+        actualizarEstadoConexion("ok", "Conectado");
+        mostrarEstado("ok", `✅ Datos cargados correctamente. ${listaFuncionarios.length} funcionarios, ${listaMotivos.length} motivos y ${listaTramites.length} trámites.`);
+      } else {
+        actualizarEstadoConexion("error", "Error de datos");
+        mostrarEstado("error", "❌ Error al cargar datos: " + (data && data.error ? data.error : "Respuesta no válida"));
+        document.getElementById("hintTramites").textContent = "❌ No se pudieron cargar los trámites.";
+      }
+    })
+    .catch(err => {
+      actualizarEstadoConexion("error", "Sin conexión");
+      mostrarEstado("error", "❌ No fue posible cargar los datos.<br>" + err.message);
+      document.getElementById("hintTramites").textContent = "❌ Sin conexión con Apps Script.";
+    });
 }
 
-else{
-
-actualizarEstadoConexion(
-"error",
-"Error de datos"
-);
-
-
-mostrarEstado(
-"error",
-"❌ Error al cargar datos: "+
-(
-data && data.error
-? data.error
-: "Respuesta no válida"
-)
-);
-
-
-document.getElementById(
-"hintTramites"
-).textContent =
-"❌ No se pudieron cargar los trámites.";
-
+function llenarSelectFuncionarios() {
+  const select = document.getElementById("selFuncionario");
+  select.innerHTML = '<option value="">-- Seleccione --</option>';
+  listaFuncionarios.forEach(f => {
+    let nombre = typeof f === "string" ? f : (f.nombre || f.funcionario || f.NOMBRE || f.FUNCIONARIO || "");
+    if (!nombre) return;
+    const option = document.createElement("option");
+    option.value = nombre;
+    option.textContent = nombre;
+    select.appendChild(option);
+  });
 }
 
-})
-
-
-.catch(err=>{
-
-console.error(
-"ERROR:",
-err
-);
-
-
-actualizarEstadoConexion(
-"error",
-"Sin conexión"
-);
-
-
-mostrarEstado(
-"error",
-"❌ No fue posible cargar los datos desde Apps Script.<br>"+
-err.message
-);
-
-
-document.getElementById(
-"hintTramites"
-).textContent =
-"❌ Sin conexión con Apps Script.";
-
-});
-
+function llenarDatalistMotivos() {
+  const dl = document.getElementById("dlMotivos");
+  dl.innerHTML = "";
+  listaMotivos.forEach(m => {
+    let motivo = typeof m === "string" ? m : (m.motivo || m.MOTIVO || m.nombre || m.descripcion || "");
+    if (!motivo) return;
+    const option = document.createElement("option");
+    option.value = motivo;
+    dl.appendChild(option);
+  });
 }
 
-
-/* =====================================================
-   FUNCIONARIOS
-===================================================== */
-
-function llenarSelectFuncionarios(){
-
-const select =
-document.getElementById(
-"selFuncionario"
-);
-
-select.innerHTML =
-'<option value="">-- Seleccione --</option>';
-
-
-listaFuncionarios.forEach(f=>{
-
-let nombre="";
-
-
-if(typeof f==="string"){
-
-nombre=f;
-
+function llenarDatalistTramites() {
+  const dl = document.getElementById("dlTramites");
+  dl.innerHTML = "";
+  listaTramites.forEach(t => {
+    let tramite = typeof t === "string" ? t : (t.tramite || t.TRAMITE || t.nombre || t.descripcion || "");
+    if (!tramite) return;
+    const option = document.createElement("option");
+    option.value = tramite;
+    dl.appendChild(option);
+  });
 }
 
-else if(f){
-
-nombre =
-f.nombre ||
-f.funcionario ||
-f.NOMBRE ||
-f.FUNCIONARIO ||
-"";
-
+function actualizarHintTramites() {
+  const hint = document.getElementById("hintTramites");
+  if (listaTramites.length > 0) {
+    hint.textContent = `✅ ${listaTramites.length} trámites disponibles. Haga clic en el campo para verlos.`;
+    hint.style.color = "#2e7d32";
+  } else {
+    hint.textContent = "⚠️ No hay trámites cargados. Verifique la hoja TRAMITES.";
+    hint.style.color = "#c62828";
+  }
 }
-
-
-if(!nombre)return;
-
-
-const option =
-document.createElement("option");
-
-
-option.value=nombre;
-
-option.textContent=nombre;
-
-
-select.appendChild(option);
-
-});
-
-}
-
-
-/* =====================================================
-   MOTIVOS
-===================================================== */
-
-function llenarDatalistMotivos(){
-
-const dl =
-document.getElementById(
-"dlMotivos"
-);
-
-dl.innerHTML="";
-
-
-listaMotivos.forEach(m=>{
-
-let motivo="";
-
-
-if(typeof m==="string"){
-
-motivo=m;
-
-}
-
-else if(m){
-
-motivo =
-m.motivo ||
-m.MOTIVO ||
-m.nombre ||
-m.descripcion ||
-"";
-
-}
-
-
-if(!motivo)return;
-
-
-const option =
-document.createElement("option");
-
-option.value=motivo;
-
-dl.appendChild(option);
-
-});
-
-}
-
-
-/* =====================================================
-   TRÁMITES
-===================================================== */
-
-function llenarDatalistTramites(){
-
-const dl =
-document.getElementById(
-"dlTramites"
-);
-
-dl.innerHTML="";
-
-
-listaTramites.forEach(t=>{
-
-let tramite="";
-
-
-if(typeof t==="string"){
-
-tramite=t;
-
-}
-
-else if(t){
-
-tramite =
-t.tramite ||
-t.TRAMITE ||
-t.nombre ||
-t.descripcion ||
-"";
-
-}
-
-
-if(!tramite)return;
-
-
-const option =
-document.createElement("option");
-
-option.value=tramite;
-
-dl.appendChild(option);
-
-});
-
-}
-
-
-function actualizarHintTramites(){
-
-const hint =
-document.getElementById(
-"hintTramites"
-);
-
-
-if(listaTramites.length>0){
-
-hint.textContent =
-"✅ "+
-listaTramites.length+
-" trámites disponibles. Haga clic en el campo para verlos.";
-
-hint.style.color="#2e7d32";
-
-}
-
-else{
-
-hint.textContent =
-"⚠️ No hay trámites cargados. Verifique la hoja TRAMITES.";
-
-hint.style.color="#c62828";
-
-}
-
-}
-
-
-/* =====================================================
-   NORMALIZAR TEXTO
-===================================================== */
-
-function normalizarTextoFront(valor){
-
-return String(valor||"")
-.normalize("NFD")
-.replace(/[\u0300-\u036f]/g,"")
-.toLowerCase()
-.trim();
-
-}
-
 
 /* =====================================================
    AUTOCOMPLETADO TRÁMITES
 ===================================================== */
-
-function obtenerNombreTramite(obj){
-
-if(typeof obj==="string")
-return obj;
-
-
-return obj &&
-(
-obj.tramite ||
-obj.TRAMITE ||
-obj.nombre ||
-obj.descripcion ||
-""
-);
-
+function normalizarTextoFront(valor) {
+  return String(valor || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 }
 
-
-function mostrarSugerenciasTramites(){
-
-const input =
-document.getElementById(
-"inpTramite"
-);
-
-const lista =
-document.getElementById(
-"listaTramites"
-);
-
-
-const texto =
-normalizarTextoFront(
-input.value
-);
-
-
-if(!listaTramites ||
-listaTramites.length===0){
-
-lista.innerHTML =
-'<div class="autocomplete-empty">'+
-'No hay trámites cargados en el sistema.'+
-'</div>';
-
-lista.style.display="block";
-
-return;
-
+function obtenerNombreTramite(obj) {
+  if (typeof obj === "string") return obj;
+  return obj && (obj.tramite || obj.TRAMITE || obj.nombre || obj.descripcion || "");
 }
 
+function mostrarSugerenciasTramites() {
+  const input = document.getElementById("inpTramite");
+  const lista = document.getElementById("listaTramites");
+  const texto = normalizarTextoFront(input.value);
 
-const filtrados =
-listaTramites
-.filter(t=>{
+  if (!listaTramites || listaTramites.length === 0) {
+    lista.innerHTML = '<div class="autocomplete-empty">No hay trámites cargados.</div>';
+    lista.style.display = "block";
+    return;
+  }
 
-const valor =
-normalizarTextoFront(
-obtenerNombreTramite(t)
-);
+  const filtrados = listaTramites.filter(t => {
+    const valor = normalizarTextoFront(obtenerNombreTramite(t));
+    return !texto || valor.includes(texto);
+  }).slice(0, 50);
 
-return !texto ||
-valor.includes(texto);
+  lista.innerHTML = "";
+  indiceTramiteActivo = -1;
 
-})
-.slice(0,50);
+  const counter = document.createElement("div");
+  counter.className = "autocomplete-counter";
+  counter.textContent = texto ? `${filtrados.length} de ${listaTramites.length} trámites coinciden` : `${listaTramites.length} trámites disponibles`;
+  lista.appendChild(counter);
 
+  if (!filtrados.length) {
+    lista.innerHTML += '<div class="autocomplete-empty">No se encontraron trámites.</div>';
+    lista.style.display = "block";
+    return;
+  }
 
-lista.innerHTML="";
-
-indiceTramiteActivo=-1;
-
-
-const counter =
-document.createElement("div");
-
-counter.className=
-"autocomplete-counter";
-
-counter.textContent =
-texto
-? filtrados.length+
-" de "+
-listaTramites.length+
-" trámites coinciden"
-: listaTramites.length+
-" trámites disponibles";
-
-
-lista.appendChild(counter);
-
-
-if(!filtrados.length){
-
-lista.innerHTML +=
-'<div class="autocomplete-empty">'+
-"No se encontraron trámites."+
-"</div>";
-
-lista.style.display="block";
-
-return;
-
+  filtrados.forEach(t => {
+    const nombre = obtenerNombreTramite(t);
+    const item = document.createElement("div");
+    item.className = "autocomplete-item";
+    item.textContent = nombre;
+    item.addEventListener("pointerdown", function(ev) {
+      ev.preventDefault();
+      input.value = nombre;
+      input.classList.remove("invalid");
+      lista.style.display = "none";
+      input.focus();
+    });
+    lista.appendChild(item);
+  });
+  lista.style.display = "block";
 }
 
-
-filtrados.forEach(t=>{
-
-const nombre =
-obtenerNombreTramite(t);
-
-
-const item =
-document.createElement("div");
-
-
-item.className=
-"autocomplete-item";
-
-
-item.textContent=
-nombre;
-
-
-item.addEventListener(
-"pointerdown",
-function(ev){
-
-ev.preventDefault();
-
-input.value=nombre;
-
-input.classList.remove(
-"invalid"
-);
-
-lista.style.display="none";
-
-input.focus();
-
-}
-);
-
-
-lista.appendChild(item);
-
-});
-
-
-lista.style.display="block";
-
+function ocultarSugerenciasTramites() {
+  setTimeout(() => {
+    const lista = document.getElementById("listaTramites");
+    if (lista) lista.style.display = "none";
+  }, 200);
 }
 
+function manejarTecladoTramites(ev) {
+  const lista = document.getElementById("listaTramites");
+  const items = Array.from(lista.querySelectorAll(".autocomplete-item"));
+  if (lista.style.display !== "block" || !items.length) return;
+
+  if (ev.key === "ArrowDown") {
+    ev.preventDefault();
+    indiceTramiteActivo = Math.min(indiceTramiteActivo + 1, items.length - 1);
+  } else if (ev.key === "ArrowUp") {
+    ev.preventDefault();
+    indiceTramiteActivo = Math.max(indiceTramiteActivo - 1, 0);
+  } else if (ev.key === "Enter" && indiceTramiteActivo >= 0) {
+    ev.preventDefault();
+    items[indiceTramiteActivo].dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
+    return;
+  } else if (ev.key === "Escape") {
+    lista.style.display = "none";
+    return;
+  } else {
+    return;
+  }
+  items.forEach((item, i) => item.classList.toggle("active", i === indiceTramiteActivo));
+}
 
 /* =====================================================
-   OCULTAR TRÁMITES
+   GESTIÓN DE MOTIVOS (DETALLES)
 ===================================================== */
-
-function ocultarSugerenciasTramites(){
-
-setTimeout(()=>{
-
-const lista =
-document.getElementById(
-"listaTramites"
-);
-
-if(lista){
-
-lista.style.display="none";
-
+function agregarMotivo() {
+  const motivo = document.getElementById("inpMotivo").value.trim();
+  const obs = document.getElementById("inpObservacionMotivo").value.trim();
+  if (!motivo) { mostrarEstado("error", "❌ Seleccione o escriba un motivo."); return; }
+  detallesFormulario.push({ motivo: motivo, observacion: obs });
+  renderDetalles();
+  document.getElementById("inpMotivo").value = "";
+  document.getElementById("inpObservacionMotivo").value = "";
 }
 
-},200);
-
+function renderDetalles() {
+  const tbody = document.getElementById("tbodyDetalles");
+  tbody.innerHTML = "";
+  detallesFormulario.forEach((d, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML =
+      "<td>" + (i + 1) + "</td>" +
+      "<td>" + escaparHTML(d.motivo) + "</td>" +
+      "<td>" + escaparHTML(d.observacion) + "</td>" +
+      "<td><button class='btn btn-danger btn-sm' onclick='quitarMotivo(" + i + ")'>X</button></td>";
+    tbody.appendChild(tr);
+  });
 }
 
-
-/* =====================================================
-   TECLADO TRÁMITES
-===================================================== */
-
-function manejarTecladoTramites(ev){
-
-const lista =
-document.getElementById(
-"listaTramites"
-);
-
-
-const items =
-Array.from(
-lista.querySelectorAll(
-".autocomplete-item"
-)
-);
-
-
-if(
-lista.style.display!=="block" ||
-!items.length
-){
-
-return;
-
+function quitarMotivo(i) {
+  detallesFormulario.splice(i, 1);
+  renderDetalles();
 }
-
-
-if(ev.key==="ArrowDown"){
-
-ev.preventDefault();
-
-indiceTramiteActivo =
-Math.min(
-indiceTramiteActivo+1,
-items.length-1
-);
-
-}
-
-
-else if(ev.key==="ArrowUp"){
-
-ev.preventDefault();
-
-indiceTramiteActivo =
-Math.max(
-indiceTramiteActivo-1,
-0
-);
-
-}
-
-
-else if(
-ev.key==="Enter" &&
-indiceTramiteActivo>=0
-){
-
-ev.preventDefault();
-
-items[
-indiceTramiteActivo
-].dispatchEvent(
-new PointerEvent(
-"pointerdown",
-{bubbles:true}
-)
-);
-
-return;
-
-}
-
-
-else if(ev.key==="Escape"){
-
-lista.style.display="none";
-
-return;
-
-}
-
-
-else{
-
-return;
-
-}
-
-
-items.forEach(
-(item,i)=>{
-
-item.classList.toggle(
-"active",
-i===indiceTramiteActivo
-);
-
-});
-
-}
-
-
-/* =====================================================
-   MOTIVOS
-===================================================== */
-
-function agregarMotivo(){
-
-const motivo =
-document.getElementById(
-"inpMotivo"
-).value.trim();
-
-
-const obs =
-document.getElementById(
-"inpObservacionMotivo"
-).value.trim();
-
-
-if(!motivo){
-
-mostrarEstado(
-"error",
-"❌ Seleccione o escriba un motivo."
-);
-
-return;
-
-}
-
-
-detallesFormulario.push({
-
-motivo:motivo,
-
-observacion:obs
-
-});
-
-
-renderDetalles();
-
-
-document.getElementById(
-"inpMotivo"
-).value="";
-
-
-document.getElementById(
-"inpObservacionMotivo"
-).value="";
-
-}
-
-
-function renderDetalles(){
-
-const tbody =
-document.getElementById(
-"tbodyDetalles"
-);
-
-
-tbody.innerHTML="";
-
-
-detallesFormulario.forEach(
-(d,i)=>{
-
-const tr =
-document.createElement("tr");
-
-
-tr.innerHTML=
-"<td>"+
-(i+1)+
-"</td>"+
-"<td>"+
-escaparHTML(d.motivo)+
-"</td>"+
-"<td>"+
-escaparHTML(d.observacion)+
-"</td>"+
-"<td>"+
-'<button class="btn btn-danger btn-sm" '+
-'onclick="quitarMotivo('+i+')">'+
-"X"+
-"</button>"+
-"</td>";
-
-
-tbody.appendChild(tr);
-
-});
-
-}
-
-
-function quitarMotivo(i){
-
-detallesFormulario.splice(
-i,
-1
-);
-
-renderDetalles();
-
-}
-
 
 /* =====================================================
    GUARDAR DEVOLUCIÓN
 ===================================================== */
+function guardarDevolucion() {
+  let valid = true;
+  const camposReq = ["inpFecha", "selFuncionario", "inpPlaca", "inpCiudadano", "inpTramite"];
+  camposReq.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el.value.trim()) { el.classList.add("invalid"); valid = false; }
+    else { el.classList.remove("invalid"); }
+  });
 
-function guardarDevolucion(){
+  if (!valid) { mostrarEstado("error", "❌ Complete los campos obligatorios."); return; }
+  if (detallesFormulario.length === 0) { mostrarEstado("error", "❌ Agregue al menos un motivo."); return; }
 
-let valid=true;
+  const datos = {
+    fecha: document.getElementById("inpFecha").value,
+    funcionario: document.getElementById("selFuncionario").value,
+    placa: document.getElementById("inpPlaca").value.trim().toUpperCase(),
+    documento: document.getElementById("inpDocumento").value.trim(),
+    ciudadano: document.getElementById("inpCiudadano").value.trim(),
+    tramite: document.getElementById("inpTramite").value.trim(),
+    detalles: detallesFormulario
+  };
 
+  const botones = document.querySelectorAll(".acciones .btn");
+  botones.forEach(btn => btn.disabled = true);
+  mostrarEstado("info", '<span class="spinner"></span> Guardando y generando PDF...');
 
-const camposReq=[
-"inpFecha",
-"selFuncionario",
-"inpPlaca",
-"inpCiudadano",
-"inpTramite"
-];
-
-
-camposReq.forEach(id=>{
-
-const el =
-document.getElementById(id);
-
-
-if(!el.value.trim()){
-
-el.classList.add(
-"invalid"
-);
-
-valid=false;
-
+  ejecutarPeticion({ action: "guardarDevolucion", datos: JSON.stringify(datos) })
+    .then(res => {
+      if (res && res.ok) {
+        mostrarEstado("ok", "✅ Guardado exitosamente. Consecutivo: " + res.consecutivo);
+        const nombreArchivo = "Devolucion_" + res.consecutivo + "_" + datos.placa + ".pdf";
+        if (res.pdfBase64) descargarPDFDesdeBase64(res.pdfBase64, nombreArchivo);
+        else if (res.pdfDownloadUrl) descargarPDFDesdeURL(res.pdfDownloadUrl, nombreArchivo);
+        setTimeout(() => { limpiarFormulario(); cargarDatosIniciales(); }, 1000);
+      } else {
+        mostrarEstado("error", "❌ Error al guardar: " + (res && res.error ? res.error : "Respuesta no válida"));
+      }
+    })
+    .catch(err => {
+      mostrarEstado("error", "❌ Error de conexión al guardar.<br>" + err.message);
+    })
+    .finally(() => {
+      botones.forEach(btn => btn.disabled = false);
+    });
 }
 
-else{
-
-el.classList.remove(
-"invalid"
-);
-
+function descargarPDFDesdeBase64(base64, filename) {
+  try {
+    const byteCharacters = atob(base64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) byteNumbers[i] = byteCharacters.charCodeAt(i);
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: "application/pdf" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      window.URL.revokeObjectURL(url);
+      if (document.body.contains(a)) document.body.removeChild(a);
+    }, 1000);
+  } catch (err) { console.error("Error PDF:", err); }
 }
 
-});
-
-
-if(!valid){
-
-mostrarEstado(
-"error",
-"❌ Complete los campos obligatorios."
-);
-
-return;
-
+function descargarPDFDesdeURL(url, filename) {
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  a.style.display = "none";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { if (document.body.contains(a)) document.body.removeChild(a); }, 1000);
 }
-
-
-if(detallesFormulario.length===0){
-
-mostrarEstado(
-"error",
-"❌ Agregue al menos un motivo."
-);
-
-return;
-
-}
-
-
-const datos={
-
-fecha:
-document.getElementById(
-"inpFecha"
-).value,
-
-funcionario:
-document.getElementById(
-"selFuncionario"
-).value,
-
-placa:
-document.getElementById(
-"inpPlaca"
-).value
-.trim()
-.toUpperCase(),
-
-documento:
-document.getElementById(
-"inpDocumento"
-).value.trim(),
-
-ciudadano:
-document.getElementById(
-"inpCiudadano"
-).value.trim(),
-
-tramite:
-document.getElementById(
-"inpTramite"
-).value.trim(),
-
-detalles:
-detallesFormulario
-
-};
-
-
-const botones =
-document.querySelectorAll(
-".acciones .btn"
-);
-
-
-botones.forEach(
-btn=>btn.disabled=true
-);
-
-
-mostrarEstado(
-"info",
-'<span class="spinner"></span>'+
-" Guardando y generando PDF..."
-);
-
-
-ejecutarPeticion({
-
-action:
-"guardarDevolucion",
-
-datos:
-JSON.stringify(datos)
-
-})
-
-
-.then(res=>{
-
-console.log(
-"RESPUESTA GUARDAR:",
-res
-);
-
-
-if(res && res.ok){
-
-mostrarEstado(
-"ok",
-"✅ Guardado exitosamente. "+
-"Consecutivo: "+
-res.consecutivo
-);
-
-
-const nombreArchivo =
-"Devolucion_"+
-res.consecutivo+
-"_"+datos.placa+
-".pdf";
-
-
-if(res.pdfBase64){
-
-descargarPDFDesdeBase64(
-res.pdfBase64,
-nombreArchivo
-);
-
-}
-
-else if(res.pdfDownloadUrl){
-
-descargarPDFDesdeURL(
-res.pdfDownloadUrl,
-nombreArchivo
-);
-
-}
-
-
-setTimeout(()=>{
-
-limpiarFormulario();
-
-cargarDatosIniciales();
-
-},1000);
-
-}
-
-else{
-
-mostrarEstado(
-"error",
-"❌ Error al guardar: "+
-(
-res && res.error
-? res.error
-: "Respuesta no válida"
-)
-);
-
-}
-
-})
-
-
-.catch(err=>{
-
-console.error(
-"ERROR GUARDANDO:",
-err
-);
-
-
-mostrarEstado(
-"error",
-"❌ Error de conexión al guardar.<br>"+
-err.message
-);
-
-})
-
-
-.finally(()=>{
-
-botones.forEach(
-btn=>btn.disabled=false
-);
-
-});
-
-}
-
-
-/* =====================================================
-   DESCARGAR PDF BASE64
-===================================================== */
-
-function descargarPDFDesdeBase64(
-base64,
-filename
-){
-
-try{
-
-const byteCharacters =
-atob(base64);
-
-
-const byteNumbers =
-new Array(
-byteCharacters.length
-);
-
-
-for(
-let i=0;
-i<byteCharacters.length;
-i++
-){
-
-byteNumbers[i] =
-byteCharacters.charCodeAt(i);
-
-}
-
-
-const byteArray =
-new Uint8Array(
-byteNumbers
-);
-
-
-const blob =
-new Blob(
-[byteArray],
-{type:"application/pdf"}
-);
-
-
-const url =
-window.URL.createObjectURL(
-blob
-);
-
-
-const a =
-document.createElement("a");
-
-
-a.href=url;
-
-a.download=filename;
-
-a.style.display="none";
-
-
-document.body.appendChild(a);
-
-a.click();
-
-
-setTimeout(()=>{
-
-window.URL.revokeObjectURL(
-url
-);
-
-if(document.body.contains(a)){
-
-document.body.removeChild(a);
-
-}
-
-},1000);
-
-
-}
-
-catch(err){
-
-console.error(
-"Error PDF:",
-err
-);
-
-}
-
-}
-
-
-/* =====================================================
-   DESCARGAR PDF URL
-===================================================== */
-
-function descargarPDFDesdeURL(
-url,
-filename
-){
-
-const a =
-document.createElement("a");
-
-
-a.href=url;
-
-a.download=filename;
-
-a.target="_blank";
-
-a.rel="noopener noreferrer";
-
-a.style.display="none";
-
-
-document.body.appendChild(a);
-
-a.click();
-
-
-setTimeout(()=>{
-
-if(document.body.contains(a)){
-
-document.body.removeChild(a);
-
-}
-
-},1000);
-
-}
-
 
 /* =====================================================
    BÚSQUEDA POR PLACA
 ===================================================== */
+function buscarPorPlaca() {
+  const placa = document.getElementById("inpBuscarPlaca").value.trim().toUpperCase();
+  if (!placa) { mostrarEstadoBusqueda("error", "❌ Ingrese una placa."); return; }
 
-function buscarPorPlaca(){
+  mostrarEstadoBusqueda("info", '<span class="spinner"></span> Buscando devoluciones para <b>' + escaparHTML(placa) + '</b>...');
 
-const placa =
-document.getElementById(
-"inpBuscarPlaca"
-).value
-.trim()
-.toUpperCase();
-
-
-if(!placa){
-
-mostrarEstadoBusqueda(
-"error",
-"❌ Ingrese una placa."
-);
-
-return;
-
+  ejecutarPeticion({ action: "buscarPorPlaca", placa: placa })
+    .then(res => {
+      if (res && res.ok) {
+        if (!res.resultados || res.resultados.length === 0) {
+          mostrarEstadoBusqueda("error", "Sin resultados para la placa <b>" + escaparHTML(placa) + "</b>.");
+          document.getElementById("contResultados").style.display = "none";
+        } else {
+          mostrarEstadoBusqueda("ok", "✅ Se encontraron " + res.resultados.length + " devolución(es).");
+          renderResultados(res.resultados);
+        }
+      } else {
+        mostrarEstadoBusqueda("error", "❌ Error en la búsqueda: " + (res && res.error ? res.error : "Respuesta no válida"));
+      }
+    })
+    .catch(err => {
+      mostrarEstadoBusqueda("error", "❌ Error de conexión.<br>" + err.message);
+    });
 }
 
+/* =====================================================
+   RENDERIZAR RESULTADOS
+   (A prueba de balas: Soporta Strings, Arrays y JSONs)
+===================================================== */
+function renderResultados(resultados) {
+  resultadosBusqueda = resultados || [];
+  const tbody = document.getElementById("tbodyResultados");
+  tbody.innerHTML = "";
 
-mostrarEstadoBusqueda(
-"info",
-'<span class="spinner"></span>'+
-" Buscando devoluciones para "+
-"<b>"+escaparHTML(placa)+"</b>..."
-);
+  resultadosBusqueda.forEach(r => {
+    const tr = document.createElement("tr");
+    
+    // Procesamiento robusto de motivos (por si vienen como Array, JSON string o Texto plano)
+    let motivosTexto = "";
+    const rawMotivos = r.motivos || r.MOTIVOS || "";
+    if (typeof rawMotivos === 'string') {
+      try {
+        const parsed = JSON.parse(rawMotivos);
+        if (Array.isArray(parsed)) {
+          motivosTexto = parsed.map(m => typeof m === 'string' ? m : (m.motivo || '')).join(", ");
+        } else { motivosTexto = rawMotivos; }
+      } catch (err) { motivosTexto = rawMotivos; }
+    } else if (Array.isArray(rawMotivos)) {
+      motivosTexto = rawMotivos.map(m => typeof m === 'string' ? m : (m.motivo || '')).join(", ");
+    } else { motivosTexto = String(rawMotivos); }
 
+    const pdfUrl = r.pdfDownloadUrl || r.pdfUrl || r.PDF || "";
+    let pdfHtml = pdfUrl ? '<a href="' + escaparAtributo(pdfUrl) + '" target="_blank" rel="noopener noreferrer" class="btn btn-success btn-sm">📄 Ver</a>' : "—";
 
-ejecutarPeticion({
+    tr.innerHTML =
+      "<td>" + escaparHTML(r.consecutivo || r.id || "") + "</td>" +
+      "<td>" + escaparHTML(r.fecha || r.FECHA || "") + "</td>" +
+      "<td>" + escaparHTML(r.placa || r.PLACA || "") + "</td>" +
+      "<td>" + escaparHTML(r.ciudadano || r.CIUDADANO || "") + "</td>" +
+      "<td>" + escaparHTML(r.funcionario || r.FUNCIONARIO || "") + "</td>" +
+      "<td>" + escaparHTML(r.tramite || r.TRAMITE || "") + "</td>" +
+      "<td>" + escaparHTML(motivosTexto) + "</td>" +
+      "<td>" + pdfHtml + "</td>";
 
-action:"buscarPorPlaca",
+    tbody.appendChild(tr);
+  });
 
-placa:placa
-
-})
-
-
-.then(res=>{
-
-console.log(
-"RESPUESTA BUSQUEDA:",
-res
-);
-
-
-if(res && res.ok){
-
-if(
-!res.resultados ||
-res.resultados.length===0
-){
-
-mostrarEstadoBusqueda(
-"error",
-"Sin resultados para la placa "+
-"<b>"+
-escaparHTML(placa)+
-"</b>."
-);
-
-document.getElementById(
-"contResultados"
-).style.display="none";
-
+  document.getElementById("contResultados").style.display = "block";
 }
 
-else{
-
-mostrarEstadoBusqueda(
-"ok",
-"✅ Se encontraron "+
-res.resultados.length+
-" devolución(es)."
-);
-
-renderResultados(
-res.resultados
-);
-
+/* =====================================================
+   LIMPIEZA Y UTILIDADES
+===================================================== */
+function limpiarFormulario() {
+  document.getElementById("selFuncionario").value = "";
+  document.getElementById("inpPlaca").value = "";
+  document.getElementById("inpDocumento").value = "";
+  document.getElementById("inpCiudadano").value = "";
+  document.getElementById("inpTramite").value = "";
+  document.getElementById("inpMotivo").value = "";
+  document.getElementById("inpObservacionMotivo").value = "";
+  detallesFormulario = [];
+  renderDetalles();
+  document.querySelectorAll(".invalid").forEach(el => el.classList.remove("invalid"));
+  
+  const hoy = new Date();
+  const yyyy = hoy.getFullYear();
+  const mm = String(hoy.getMonth() + 1).padStart(2, "0");
+  const dd = String(hoy.getDate()).padStart(2, "0");
+  document.getElementById("inpFecha").value = yyyy + "-" + mm + "-" + dd;
+  mostrarEstado("info", "Formulario limpiado.");
 }
 
+function limpiarBusqueda() {
+  document.getElementById("inpBuscarPlaca").value = "";
+  document.getElementById("tbodyResultados").innerHTML = "";
+  document.getElementById("contResultados").style.display = "none";
+  document.getElementById("msgBusqueda").className = "estado-msg";
+  document.getElementById("msgBusqueda").innerHTML = "";
 }
 
-else{
-
-mostrarEstadoBusqueda(
-"error",
-"❌ Error en la búsqueda: "+
-(
-res && res.error
-? res.error
-: "Respuesta no válida"
-)
-);
-
+function escaparHTML(valor) {
+  return String(valor ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
-})
+function escaparAtributo(valor) {
+  return String(valor ?? "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
 
+/* =====================================================
+   INICIO DEL SISTEMA
+===================================================== */
+document.addEventListener("DOMContentLoaded", function() {
+  const hoy = new Date();
+  const yyyy = hoy.getFullYear();
+  const mm = String(hoy.getMonth() + 1).padStart(2, "0");
+  const dd = String(hoy.getDate()).padStart(2, "0");
+  document.getElementById("inpFecha").value = yyyy + "-" + mm + "-" + dd;
 
-.catch(err=>{
+  const inpTramite = document.getElementById("inpTramite");
+  if (inpTramite) {
+    inpTramite.addEventListener("focus", mostrarSugerenciasTramites);
+    inpTramite.addEventListener("input", mostrarSugerenciasTramites);
+    inpTramite.addEventListener("keydown", manejarTecladoTramites);
+    inpTramite.addEventListener("blur", ocultarSugerenciasTramites);
+  }
 
-console.error(
-"ERROR BUSQUEDA:",
-err
-);
+  ["inpPlaca", "inpBuscarPlaca"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("input", function() { this.value = this.value.toUpperCase(); });
+  });
 
-
-mostrarEstadoBusqueda(
-"error",
-"❌ Error de conexión.<br>"+
-err.message
-);
-
+  cargarDatosIniciales();
 });
-
-}
-
-
-/* =====================================================
-   RESULTADOS
-===================================================== */
-
-function renderResultados(
-resultados
-){
-
-resultadosBusqueda =
-resultados || [];
-
-
-const tbody =
-document.getElementById(
-"tbodyResultados"
-);
-
-
-tbody.innerHTML="";
-
-
-resultadosBusqueda.forEach(
-(r,i)=>{
-
-const tr =
-document.createElement("tr");
-
-
-const consecutivo =
-r.consecutivo ||
-r.id ||
-r.ID ||
-"";
-
-
-const fecha =
-r.fecha ||
-r.FECHA ||
-"";
-
-
-const placa =
-r.placa ||
-r.PLACA ||
-"";
-
-
-const ciudadano =
-r.ciudadano ||
-r.CIUDADANO ||
-"";
-
-
-const funcionario =
-r.funcionario ||
-r.FUNCIONARIO ||
-"";
-
-
-const tramite =
-r.tramite ||
-r.TRAMITE ||
-"";
-
-
-const motivos =
-r.motivos ||
-r.MOTIVOS ||
-"";
-
-
-let pdf="";
-
-
-const pdfUrl =
-r.pdfDownloadUrl ||
-r.pdfUrl ||
-r.PDF ||
-"";
-
-
-if(pdfUrl){
-
-pdf =
-'<a href="'+
-escaparAtributo(pdfUrl)+
-'" target="_blank" rel="noopener noreferrer">'+
-"📄 PDF"+
-"</a>";
-
-}
-
-else{
-
-pdf="—";
-
-}
-
-
-tr.innerHTML=
-"<td>"+escaparHTML(consecutivo)+"</td>"+
-"<td>"+escaparHTML(fecha)+"</td>"+
-"<td>"+escaparHTML(placa)+"</td>"+
-"<td>"+escaparHTML(ciudadano)+"</td>"+
-"<td>"+escaparHTML(funcionario)+"</td>"+
-"<td>"+escaparHTML(tramite)+"</td>"+
-"<td>"+escaparHTML(motivos)+"</td>"+
-"<td>"+pdf+"</td>";
-
-
-tbody.appendChild(tr);
-
-});
-
-
-document.getElementById(
-"contResultados"
-).style.display="block";
-
-}
-
-
-/* =====================================================
-   LIMPIAR FORMULARIO
-===================================================== */
-
-function limpiarFormulario(){
-
-document.getElementById(
-"selFuncionario"
-).value="";
-
-
-document.getElementById(
-"inpPlaca"
-).value="";
-
-
-document.getElementById(
-"inpDocumento"
-).value="";
-
-
-document.getElementById(
-"inpCiudadano"
-).value="";
-
-
-document.getElementById(
-"inpTramite"
-).value="";
-
-
-document.getElementById(
-"inpMotivo"
-).value="";
-
-
-document.getElementById(
-"inpObservacionMotivo"
-).value="";
-
-
-detallesFormulario=[];
-
-renderDetalles();
-
-
-document
-.querySelectorAll(".invalid")
-.forEach(
-el=>el.classList.remove("invalid")
-);
-
-
-const fecha =
-document.getElementById(
-"inpFecha"
-);
-
-
-const hoy =
-new Date();
-
-
-const yyyy =
-hoy.getFullYear();
-
-
-const mm =
-String(
-hoy.getMonth()+1
-).padStart(2,"0");
-
-
-const dd =
-String(
-hoy.getDate()
-).padStart(2,"0");
-
-
-fecha.value =
-yyyy+"-"+mm+"-"+dd;
-
-
-mostrarEstado(
-"info",
-"Formulario limpiado."
-);
-
-}
-
-
-/* =====================================================
-   LIMPIAR BÚSQUEDA
-===================================================== */
-
-function limpiarBusqueda(){
-
-document.getElementById(
-"inpBuscarPlaca"
-).value="";
-
-
-document.getElementById(
-"tbodyResultados"
-).innerHTML="";
-
-
-document.getElementById(
-"contResultados"
-).style.display="none";
-
-
-document.getElementById(
-"msgBusqueda"
-).className=
-"estado-msg";
-
-
-document.getElementById(
-"msgBusqueda"
-).innerHTML="";
-
-}
-
-
-/* =====================================================
-   ESCAPAR HTML
-===================================================== */
-
-function escaparHTML(valor){
-
-return String(
-valor ?? ""
-)
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
-
-}
-
-
-function escaparAtributo(valor){
-
-return String(
-valor ?? ""
-)
-.replace(/&/g,"&amp;")
-.replace(/"/g,"&quot;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;");
-
-}
-
-
-/* =====================================================
-   EVENTOS
-===================================================== */
-
-document.addEventListener(
-"DOMContentLoaded",
-function(){
-
-console.log(
-"🚀 SISTEMA DEVOLUCIÓN DE TRÁMITES INICIADO"
-);
-
-
-/* FECHA */
-
-const fecha =
-document.getElementById(
-"inpFecha"
-);
-
-
-if(fecha){
-
-const hoy =
-new Date();
-
-
-const yyyy =
-hoy.getFullYear();
-
-
-const mm =
-String(
-hoy.getMonth()+1
-).padStart(2,"0");
-
-
-const dd =
-String(
-hoy.getDate()
-).padStart(2,"0");
-
-
-fecha.value =
-yyyy+"-"+mm+"-"+dd;
-
-}
-
-
-/* TRÁMITES */
-
-const inpTramite =
-document.getElementById(
-"inpTramite"
-);
-
-
-if(inpTramite){
-
-inpTramite.addEventListener(
-"focus",
-mostrarSugerenciasTramites
-);
-
-inpTramite.addEventListener(
-"input",
-mostrarSugerenciasTramites
-);
-
-inpTramite.addEventListener(
-"keydown",
-manejarTecladoTramites
-);
-
-inpTramite.addEventListener(
-"blur",
-ocultarSugerenciasTramites
-);
-
-}
-
-
-/* MAYÚSCULAS PLACA */
-
-const inpPlaca =
-document.getElementById(
-"inpPlaca"
-);
-
-
-if(inpPlaca){
-
-inpPlaca.addEventListener(
-"input",
-function(){
-
-this.value =
-this.value.toUpperCase();
-
-}
-);
-
-}
-
-
-/* MAYÚSCULAS PLACA BÚSQUEDA */
-
-const inpBuscarPlaca =
-document.getElementById(
-"inpBuscarPlaca"
-);
-
-
-if(inpBuscarPlaca){
-
-inpBuscarPlaca.addEventListener(
-"input",
-function(){
-
-this.value =
-this.value.toUpperCase();
-
-}
-);
-
-}
-
-
-/* CARGAR DATOS */
-
-cargarDatosIniciales();
-
-});
-
 </script>
-
 </body>
 </html>
