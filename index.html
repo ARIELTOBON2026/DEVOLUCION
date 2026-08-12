@@ -108,12 +108,18 @@
 </div>
 
 <script>
+// ==========================================
+// CONFIGURACIÓN
+// ==========================================
 const URL_BACKEND = "https://script.google.com/macros/s/AKfycbxHh64KFA_72yjVYoH6-rEb4MxNZGky2rmcHjR94MiT6a__RoEU2mr37YeheHxHXa-Tcg/exec";
 
 let listaFuncionarios = [];
 let listaMotivos = [];
 let detallesFormulario = [];
 
+// ==========================================
+// PETICIÓN AL BACKEND
+// ==========================================
 async function ejecutarPeticion(params) {
   const url = new URL(URL_BACKEND);
   params._nocache = Date.now();
@@ -123,6 +129,9 @@ async function ejecutarPeticion(params) {
   return await response.json();
 }
 
+// ==========================================
+// CARGAR DATOS INICIALES
+// ==========================================
 function cargarDatosIniciales() {
   mostrarEstado("info", '<span class="spinner"></span> Conectando con el servidor...');
   ejecutarPeticion({ action: "getInitialData" })
@@ -163,6 +172,9 @@ function llenarDatalistMotivos() {
   });
 }
 
+// ==========================================
+// GESTIÓN DE MOTIVOS
+// ==========================================
 function agregarMotivo() {
   const motivo = document.getElementById("inpMotivo").value.trim();
   const obs = document.getElementById("inpObservacionMotivo").value.trim();
@@ -183,6 +195,9 @@ function renderDetalles() {
 
 function quitarMotivo(i) { detallesFormulario.splice(i, 1); renderDetalles(); }
 
+// ==========================================
+// GUARDAR DEVOLUCIÓN (CORREGIDO)
+// ==========================================
 function guardarDevolucion() {
   // Validación visual de campos obligatorios
   let valid = true;
@@ -222,23 +237,23 @@ function guardarDevolucion() {
       if (res.ok) {
         mostrarEstado("ok", "✅ Guardado exitosamente! Consecutivo: " + res.consecutivo + ". Descargando PDF...");
 
-        // Descarga forzada usando la URL de descarga directa que devuelve el backend
-        if (res.pdfUrl) {
-          const a = document.createElement("a");
-          a.href = res.pdfUrl;
-          a.download = `Devolucion_${res.consecutivo}_${datos.placa}.pdf`;
-          a.target = "_blank";
-          a.rel = "noopener noreferrer";
-          document.body.appendChild(a);
-          a.click();
-          // Limpiar el elemento después de disparar la descarga
-          setTimeout(() => {
-            document.body.removeChild(a);
-          }, 100);
+        const nombreArchivo = `Devolucion_${res.consecutivo}_${datos.placa}.pdf`;
+
+        // ✅ MÉTODO PRINCIPAL: Descargar desde base64 (NUNCA cierra la página)
+        if (res.pdfBase64) {
+          descargarPDFDesdeBase64(res.pdfBase64, nombreArchivo);
+        }
+        // ✅ MÉTODO DE RESPALDO: Descargar desde URL sin cerrar la página
+        else if (res.pdfDownloadUrl) {
+          descargarPDFDesdeURL(res.pdfDownloadUrl, nombreArchivo);
         }
 
-        limpiarFormulario();
-        cargarDatosIniciales();
+        // Limpiar formulario y recargar datos
+        setTimeout(() => {
+          limpiarFormulario();
+          cargarDatosIniciales();
+        }, 500);
+
       } else {
         mostrarEstado("error", "Error al guardar: " + res.error);
       }
@@ -252,6 +267,78 @@ function guardarDevolucion() {
     });
 }
 
+// ==========================================
+// DESCARGA DE PDF - MÉTODO PRINCIPAL (BASE64)
+// ✅ Este método NUNCA cierra la página porque no navega a ninguna URL
+// ==========================================
+function descargarPDFDesdeBase64(base64, filename) {
+  try {
+    const byteCharacters = atob(base64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: 'application/pdf' });
+
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+
+    setTimeout(() => {
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    }, 1000);
+
+  } catch (err) {
+    console.error("Error descargando desde base64:", err);
+    mostrarEstado("error", "Error al descargar PDF. Intentando método alternativo...");
+  }
+}
+
+// ==========================================
+// DESCARGA DE PDF - MÉTODO DE RESPALDO (URL)
+// ✅ Usa enlace con download + iframe oculto. No cierra la página.
+// ==========================================
+function descargarPDFDesdeURL(url, filename) {
+  // Método 1: Enlace con atributo download (fuerza descarga sin navegar)
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.target = "_self";
+  a.rel = "noopener noreferrer";
+  a.style.display = "none";
+  document.body.appendChild(a);
+  a.click();
+
+  setTimeout(() => {
+    if (document.body.contains(a)) {
+      document.body.removeChild(a);
+    }
+  }, 1000);
+
+  // Método 2 (respaldo): iframe oculto que no cierra la página
+  setTimeout(() => {
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = url;
+    document.body.appendChild(iframe);
+
+    setTimeout(() => {
+      if (document.body.contains(iframe)) {
+        document.body.removeChild(iframe);
+      }
+    }, 60000);
+  }, 500);
+}
+
+// ==========================================
+// LIMPIAR FORMULARIO
+// ==========================================
 function limpiarFormulario() {
   document.getElementById("inpFecha").value = new Date().toISOString().split("T")[0];
   document.getElementById("selFuncionario").value = "";
@@ -270,6 +357,9 @@ function mostrarEstado(tipo, html) {
   el.innerHTML = html;
 }
 
+// ==========================================
+// INICIALIZACIÓN
+// ==========================================
 document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("inpFecha").value = new Date().toISOString().split("T")[0];
   const camposReq = ['inpFecha', 'selFuncionario', 'inpPlaca', 'inpCiudadano'];
