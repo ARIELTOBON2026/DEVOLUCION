@@ -69,19 +69,22 @@
             <input type="text" id="ciudadano" class="form-control" placeholder="Nombre completo" required>
           </div>
 
+          <!-- TIPO DE TRÁMITE CON BÚSQUEDA INTERACTIVA (DATALIST) -->
           <div class="col-md-6">
             <label for="tramite" class="form-label">Tipo de Trámite</label>
-            <select id="tramite" class="form-select" required>
-              <option value="">Cargando catálogo...</option>
-            </select>
+            <input type="text" id="tramite" class="form-control" list="listaTramites" placeholder="Escriba o seleccione un trámite..." required autocomplete="off">
+            <datalist id="listaTramites"></datalist>
           </div>
         </div>
 
         <hr class="my-4">
 
-        <!-- DETALLES Y MOTIVOS (MULTIFILA) -->
+        <!-- DETALLES Y MOTIVOS (MULTIFILA CON BÚSQUEDA) -->
         <h5>Motivos de Devolución</h5>
         <p class="text-muted small">Agregue uno o más motivos para justificar la devolución del trámite.</p>
+
+        <!-- DATALIST GLOBAL PARA BÚSQUEDA DE MOTIVOS -->
+        <datalist id="listaMotivos"></datalist>
 
         <div class="table-responsive">
           <table class="table table-bordered align-middle" id="tablaDetalles">
@@ -115,7 +118,7 @@
     </div>
   </div>
 
-  <!-- SECCIÓN BÚSQUEDA POR PLACA (EN LA PARTE INFERIOR) -->
+  <!-- SECCIÓN BÚSQUEDA POR PLACA -->
   <div class="card mt-4">
     <div class="card-header bg-dark">
       🔍 Consultar Devoluciones por Placa
@@ -155,7 +158,6 @@
 </div>
 
 <script>
-  // ⚠️ REEMPLAZA ESTA URL CON TU ENLACE DE WEB APP DE GOOGLE APPS SCRIPT DEPLOYED
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw1D5Lb7q3GEeksJgXho_avO8lJ3NWgZWuTJPhJ1VWz6-U2Kfd8msUcc1w-VQpgL5fVlA/exec";
 
   let listaMotivosGlobal = [];
@@ -174,7 +176,7 @@
   }
 
   /* =====================================================
-     DESCARGA SILENCIOSA EN SEGUNDO PLANO (OPCIÓN 2)
+     DESCARGA EN SEGUNDO PLANO
   ===================================================== */
   function descargarEnSegundoPlano(url) {
     const iframe = document.createElement("iframe");
@@ -182,7 +184,6 @@
     iframe.src = url;
     document.body.appendChild(iframe);
     
-    // Se elimina el iframe del DOM tras 10 segundos
     setTimeout(() => {
       if (iframe) iframe.remove();
     }, 10000);
@@ -195,9 +196,15 @@
     ejecutarPeticion({ action: "getInitialData" })
       .then(res => {
         if (res && res.ok) {
+          // Select estándar para funcionarios
           poblarSelect("funcionario", res.funcionarios, "nombre");
-          poblarSelect("tramite", res.tramites, "tramite");
+
+          // Datalist con filtro para Trámites
+          poblarDatalist("listaTramites", res.tramites, "tramite");
+
+          // Datalist con filtro para Motivos
           listaMotivosGlobal = res.motivos || [];
+          poblarDatalist("listaMotivos", listaMotivosGlobal, "motivo");
           
           // Fila por defecto en tabla de detalles
           if (document.getElementById("tbodyDetalles").children.length === 0) {
@@ -226,6 +233,22 @@
     }
   }
 
+  function poblarDatalist(idElem, lista, claveTexto) {
+    const datalist = document.getElementById(idElem);
+    if (!datalist) return;
+    datalist.innerHTML = "";
+    if (Array.isArray(lista)) {
+      lista.forEach(item => {
+        const val = item[claveTexto] || "";
+        if (val) {
+          const opt = document.createElement("option");
+          opt.value = val;
+          datalist.appendChild(opt);
+        }
+      });
+    }
+  }
+
   /* =====================================================
      TABLA DINÁMICA DE DETALLES
   ===================================================== */
@@ -235,18 +258,10 @@
 
     const tr = document.createElement("tr");
 
-    // Opciones para el select de motivo
-    let opcionesMotivo = '<option value="">-- Seleccione Motivo --</option>';
-    listaMotivosGlobal.forEach(m => {
-      if (m.motivo) opcionesMotivo += `<option value="${escaparHTML(m.motivo)}">${escaparHTML(m.motivo)}</option>`;
-    });
-
     tr.innerHTML = `
       <td class="text-center num-item">${numFila}</td>
       <td>
-        <select class="form-select sel-motivo" required>
-          ${opcionesMotivo}
-        </select>
+        <input type="text" class="form-control sel-motivo" list="listaMotivos" placeholder="Escriba o seleccione un motivo..." required autocomplete="off">
       </td>
       <td>
         <input type="text" class="form-control inp-observacion" placeholder="Detalles u observaciones opcionales...">
@@ -291,8 +306,8 @@
     const detalles = [];
     const filas = document.querySelectorAll("#tbodyDetalles tr");
     filas.forEach(tr => {
-      const mot = tr.querySelector(".sel-motivo").value;
-      const obs = tr.querySelector(".inp-observacion").value;
+      const mot = tr.querySelector(".sel-motivo").value.trim();
+      const obs = tr.querySelector(".inp-observacion").value.trim();
       if (mot) {
         detalles.push({ motivo: mot, observacion: obs });
       }
@@ -300,7 +315,7 @@
 
     if (detalles.length === 0) {
       msg.className = "estado-msg text-danger";
-      msg.innerHTML = "❌ Debe seleccionar al menos un motivo válido.";
+      msg.innerHTML = "❌ Debe ingresar al menos un motivo válido.";
       return;
     }
 
@@ -312,7 +327,7 @@
         placa: document.getElementById("placa").value.trim().toUpperCase(),
         documento: document.getElementById("documento").value.trim(),
         ciudadano: document.getElementById("ciudadano").value.trim(),
-        tramite: document.getElementById("tramite").value,
+        tramite: document.getElementById("tramite").value.trim(),
         detalles: detalles
       }
     };
@@ -329,7 +344,6 @@
           msg.innerHTML = `✅ ¡Registrado con éxito! Consecutivo N° <b>${res.consecutivo}</b>`;
           
           if (res.pdfDownloadUrl) {
-            // OPCIÓN 2: Descarga limpia en segundo plano sin abrir pestañas
             descargarEnSegundoPlano(res.pdfDownloadUrl);
           }
           reiniciarFormulario();
@@ -353,7 +367,7 @@
   }
 
   /* =====================================================
-     BÚSQUEDA POR PLACA (Global)
+     BÚSQUEDA POR PLACA
   ===================================================== */
   window.buscarPorPlaca = function() {
     const input = document.getElementById("inpBuscarPlaca");
@@ -430,8 +444,6 @@
       .then(res => {
         if (res && res.ok && res.pdfDownloadUrl) {
           mostrarEstadoBusqueda("text-success", "✅ Descargando documento PDF...");
-          
-          // OPCIÓN 2: Descarga limpia en segundo plano sin abrir pestañas
           descargarEnSegundoPlano(res.pdfDownloadUrl);
         } else {
           mostrarEstadoBusqueda("text-danger", "❌ Error al generar PDF: " + (res.error || "Sin enlace de descarga"));
