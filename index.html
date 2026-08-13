@@ -33,43 +33,6 @@
 
 <div class="container">
 
-  <!-- ACORDEÓN / SECCIÓN BÚSQUEDA POR PLACA -->
-  <div class="card">
-    <div class="card-header bg-dark">
-      🔍 Consultar Devoluciones por Placa
-    </div>
-    <div class="card-body">
-      <div class="row g-2 align-items-center">
-        <div class="col-sm-4 col-md-3">
-          <input type="text" id="inpBuscarPlaca" class="form-control text-uppercase" placeholder="Ej: AAA123" maxlength="6">
-        </div>
-        <div class="col-auto">
-          <button type="button" class="btn btn-success" onclick="buscarPorPlaca()">🔍 Buscar</button>
-          <button type="button" class="btn btn-secondary" onclick="limpiarBusqueda()">🧹 Limpiar</button>
-        </div>
-      </div>
-      <div id="msgBusqueda" class="estado-msg"></div>
-
-      <!-- TABLA RESULTADOS DE BÚSQUEDA -->
-      <div id="contResultados" class="table-responsive mt-3" style="display: none;">
-        <table class="table table-striped table-hover align-middle">
-          <thead class="table-dark">
-            <tr>
-              <th>ID</th>
-              <th>Fecha</th>
-              <th>Placa</th>
-              <th>Ciudadano</th>
-              <th>Trámite</th>
-              <th>Motivo(s)</th>
-              <th>Acción</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyResultados"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
   <!-- FORMULARIO DE REGISTRO -->
   <div class="card">
     <div class="card-header">
@@ -149,6 +112,43 @@
 
         <div id="msgGuardado" class="estado-msg text-end mt-2"></div>
       </form>
+    </div>
+  </div>
+
+  <!-- SECCIÓN BÚSQUEDA POR PLACA (AHORA EN LA PARTE INFERIOR) -->
+  <div class="card mt-4">
+    <div class="card-header bg-dark">
+      🔍 Consultar Devoluciones por Placa
+    </div>
+    <div class="card-body">
+      <div class="row g-2 align-items-center">
+        <div class="col-sm-4 col-md-3">
+          <input type="text" id="inpBuscarPlaca" class="form-control text-uppercase" placeholder="Ej: AAA123" maxlength="6">
+        </div>
+        <div class="col-auto">
+          <button type="button" class="btn btn-success" onclick="buscarPorPlaca()">🔍 Buscar</button>
+          <button type="button" class="btn btn-secondary" onclick="limpiarBusqueda()">🧹 Limpiar</button>
+        </div>
+      </div>
+      <div id="msgBusqueda" class="estado-msg"></div>
+
+      <!-- TABLA RESULTADOS DE BÚSQUEDA -->
+      <div id="contResultados" class="table-responsive mt-3" style="display: none;">
+        <table class="table table-striped table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Fecha</th>
+              <th>Placa</th>
+              <th>Ciudadano</th>
+              <th>Trámite</th>
+              <th>Motivo(s)</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyResultados"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
