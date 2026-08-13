@@ -450,7 +450,7 @@ th{
 /* =====================================================
    CONFIGURACIÓN
 ===================================================== */
-const URL_BACKEND = "https://script.google.com/macros/s/AKfycbwpbsTMERbMtskSbsfWKhcc0xmZ8F5WoPnHUJwrDzhl0sI1tntSn_6-CZkhsjBg7uMpaA/exec";
+const URL_BACKEND = "https://script.google.com/macros/s/AKfycbz7SiCodemB5yE0CqsSfF3uPrhfwNuXcXOpPAxxbRhGj2qkViSvIMi1ypx0MZ5jkzkLfw/exec";
 
 let listaFuncionarios = [];
 let listaMotivos = [];
@@ -486,49 +486,37 @@ function actualizarEstadoConexion(tipo, texto) {
 }
 
 /* =====================================================
-   JSONP (SOLUCIÓN ANTI-CORS)
+   PETICIONES CON FETCH (REEMPLAZO ROBUSTO ANTI-CORS)
 ===================================================== */
-function ejecutarPeticion(params) {
-  return new Promise((resolve, reject) => {
-    const callbackName = "jsonpCallback_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
-    const script = document.createElement("script");
-    let terminado = false;
+async function ejecutarPeticion(params) {
+  const action = params.action || "ping";
+  const esPost = action === "guardarDevolucion";
+  let url = URL_BACKEND;
+  let config = {};
 
-    window[callbackName] = function(data) {
-      terminado = true;
-      try { resolve(data); }
-      finally {
-        delete window[callbackName];
-        if (script.parentNode) script.parentNode.removeChild(script);
-      }
+  if (esPost) {
+    config = {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(params)
     };
-
-    script.onerror = function() {
-      if (terminado) return;
-      delete window[callbackName];
-      if (script.parentNode) script.parentNode.removeChild(script);
-      reject(new Error("No fue posible cargar la respuesta JSONP de Apps Script."));
-    };
-
+  } else {
     const query = new URLSearchParams();
     Object.keys(params).forEach(key => {
       let valor = params[key];
       if (valor === undefined || valor === null) valor = "";
       query.append(key, String(valor));
     });
-    query.append("callback", callbackName);
     query.append("_nocache", Date.now());
+    url += "?" + query.toString();
+    config = { method: "GET" };
+  }
 
-    script.src = URL_BACKEND + "?" + query.toString();
-    document.head.appendChild(script);
-
-    setTimeout(() => {
-      if (terminado) return;
-      delete window[callbackName];
-      if (script.parentNode) script.parentNode.removeChild(script);
-      reject(new Error("Tiempo de espera agotado al conectar con Apps Script."));
-    }, 20000);
-  });
+  const respuesta = await fetch(url, config);
+  if (!respuesta.ok) {
+    throw new Error("Error HTTP servidor: " + respuesta.status);
+  }
+  return await respuesta.json();
 }
 
 /* =====================================================
@@ -736,7 +724,7 @@ function quitarMotivo(i) {
 }
 
 /* =====================================================
-   GUARDAR DEVOLUCIÓN
+   GUARDAR DEVOLUCIÓN Y GENERAR PDF
 ===================================================== */
 function guardarDevolucion() {
   let valid = true;
@@ -769,8 +757,13 @@ function guardarDevolucion() {
       if (res && res.ok) {
         mostrarEstado("ok", "✅ Guardado exitosamente. Consecutivo: " + res.consecutivo);
         const nombreArchivo = "Devolucion_" + res.consecutivo + "_" + datos.placa + ".pdf";
-        if (res.pdfBase64) descargarPDFDesdeBase64(res.pdfBase64, nombreArchivo);
-        else if (res.pdfDownloadUrl) descargarPDFDesdeURL(res.pdfDownloadUrl, nombreArchivo);
+        
+        if (res.pdfBase64) {
+          descargarPDFDesdeBase64(res.pdfBase64, nombreArchivo);
+        } else if (res.pdfDownloadUrl) {
+          descargarPDFDesdeURL(res.pdfDownloadUrl, nombreArchivo);
+        }
+
         setTimeout(() => { limpiarFormulario(); cargarDatosIniciales(); }, 1000);
       } else {
         mostrarEstado("error", "❌ Error al guardar: " + (res && res.error ? res.error : "Respuesta no válida"));
@@ -802,7 +795,7 @@ function descargarPDFDesdeBase64(base64, filename) {
       window.URL.revokeObjectURL(url);
       if (document.body.contains(a)) document.body.removeChild(a);
     }, 1000);
-  } catch (err) { console.error("Error PDF:", err); }
+  } catch (err) { console.error("Error al procesar descarga de PDF:", err); }
 }
 
 function descargarPDFDesdeURL(url, filename) {
@@ -847,7 +840,6 @@ function buscarPorPlaca() {
 
 /* =====================================================
    RENDERIZAR RESULTADOS
-   (A prueba de balas: Soporta Strings, Arrays y JSONs)
 ===================================================== */
 function renderResultados(resultados) {
   resultadosBusqueda = resultados || [];
@@ -857,7 +849,6 @@ function renderResultados(resultados) {
   resultadosBusqueda.forEach(r => {
     const tr = document.createElement("tr");
     
-    // Procesamiento robusto de motivos (por si vienen como Array, JSON string o Texto plano)
     let motivosTexto = "";
     const rawMotivos = r.motivos || r.MOTIVOS || "";
     if (typeof rawMotivos === 'string') {
