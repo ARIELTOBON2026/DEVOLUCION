@@ -115,7 +115,7 @@
     </div>
   </div>
 
-  <!-- SECCIÓN BÚSQUEDA POR PLACA (AHORA EN LA PARTE INFERIOR) -->
+  <!-- SECCIÓN BÚSQUEDA POR PLACA (EN LA PARTE INFERIOR) -->
   <div class="card mt-4">
     <div class="card-header bg-dark">
       🔍 Consultar Devoluciones por Placa
@@ -314,7 +314,14 @@
           msg.innerHTML = `✅ ¡Registrado con éxito! Consecutivo N° <b>${res.consecutivo}</b>`;
           
           if (res.pdfDownloadUrl) {
-            window.open(res.pdfDownloadUrl, "_blank");
+            // CORRECCIÓN: Inserción de enlace dinámico para evitar ventana en blanco por bloqueo del navegador
+            const a = document.createElement("a");
+            a.href = res.pdfDownloadUrl;
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
           }
           reiniciarFormulario();
         } else {
@@ -414,7 +421,15 @@
       .then(res => {
         if (res && res.ok && res.pdfDownloadUrl) {
           mostrarEstadoBusqueda("text-success", "✅ Documento PDF listo.");
-          window.open(res.pdfDownloadUrl, "_blank");
+          
+          // CORRECCIÓN: Inserción de enlace dinámico para abrir el PDF correctamente
+          const a = document.createElement("a");
+          a.href = res.pdfDownloadUrl;
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
         } else {
           mostrarEstadoBusqueda("text-danger", "❌ Error al generar PDF: " + (res.error || "Sin enlace de descarga"));
         }
