@@ -261,8 +261,8 @@
     });
   }
 
-  /* =====================================================
-     GUARDAR DEVOLUCIÓN (Submit)
+/* =====================================================
+     GUARDAR DEVOLUCIÓN (Submit) - FIX PANTALLA EN BLANCO
   ===================================================== */
   function guardarDevolucion(event) {
     event.preventDefault();
@@ -270,6 +270,7 @@
     const btn = document.getElementById("btnGuardar");
     const msg = document.getElementById("msgGuardado");
 
+    // Recopilar detalles
     const detalles = [];
     const filas = document.querySelectorAll("#tbodyDetalles tr");
     filas.forEach(tr => {
@@ -284,6 +285,22 @@
       msg.className = "estado-msg text-danger";
       msg.innerHTML = "❌ Debe seleccionar al menos un motivo válido.";
       return;
+    }
+
+    // 1. Abrir la pestaña INMEDIATAMENTE al hacer clic para evitar parpadeos y bloqueos de pop-up
+    const ventanaPDF = window.open("about:blank", "_blank");
+    if (ventanaPDF) {
+      ventanaPDF.document.write(`
+        <html>
+          <head><title>Generando PDF...</title></head>
+          <body style="font-family: Arial, sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f4f6f9;">
+            <div style="text-align: center; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+              <h2 style="color: #1b365d; margin-bottom: 10px;">Secretaría de Movilidad</h2>
+              <p style="color: #555; font-size: 16px;">Generando documento PDF de devolución, por favor espere...</p>
+            </div>
+          </body>
+        </html>
+      `);
     }
 
     const payload = {
@@ -310,22 +327,32 @@
           msg.className = "estado-msg text-success";
           msg.innerHTML = `✅ ¡Registrado con éxito! Consecutivo N° <b>${res.consecutivo}</b>`;
           
+          // 2. Redirigir la pestaña ya abierta al enlace de descarga generado
           if (res.pdfDownloadUrl) {
-            window.open(res.pdfDownloadUrl, "_blank");
+            if (ventanaPDF) {
+              ventanaPDF.location.href = res.pdfDownloadUrl;
+            } else {
+              window.open(res.pdfDownloadUrl, "_blank");
+            }
+          } else if (ventanaPDF) {
+            ventanaPDF.close();
           }
+
           reiniciarFormulario();
         } else {
+          if (ventanaPDF) ventanaPDF.close();
           msg.className = "estado-msg text-danger";
           msg.innerHTML = "❌ Error: " + (res.error || "Ocurrió un fallo en el registro");
         }
       })
       .catch(err => {
         btn.disabled = false;
+        if (ventanaPDF) ventanaPDF.close();
         msg.className = "estado-msg text-danger";
         msg.innerHTML = "❌ Error de conexión: " + err.message;
       });
-  }
-
+  }  
+  
   function reiniciarFormulario() {
     document.getElementById("formDevolucion").reset();
     document.getElementById("tbodyDetalles").innerHTML = "";
