@@ -60,9 +60,10 @@ header p{
   padding-bottom:8px;
 }
 
+/* SISTEMA DE GRID REORGANIZADO */
 .form-grid{
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns: repeat(12, 1fr);
   gap:15px;
 }
 
@@ -71,9 +72,12 @@ header p{
   flex-direction:column;
 }
 
-.form-group.full{
-  grid-column:1/-1;
-}
+/* Clases de ancho personalizado */
+.col-3 { grid-column: span 3; }
+.col-4 { grid-column: span 4; }
+.col-5 { grid-column: span 5; }
+.col-6 { grid-column: span 6; }
+.col-12, .form-group.full { grid-column: span 12; }
 
 .form-group label{
   font-size:.8rem;
@@ -103,6 +107,7 @@ header p{
   font-size:.9rem;
   transition:.2s;
   background:#fff;
+  width: 100%;
 }
 
 .form-group input:focus,
@@ -231,6 +236,7 @@ th{
 
 .autocomplete-wrap{
   position:relative;
+  width: 100%;
 }
 
 .autocomplete-list{
@@ -305,17 +311,14 @@ th{
   color:#1565c0;
 }
 
-@media(max-width:700px){
+@media(max-width:768px){
   body{
     padding:10px;
   }
 
-  .form-grid{
-    grid-template-columns:1fr;
-  }
-
-  .form-group.full{
-    grid-column:auto;
+  /* En celulares todo pasa a ancho completo para no distorsionar */
+  .col-3, .col-4, .col-5, .col-6, .col-12 {
+    grid-column: span 12;
   }
 
   header h1{
@@ -345,27 +348,31 @@ th{
 <div class="card">
   <h2>Datos de la devolución</h2>
   <div class="form-grid">
-    <div class="form-group">
+    <div class="form-group col-6">
       <label for="selFuncionario">Funcionario <span class="req">*</span></label>
       <select id="selFuncionario"><option value="">Cargando...</option></select>
     </div>
-    <div class="form-group">
+    <div class="form-group col-6">
       <label for="inpFecha">Fecha <span class="req">*</span></label>
       <input type="date" id="inpFecha">
     </div>
-    <div class="form-group full">
+
+    <!-- Fila Reorganizada: Placa (Reducida), Documento y Ciudadano -->
+    <div class="form-group col-3">
       <label for="inpPlaca">Placa <span class="req">*</span></label>
       <input type="text" id="inpPlaca" placeholder="ABC123" maxlength="10" style="text-transform:uppercase;">
     </div>
-    <div class="form-group">
+    <div class="form-group col-4">
       <label for="inpDocumento">Documento</label>
       <input type="text" id="inpDocumento" placeholder="C.C. / NIT">
     </div>
-    <div class="form-group">
+    <div class="form-group col-5">
       <label for="inpCiudadano">Ciudadano <span class="req">*</span></label>
       <input type="text" id="inpCiudadano" placeholder="Nombre completo">
     </div>
-    <div class="form-group full">
+
+    <!-- Trámite expandido al 100% de su fila -->
+    <div class="form-group col-12">
       <label for="inpTramite">Trámite <span class="req">*</span></label>
       <div class="autocomplete-wrap">
         <input type="text" id="inpTramite" placeholder="Escriba o haga clic para ver trámites..." autocomplete="off">
@@ -381,12 +388,12 @@ th{
 <div class="card">
   <h2>Detalle de la devolución</h2>
   <div class="form-grid">
-    <div class="form-group">
+    <div class="form-group col-6">
       <label for="inpMotivo">Motivo <span class="req">*</span></label>
       <input type="text" id="inpMotivo" list="dlMotivos" placeholder="Escriba para buscar motivo..." autocomplete="off">
       <datalist id="dlMotivos"></datalist>
     </div>
-    <div class="form-group">
+    <div class="form-group col-6">
       <label for="inpObservacionMotivo">Observación</label>
       <input type="text" id="inpObservacionMotivo">
     </div>
@@ -418,11 +425,11 @@ th{
 <div class="card">
   <h2>🔍 Búsqueda de devoluciones por placa</h2>
   <div class="form-grid">
-    <div class="form-group">
+    <div class="form-group col-6">
       <label for="inpBuscarPlaca">Placa a buscar</label>
       <input type="text" id="inpBuscarPlaca" placeholder="Ej: ABC123" maxlength="10" style="text-transform:uppercase;">
     </div>
-    <div class="form-group">
+    <div class="form-group col-6">
       <label>&nbsp;</label>
       <div class="acciones" style="margin-top:0;">
         <button class="btn btn-success" onclick="buscarPorPlaca()">🔍 Buscar</button>
@@ -724,7 +731,7 @@ function quitarMotivo(i) {
 }
 
 /* =====================================================
-   GUARDAR DEVOLUCIÓN Y GENERAR PDF (CORREGIDO Y VALIDADO)
+   GUARDAR DEVOLUCIÓN Y GENERAR PDF
 ===================================================== */
 function guardarDevolucion() {
   let valid = true;
@@ -757,7 +764,6 @@ function guardarDevolucion() {
       if (res && res.ok) {
         const nombreArchivo = "Devolucion_" + res.consecutivo + "_" + datos.placa + ".pdf";
 
-        // Detección de fallos en el PDF
         if (res.pdfError) {
           mostrarEstado("error", "⚠️ Se guardó el registro (Consecutivo " + res.consecutivo + "), pero falló el PDF: <br><b>" + res.pdfError + "</b>");
         } else if (res.pdfBase64) {
