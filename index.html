@@ -24,7 +24,7 @@
 <!-- ENCABEZADO -->
 <div class="header-banner text-center">
   <div class="container">
-    <h2>SECRETARÍA DE MOVILIDAD v1.1</h2>
+    <h2>SECRETARÍA DE MOVILIDAD</h2>
     <h4>La Ceja del Tambo</h4>
     <p class="mb-0">Sistema Maestro de Registro y Devolución de Trámites</p>
     <div id="estadoConexion" class="badge bg-warning text-dark mt-2">Comprobando conexión...</div>
@@ -33,44 +33,7 @@
 
 <div class="container">
 
-  <!-- ACORDEÓN / SECCIÓN BÚSQUEDA POR PLACA -->
-  <div class="card">
-    <div class="card-header bg-dark">
-      🔍 Consultar Devoluciones por Placa
-    </div>
-    <div class="card-body">
-      <div class="row g-2 align-items-center">
-        <div class="col-sm-4 col-md-3">
-          <input type="text" id="inpBuscarPlaca" class="form-control text-uppercase" placeholder="Ej: AAA123" maxlength="6">
-        </div>
-        <div class="col-auto">
-          <button type="button" class="btn btn-success" onclick="buscarPorPlaca()">🔍 Buscar</button>
-          <button type="button" class="btn btn-secondary" onclick="limpiarBusqueda()">🧹 Limpiar</button>
-        </div>
-      </div>
-      <div id="msgBusqueda" class="estado-msg"></div>
-
-      <!-- TABLA RESULTADOS DE BÚSQUEDA -->
-      <div id="contResultados" class="table-responsive mt-3" style="display: none;">
-        <table class="table table-striped table-hover align-middle">
-          <thead class="table-dark">
-            <tr>
-              <th>ID</th>
-              <th>Fecha</th>
-              <th>Placa</th>
-              <th>Ciudadano</th>
-              <th>Trámite</th>
-              <th>Motivo(s)</th>
-              <th>Acción</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyResultados"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- FORMULARIO DE REGISTRO -->
+  <!-- 1. FORMULARIO DE REGISTRO DE DEVOLUCIONES -->
   <div class="card">
     <div class="card-header">
       📝 Registro de Nueva Devolución
@@ -131,7 +94,7 @@
               </tr>
             </thead>
             <tbody id="tbodyDetalles">
-              <!-- Se agregan filas dinámicamente -->
+              <!-- Filas dinámicas -->
             </tbody>
           </table>
         </div>
@@ -152,11 +115,48 @@
     </div>
   </div>
 
+  <!-- 2. SECCIÓN BÚSQUEDA POR PLACA (AHORA EN LA PARTE INFERIOR) -->
+  <div class="card">
+    <div class="card-header bg-dark text-white">
+      🔍 Consultar Devoluciones por Placa
+    </div>
+    <div class="card-body">
+      <div class="row g-2 align-items-center">
+        <div class="col-sm-4 col-md-3">
+          <input type="text" id="inpBuscarPlaca" class="form-control text-uppercase" placeholder="Ej: AAA123" maxlength="6">
+        </div>
+        <div class="col-auto">
+          <button type="button" class="btn btn-success" onclick="buscarPorPlaca()">🔍 Buscar</button>
+          <button type="button" class="btn btn-secondary" onclick="limpiarBusqueda()">🧹 Limpiar</button>
+        </div>
+      </div>
+      <div id="msgBusqueda" class="estado-msg"></div>
+
+      <!-- TABLA DE RESULTADOS DE BÚSQUEDA -->
+      <div id="contResultados" class="table-responsive mt-3" style="display: none;">
+        <table class="table table-striped table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Fecha</th>
+              <th>Placa</th>
+              <th>Ciudadano</th>
+              <th>Trámite</th>
+              <th>Motivo(s)</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyResultados"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
-  // ⚠️ REEMPLAZA ESTA URL CON TU ENLACE DE WEB APP DE GOOGLE APPS SCRIPT DEPLOYED
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw1D5Lb7q3GEeksJgXho_avO8lJ3NWgZWuTJPhJ1VWz6-U2Kfd8msUcc1w-VQpgL5fVlA/exec";
+  // ⚠️ REEMPLAZA CON TU URL DE WEB APP DE GOOGLE APPS SCRIPT
+  const SCRIPT_URL = "https://script.google.com/macros/s/TU_SCRIPT_ID_AQUI/exec";
 
   let listaMotivosGlobal = [];
 
@@ -184,7 +184,6 @@
           poblarSelect("tramite", res.tramites, "tramite");
           listaMotivosGlobal = res.motivos || [];
           
-          // Fila por defecto en tabla de detalles
           if (document.getElementById("tbodyDetalles").children.length === 0) {
             agregarFilaDetalle();
           }
@@ -220,7 +219,6 @@
 
     const tr = document.createElement("tr");
 
-    // Opciones para el select de motivo
     let opcionesMotivo = '<option value="">-- Seleccione Motivo --</option>';
     listaMotivosGlobal.forEach(m => {
       if (m.motivo) opcionesMotivo += `<option value="${escaparHTML(m.motivo)}">${escaparHTML(m.motivo)}</option>`;
@@ -272,7 +270,6 @@
     const btn = document.getElementById("btnGuardar");
     const msg = document.getElementById("msgGuardado");
 
-    // Recopilar detalles
     const detalles = [];
     const filas = document.querySelectorAll("#tbodyDetalles tr");
     filas.forEach(tr => {
