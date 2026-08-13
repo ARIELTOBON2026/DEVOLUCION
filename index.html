@@ -1,970 +1,471 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Sistema Maestro-Detalle de Devoluciones - Secretaría de Movilidad - La Ceja del Tambo">
-<title>DEVOLUCIÓN DE TRÁMITES</title>
-
-<style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
-
-body{
-  font-family:'Segoe UI',Arial,sans-serif;
-  background:#f0f2f5;
-  color:#333;
-  padding:20px;
-}
-
-.container{
-  max-width:1100px;
-  margin:0 auto;
-}
-
-header{
-  background:#1a237e;
-  color:#fff;
-  padding:20px;
-  border-radius:8px;
-  text-align:center;
-  margin-bottom:25px;
-}
-
-header h1{
-  font-size:1.4rem;
-  margin-bottom:5px;
-}
-
-header p{
-  font-size:.85rem;
-  opacity:.85;
-}
-
-.card{
-  background:#fff;
-  border-radius:8px;
-  padding:20px;
-  margin-bottom:20px;
-  box-shadow:0 2px 8px rgba(0,0,0,.08);
-}
-
-.card h2{
-  font-size:1.1rem;
-  margin-bottom:15px;
-  color:#1a237e;
-  border-bottom:2px solid #e8eaf6;
-  padding-bottom:8px;
-}
-
-/* SISTEMA DE GRID REORGANIZADO */
-.form-grid{
-  display:grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap:15px;
-}
-
-.form-group{
-  display:flex;
-  flex-direction:column;
-}
-
-/* Clases de ancho personalizado */
-.col-3 { grid-column: span 3; }
-.col-4 { grid-column: span 4; }
-.col-5 { grid-column: span 5; }
-.col-6 { grid-column: span 6; }
-.col-12, .form-group.full { grid-column: span 12; }
-
-.form-group label{
-  font-size:.8rem;
-  font-weight:600;
-  margin-bottom:4px;
-  color:#555;
-  cursor: pointer;
-}
-
-.req{
-  color:#d32f2f;
-}
-
-.hint{
-  font-size:.72rem;
-  color:#1565c0;
-  margin-top:4px;
-  font-weight:500;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea{
-  padding:9px 12px;
-  border:1px solid #ccc;
-  border-radius:5px;
-  font-size:.9rem;
-  transition:.2s;
-  background:#fff;
-  width: 100%;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus{
-  outline:none;
-  border-color:#1a237e;
-  box-shadow:0 0 0 2px rgba(26,35,126,.08);
-}
-
-.invalid{
-  border-color:#d32f2f!important;
-  background:#ffebee!important;
-}
-
-.btn{
-  padding:10px 18px;
-  border:none;
-  border-radius:5px;
-  cursor:pointer;
-  font-size:.85rem;
-  font-weight:600;
-  transition:opacity .2s;
-}
-
-.btn:hover:not(:disabled){
-  opacity:.85;
-}
-
-.btn:disabled{
-  opacity:.5;
-  cursor:not-allowed;
-}
-
-.btn-success{
-  background:#2e7d32;
-  color:#fff;
-}
-
-.btn-secondary{
-  background:#78909c;
-  color:#fff;
-}
-
-.btn-danger{
-  background:#c62828;
-  color:#fff;
-}
-
-.btn-sm{
-  padding:6px 12px;
-  font-size:.78rem;
-}
-
-.acciones{
-  display:flex;
-  gap:10px;
-  margin-top:15px;
-  flex-wrap:wrap;
-}
-
-.estado-msg{
-  padding:12px;
-  border-radius:5px;
-  margin-top:15px;
-  font-size:.85rem;
-  display:none;
-}
-
-.estado-msg.ok{
-  background:#e8f5e9;
-  color:#2e7d32;
-  display:block;
-}
-
-.estado-msg.error{
-  background:#ffebee;
-  color:#c62828;
-  display:block;
-}
-
-.estado-msg.info{
-  background:#e3f2fd;
-  color:#1565c0;
-  display:block;
-}
-
-.spinner{
-  display:inline-block;
-  width:16px;
-  height:16px;
-  border:2px solid #ccc;
-  border-top-color:#1a237e;
-  border-radius:50%;
-  animation:spin .7s linear infinite;
-  margin-right:6px;
-  vertical-align:middle;
-}
-
-@keyframes spin{
-  to{transform:rotate(360deg);}
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:10px;
-}
-
-th,td{
-  padding:8px 10px;
-  border:1px solid #ddd;
-  font-size:.82rem;
-  text-align:left;
-  vertical-align:top;
-}
-
-th{
-  background:#e8eaf6;
-  font-weight:600;
-}
-
-.tabla-resultados{
-  overflow-x:auto;
-}
-
-.autocomplete-wrap{
-  position:relative;
-  width: 100%;
-}
-
-.autocomplete-list{
-  position:absolute;
-  z-index:1000;
-  left:0;
-  right:0;
-  top:100%;
-  background:#fff;
-  border:1px solid #ccc;
-  border-top:none;
-  border-radius:0 0 5px 5px;
-  max-height:250px;
-  overflow-y:auto;
-  box-shadow:0 4px 10px rgba(0,0,0,.12);
-  display:none;
-}
-
-.autocomplete-item{
-  padding:9px 12px;
-  cursor:pointer;
-  font-size:.88rem;
-  border-bottom:1px solid #eee;
-}
-
-.autocomplete-item:hover,
-.autocomplete-item.active{
-  background:#e8eaf6;
-}
-
-.autocomplete-empty{
-  padding:9px 12px;
-  color:#777;
-  font-size:.82rem;
-  font-style:italic;
-}
-
-.autocomplete-counter{
-  padding:6px 12px;
-  background:#f5f5f5;
-  color:#666;
-  font-size:.72rem;
-  border-bottom:1px solid #eee;
-  font-weight:600;
-}
-
-.estado-conexion{
-  font-size:.75rem;
-  margin-top:8px;
-}
-
-.badge{
-  display:inline-block;
-  padding:3px 8px;
-  border-radius:12px;
-  font-size:.7rem;
-  font-weight:600;
-}
-
-.badge-ok{
-  background:#e8f5e9;
-  color:#2e7d32;
-}
-
-.badge-error{
-  background:#ffebee;
-  color:#c62828;
-}
-
-.badge-info{
-  background:#e3f2fd;
-  color:#1565c0;
-}
-
-@media(max-width:768px){
-  body{
-    padding:10px;
-  }
-
-  /* En celulares todo pasa a ancho completo para no distorsionar */
-  .col-3, .col-4, .col-5, .col-6, .col-12 {
-    grid-column: span 12;
-  }
-
-  header h1{
-    font-size:1.15rem;
-  }
-
-  .card{
-    padding:15px;
-  }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Devolución de Trámites - Secretaría de Movilidad</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f4f6f9; padding-bottom: 50px; }
+    .header-banner { background-color: #1b365d; color: white; padding: 20px 0; margin-bottom: 25px; }
+    .card { box-shadow: 0 4px 8px rgba(0,0,0,0.05); border: none; margin-bottom: 25px; }
+    .card-header { background-color: #0d6efd; color: white; font-weight: bold; }
+    .estado-msg { font-weight: bold; margin-top: 10px; }
+    .spinner {
+      display: inline-block; width: 1rem; height: 1rem;
+      border: 0.15em solid currentColor; border-right-color: transparent;
+      border-radius: 50%; animation: spinner-border .75s linear infinite;
+    }
+    .btn-eliminar-fila { padding: 0.25rem 0.5rem; font-size: 0.875rem; }
+  </style>
 </head>
-
 <body>
+
+<!-- ENCABEZADO -->
+<div class="header-banner text-center">
+  <div class="container">
+    <h2>SECRETARÍA DE MOVILIDAD</h2>
+    <h4>La Ceja del Tambo</h4>
+    <p class="mb-0">Sistema Maestro de Registro y Devolución de Trámites</p>
+    <div id="estadoConexion" class="badge bg-warning text-dark mt-2">Comprobando conexión...</div>
+  </div>
+</div>
 
 <div class="container">
 
-<header>
-  <h1>DEVOLUCIÓN DE TRÁMITES V.1.00</h1>
-  <p>Secretaría de Movilidad - La Ceja del Tambo</p>
-  <div id="estadoConexion" class="estado-conexion">
-    <span class="badge badge-info">Conectando...</span>
-  </div>
-</header>
-
-<!-- DATOS DE LA DEVOLUCIÓN -->
-<div class="card">
-  <h2>Datos de la devolución</h2>
-  <div class="form-grid">
-    <div class="form-group col-6">
-      <label for="selFuncionario">Funcionario <span class="req">*</span></label>
-      <select id="selFuncionario"><option value="">Cargando...</option></select>
+  <!-- ACORDEÓN / SECCIÓN BÚSQUEDA POR PLACA -->
+  <div class="card">
+    <div class="card-header bg-dark">
+      🔍 Consultar Devoluciones por Placa
     </div>
-    <div class="form-group col-6">
-      <label for="inpFecha">Fecha <span class="req">*</span></label>
-      <input type="date" id="inpFecha">
-    </div>
-
-    <!-- Fila Reorganizada: Placa (Reducida), Documento y Ciudadano -->
-    <div class="form-group col-3">
-      <label for="inpPlaca">Placa <span class="req">*</span></label>
-      <input type="text" id="inpPlaca" placeholder="ABC123" maxlength="10" style="text-transform:uppercase;">
-    </div>
-    <div class="form-group col-4">
-      <label for="inpDocumento">Documento</label>
-      <input type="text" id="inpDocumento" placeholder="C.C. / NIT">
-    </div>
-    <div class="form-group col-5">
-      <label for="inpCiudadano">Ciudadano <span class="req">*</span></label>
-      <input type="text" id="inpCiudadano" placeholder="Nombre completo">
-    </div>
-
-    <!-- Trámite expandido al 100% de su fila -->
-    <div class="form-group col-12">
-      <label for="inpTramite">Trámite <span class="req">*</span></label>
-      <div class="autocomplete-wrap">
-        <input type="text" id="inpTramite" placeholder="Escriba o haga clic para ver trámites..." autocomplete="off">
-        <datalist id="dlTramites"></datalist>
-        <div id="listaTramites" class="autocomplete-list"></div>
+    <div class="card-body">
+      <div class="row g-2 align-items-center">
+        <div class="col-sm-4 col-md-3">
+          <input type="text" id="inpBuscarPlaca" class="form-control text-uppercase" placeholder="Ej: AAA123" maxlength="6">
+        </div>
+        <div class="col-auto">
+          <button type="button" class="btn btn-success" onclick="buscarPorPlaca()">🔍 Buscar</button>
+          <button type="button" class="btn btn-secondary" onclick="limpiarBusqueda()">🧹 Limpiar</button>
+        </div>
       </div>
-      <span id="hintTramites" class="hint">⏳ Esperando carga de trámites...</span>
-    </div>
-  </div>
-</div>
+      <div id="msgBusqueda" class="estado-msg"></div>
 
-<!-- DETALLE -->
-<div class="card">
-  <h2>Detalle de la devolución</h2>
-  <div class="form-grid">
-    <div class="form-group col-6">
-      <label for="inpMotivo">Motivo <span class="req">*</span></label>
-      <input type="text" id="inpMotivo" list="dlMotivos" placeholder="Escriba para buscar motivo..." autocomplete="off">
-      <datalist id="dlMotivos"></datalist>
-    </div>
-    <div class="form-group col-6">
-      <label for="inpObservacionMotivo">Observación</label>
-      <input type="text" id="inpObservacionMotivo">
-    </div>
-  </div>
-  <div class="acciones">
-    <button class="btn btn-secondary btn-sm" onclick="agregarMotivo()">+ Agregar motivo</button>
-  </div>
-  <div class="tabla-resultados">
-    <table>
-      <thead>
-        <tr><th>N°</th><th>Motivo</th><th>Observación</th><th>Acción</th></tr>
-      </thead>
-      <tbody id="tbodyDetalles"></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- ACCIONES -->
-<div class="card">
-  <h2>Acciones</h2>
-  <div class="acciones">
-    <button class="btn btn-success" onclick="guardarDevolucion()">📄 Guardar y Generar PDF</button>
-    <button class="btn btn-secondary" onclick="limpiarFormulario()">🧹 Limpiar</button>
-  </div>
-  <div id="msgEstado" class="estado-msg"></div>
-</div>
-
-<!-- BÚSQUEDA -->
-<div class="card">
-  <h2>🔍 Búsqueda de devoluciones por placa</h2>
-  <div class="form-grid">
-    <div class="form-group col-6">
-      <label for="inpBuscarPlaca">Placa a buscar</label>
-      <input type="text" id="inpBuscarPlaca" placeholder="Ej: ABC123" maxlength="10" style="text-transform:uppercase;">
-    </div>
-    <div class="form-group col-6">
-      <label>&nbsp;</label>
-      <div class="acciones" style="margin-top:0;">
-      <button type="button" class="btn btn-success" onclick="buscarPorPlaca()">🔍 Buscar</button>
-      <button type="button" class="btn btn-secondary" onclick="limpiarBusqueda()">🧹 Limpiar</button>
+      <!-- TABLA RESULTADOS DE BÚSQUEDA -->
+      <div id="contResultados" class="table-responsive mt-3" style="display: none;">
+        <table class="table table-striped table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Fecha</th>
+              <th>Placa</th>
+              <th>Ciudadano</th>
+              <th>Trámite</th>
+              <th>Motivo(s)</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyResultados"></tbody>
+        </table>
       </div>
     </div>
   </div>
-  <div id="msgBusqueda" class="estado-msg"></div>
-  <div id="contResultados" class="tabla-resultados" style="display:none;">
-    <table>
-      <thead>
-        <tr>
-          <th>Consec.</th><th>Fecha</th><th>Placa</th><th>Ciudadano</th>
-          <th>Funcionario</th><th>Trámite</th><th>Motivos</th><th>PDF</th>
-        </tr>
-      </thead>
-      <tbody id="tbodyResultados"></tbody>
-    </table>
+
+  <!-- FORMULARIO DE REGISTRO -->
+  <div class="card">
+    <div class="card-header">
+      📝 Registro de Nueva Devolución
+    </div>
+    <div class="card-body">
+      <form id="formDevolucion" onsubmit="guardarDevolucion(event)">
+        
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label for="fecha" class="form-label">Fecha de Devolución</label>
+            <input type="date" id="fecha" class="form-control" required>
+          </div>
+
+          <div class="col-md-4">
+            <label for="funcionario" class="form-label">Funcionario Responsable</label>
+            <select id="funcionario" class="form-select" required>
+              <option value="">Cargando catálogo...</option>
+            </select>
+          </div>
+
+          <div class="col-md-2">
+            <label for="placa" class="form-label">Placa Vehículo</label>
+            <input type="text" id="placa" class="form-control text-uppercase" placeholder="AAA123" maxlength="6" required>
+          </div>
+
+          <div class="col-md-3">
+            <label for="documento" class="form-label">Documento / Cédula</label>
+            <input type="text" id="documento" class="form-control" placeholder="Número de documento" required>
+          </div>
+
+          <div class="col-md-6">
+            <label for="ciudadano" class="form-label">Nombre del Ciudadano / Solicitante</label>
+            <input type="text" id="ciudadano" class="form-control" placeholder="Nombre completo" required>
+          </div>
+
+          <div class="col-md-6">
+            <label for="tramite" class="form-label">Tipo de Trámite</label>
+            <select id="tramite" class="form-select" required>
+              <option value="">Cargando catálogo...</option>
+            </select>
+          </div>
+        </div>
+
+        <hr class="my-4">
+
+        <!-- DETALLES Y MOTIVOS (MULTIFILA) -->
+        <h5>Motivos de Devolución</h5>
+        <p class="text-muted small">Agregue uno o más motivos para justificar la devolución del trámite.</p>
+
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle" id="tablaDetalles">
+            <thead class="table-light">
+              <tr>
+                <th style="width: 5%;">N°</th>
+                <th style="width: 45%;">Motivo de Devolución</th>
+                <th style="width: 42%;">Observación Adicional</th>
+                <th style="width: 8%;" class="text-center">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyDetalles">
+              <!-- Se agregan filas dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+
+        <button type="button" class="btn btn-outline-primary mb-3" onclick="agregarFilaDetalle()">
+          ➕ Agregar Otro Motivo
+        </button>
+
+        <hr>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+          <button type="reset" class="btn btn-secondary me-md-2" onclick="reiniciarFormulario()">Limpiar Formulario</button>
+          <button type="submit" id="btnGuardar" class="btn btn-primary">💾 Registrar y Generar PDF</button>
+        </div>
+
+        <div id="msgGuardado" class="estado-msg text-end mt-2"></div>
+      </form>
+    </div>
   </div>
-</div>
 
 </div>
 
 <script>
-/* =====================================================
-   CONFIGURACIÓN
-===================================================== */
-const URL_BACKEND = "https://script.google.com/macros/s/AKfycby8_PkltoQAWbbsX6C1TgUOB1Jp_Fs6cITZRSrTMWZ84aLbCu2zRIr0BXn-b-1SWucgmw/exec";
+  // ⚠️ REEMPLAZA ESTA URL CON TU ENLACE DE WEB APP DE GOOGLE APPS SCRIPT DEPLOYED
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw1D5Lb7q3GEeksJgXho_avO8lJ3NWgZWuTJPhJ1VWz6-U2Kfd8msUcc1w-VQpgL5fVlA/exec";
 
-let listaFuncionarios = [];
-let listaMotivos = [];
-let listaTramites = [];
-let detallesFormulario = [];
-let resultadosBusqueda = [];
-let indiceTramiteActivo = -1;
+  let listaMotivosGlobal = [];
 
-/* =====================================================
-   ESTADO Y MENSAJES
-===================================================== */
-function mostrarEstado(tipo, mensaje) {
-  const el = document.getElementById("msgEstado");
-  if (!el) return;
-  el.className = "estado-msg " + tipo;
-  el.innerHTML = mensaje;
-}
-
-function mostrarEstadoBusqueda(tipo, mensaje) {
-  const el = document.getElementById("msgBusqueda");
-  if (!el) return;
-  el.className = "estado-msg " + tipo;
-  el.innerHTML = mensaje;
-}
-
-function actualizarEstadoConexion(tipo, texto) {
-  const el = document.getElementById("estadoConexion");
-  if (!el) return;
-  let clase = "badge-info";
-  if (tipo === "ok") clase = "badge-ok";
-  if (tipo === "error") clase = "badge-error";
-  el.innerHTML = '<span class="badge ' + clase + '">' + texto + '</span>';
-}
-
-/* =====================================================
-   PETICIONES CON FETCH
-===================================================== */
-async function ejecutarPeticion(params) {
-  const action = params.action || "ping";
-  const esPost = action === "guardarDevolucion";
-  let url = URL_BACKEND;
-  let config = {};
-
-  if (esPost) {
-    config = {
+  /* =====================================================
+     PETICIONES HTTP (Fetch POST)
+  ===================================================== */
+  async function ejecutarPeticion(payload) {
+    const res = await fetch(SCRIPT_URL, {
       method: "POST",
+      mode: "cors",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(params)
-    };
-  } else {
-    const query = new URLSearchParams();
-    Object.keys(params).forEach(key => {
-      let valor = params[key];
-      if (valor === undefined || valor === null) valor = "";
-      query.append(key, String(valor));
+      body: JSON.stringify(payload)
     });
-    query.append("_nocache", Date.now());
-    url += "?" + query.toString();
-    config = { method: "GET" };
+    return await res.json();
   }
 
-  const respuesta = await fetch(url, config);
-  if (!respuesta.ok) {
-    throw new Error("Error HTTP servidor: " + respuesta.status);
-  }
-  return await respuesta.json();
-}
-
-/* =====================================================
-   CARGAR DATOS INICIALES
-===================================================== */
-function cargarDatosIniciales() {
-  mostrarEstado("info", '<span class="spinner"></span> Conectando con Apps Script...');
-  actualizarEstadoConexion("info", "Conectando...");
-
-  ejecutarPeticion({ action: "getInitialData" })
-    .then(data => {
-      if (data && data.ok) {
-        listaFuncionarios = Array.isArray(data.funcionarios) ? data.funcionarios : [];
-        listaMotivos = Array.isArray(data.motivos) ? data.motivos : [];
-        listaTramites = Array.isArray(data.tramites) ? data.tramites : [];
-
-        llenarSelectFuncionarios();
-        llenarDatalistMotivos();
-        llenarDatalistTramites();
-        actualizarHintTramites();
-
-        actualizarEstadoConexion("ok", "Conectado");
-        mostrarEstado("ok", `✅ Datos cargados correctamente. ${listaFuncionarios.length} funcionarios, ${listaMotivos.length} motivos y ${listaTramites.length} trámites.`);
-      } else {
-        actualizarEstadoConexion("error", "Error de datos");
-        mostrarEstado("error", "❌ Error al cargar datos: " + (data && data.error ? data.error : "Respuesta no válida"));
-        document.getElementById("hintTramites").textContent = "❌ No se pudieron cargar los trámites.";
-      }
-    })
-    .catch(err => {
-      actualizarEstadoConexion("error", "Sin conexión");
-      mostrarEstado("error", "❌ No fue posible cargar los datos.<br>" + err.message);
-      document.getElementById("hintTramites").textContent = "❌ Sin conexión con Apps Script.";
-    });
-}
-
-function llenarSelectFuncionarios() {
-  const select = document.getElementById("selFuncionario");
-  select.innerHTML = '<option value="">-- Seleccione --</option>';
-  listaFuncionarios.forEach(f => {
-    let nombre = typeof f === "string" ? f : (f.nombre || f.funcionario || f.NOMBRE || f.FUNCIONARIO || "");
-    if (!nombre) return;
-    const option = document.createElement("option");
-    option.value = nombre;
-    option.textContent = nombre;
-    select.appendChild(option);
-  });
-}
-
-function llenarDatalistMotivos() {
-  const dl = document.getElementById("dlMotivos");
-  dl.innerHTML = "";
-  listaMotivos.forEach(m => {
-    let motivo = typeof m === "string" ? m : (m.motivo || m.MOTIVO || m.nombre || m.descripcion || "");
-    if (!motivo) return;
-    const option = document.createElement("option");
-    option.value = motivo;
-    dl.appendChild(option);
-  });
-}
-
-function llenarDatalistTramites() {
-  const dl = document.getElementById("dlTramites");
-  dl.innerHTML = "";
-  listaTramites.forEach(t => {
-    let tramite = typeof t === "string" ? t : (t.tramite || t.TRAMITE || t.nombre || t.descripcion || "");
-    if (!tramite) return;
-    const option = document.createElement("option");
-    option.value = tramite;
-    dl.appendChild(option);
-  });
-}
-
-function actualizarHintTramites() {
-  const hint = document.getElementById("hintTramites");
-  if (listaTramites.length > 0) {
-    hint.textContent = `✅ ${listaTramites.length} trámites disponibles. Haga clic en el campo para verlos.`;
-    hint.style.color = "#2e7d32";
-  } else {
-    hint.textContent = "⚠️ No hay trámites cargados. Verifique la hoja TRAMITES.";
-    hint.style.color = "#c62828";
-  }
-}
-
-/* =====================================================
-   AUTOCOMPLETADO TRÁMITES
-===================================================== */
-function normalizarTextoFront(valor) {
-  return String(valor || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-}
-
-function obtenerNombreTramite(obj) {
-  if (typeof obj === "string") return obj;
-  return obj && (obj.tramite || obj.TRAMITE || obj.nombre || obj.descripcion || "");
-}
-
-function mostrarSugerenciasTramites() {
-  const input = document.getElementById("inpTramite");
-  const lista = document.getElementById("listaTramites");
-  const texto = normalizarTextoFront(input.value);
-
-  if (!listaTramites || listaTramites.length === 0) {
-    lista.innerHTML = '<div class="autocomplete-empty">No hay trámites cargados.</div>';
-    lista.style.display = "block";
-    return;
+  /* =====================================================
+     CARGA DE CATÁLOGOS INICIALES
+  ===================================================== */
+  function cargarCatalogosIniciales() {
+    ejecutarPeticion({ action: "getInitialData" })
+      .then(res => {
+        if (res && res.ok) {
+          poblarSelect("funcionario", res.funcionarios, "nombre");
+          poblarSelect("tramite", res.tramites, "tramite");
+          listaMotivosGlobal = res.motivos || [];
+          
+          // Fila por defecto en tabla de detalles
+          if (document.getElementById("tbodyDetalles").children.length === 0) {
+            agregarFilaDetalle();
+          }
+        } else {
+          alert("Error cargando catálogos: " + (res.error || "Desconocido"));
+        }
+      })
+      .catch(err => alert("Error de conexión al cargar catálogos: " + err.message));
   }
 
-  const filtrados = listaTramites.filter(t => {
-    const valor = normalizarTextoFront(obtenerNombreTramite(t));
-    return !texto || valor.includes(texto);
-  }).slice(0, 50);
-
-  lista.innerHTML = "";
-  indiceTramiteActivo = -1;
-
-  const counter = document.createElement("div");
-  counter.className = "autocomplete-counter";
-  counter.textContent = texto ? `${filtrados.length} de ${listaTramites.length} trámites coinciden` : `${listaTramites.length} trámites disponibles`;
-  lista.appendChild(counter);
-
-  if (!filtrados.length) {
-    lista.innerHTML += '<div class="autocomplete-empty">No se encontraron trámites.</div>';
-    lista.style.display = "block";
-    return;
+  function poblarSelect(idElem, lista, claveTexto) {
+    const select = document.getElementById(idElem);
+    select.innerHTML = '<option value="">-- Seleccione una opción --</option>';
+    if (Array.isArray(lista)) {
+      lista.forEach(item => {
+        const val = item[claveTexto] || "";
+        if (val) {
+          const opt = document.createElement("option");
+          opt.value = val;
+          opt.textContent = val;
+          select.appendChild(opt);
+        }
+      });
+    }
   }
 
-  filtrados.forEach(t => {
-    const nombre = obtenerNombreTramite(t);
-    const item = document.createElement("div");
-    item.className = "autocomplete-item";
-    item.textContent = nombre;
-    item.addEventListener("pointerdown", function(ev) {
-      ev.preventDefault();
-      input.value = nombre;
-      input.classList.remove("invalid");
-      lista.style.display = "none";
-      input.focus();
-    });
-    lista.appendChild(item);
-  });
-  lista.style.display = "block";
-}
+  /* =====================================================
+     TABLA DINÁMICA DE DETALLES
+  ===================================================== */
+  function agregarFilaDetalle() {
+    const tbody = document.getElementById("tbodyDetalles");
+    const numFila = tbody.children.length + 1;
 
-function ocultarSugerenciasTramites() {
-  setTimeout(() => {
-    const lista = document.getElementById("listaTramites");
-    if (lista) lista.style.display = "none";
-  }, 200);
-}
-
-function manejarTecladoTramites(ev) {
-  const lista = document.getElementById("listaTramites");
-  const items = Array.from(lista.querySelectorAll(".autocomplete-item"));
-  if (lista.style.display !== "block" || !items.length) return;
-
-  if (ev.key === "ArrowDown") {
-    ev.preventDefault();
-    indiceTramiteActivo = Math.min(indiceTramiteActivo + 1, items.length - 1);
-  } else if (ev.key === "ArrowUp") {
-    ev.preventDefault();
-    indiceTramiteActivo = Math.max(indiceTramiteActivo - 1, 0);
-  } else if (ev.key === "Enter" && indiceTramiteActivo >= 0) {
-    ev.preventDefault();
-    items[indiceTramiteActivo].dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
-    return;
-  } else if (ev.key === "Escape") {
-    lista.style.display = "none";
-    return;
-  } else {
-    return;
-  }
-  items.forEach((item, i) => item.classList.toggle("active", i === indiceTramiteActivo));
-}
-
-/* =====================================================
-   GESTIÓN DE MOTIVOS (DETALLES)
-===================================================== */
-function agregarMotivo() {
-  const motivo = document.getElementById("inpMotivo").value.trim();
-  const obs = document.getElementById("inpObservacionMotivo").value.trim();
-  if (!motivo) { mostrarEstado("error", "❌ Seleccione o escriba un motivo."); return; }
-  detallesFormulario.push({ motivo: motivo, observacion: obs });
-  renderDetalles();
-  document.getElementById("inpMotivo").value = "";
-  document.getElementById("inpObservacionMotivo").value = "";
-}
-
-function renderDetalles() {
-  const tbody = document.getElementById("tbodyDetalles");
-  tbody.innerHTML = "";
-  detallesFormulario.forEach((d, i) => {
     const tr = document.createElement("tr");
-    tr.innerHTML =
-      "<td>" + (i + 1) + "</td>" +
-      "<td>" + escaparHTML(d.motivo) + "</td>" +
-      "<td>" + escaparHTML(d.observacion) + "</td>" +
-      "<td><button class='btn btn-danger btn-sm' onclick='quitarMotivo(" + i + ")'>X</button></td>";
+
+    // Opciones para el select de motivo
+    let opcionesMotivo = '<option value="">-- Seleccione Motivo --</option>';
+    listaMotivosGlobal.forEach(m => {
+      if (m.motivo) opcionesMotivo += `<option value="${escaparHTML(m.motivo)}">${escaparHTML(m.motivo)}</option>`;
+    });
+
+    tr.innerHTML = `
+      <td class="text-center num-item">${numFila}</td>
+      <td>
+        <select class="form-select sel-motivo" required>
+          ${opcionesMotivo}
+        </select>
+      </td>
+      <td>
+        <input type="text" class="form-control inp-observacion" placeholder="Detalles u observaciones opcionales...">
+      </td>
+      <td class="text-center">
+        <button type="button" class="btn btn-danger btn-eliminar-fila" onclick="eliminarFilaDetalle(this)">🗑️</button>
+      </td>
+    `;
+
     tbody.appendChild(tr);
-  });
-}
+    renumerarFilas();
+  }
 
-function quitarMotivo(i) {
-  detallesFormulario.splice(i, 1);
-  renderDetalles();
-}
+  function eliminarFilaDetalle(btn) {
+    const tbody = document.getElementById("tbodyDetalles");
+    if (tbody.children.length <= 1) {
+      alert("Debe mantener al menos un motivo de devolución.");
+      return;
+    }
+    btn.closest("tr").remove();
+    renumerarFilas();
+  }
 
-/* =====================================================
-   GUARDAR DEVOLUCIÓN Y GENERAR PDF
-===================================================== */
-function guardarDevolucion() {
-  let valid = true;
-  const camposReq = ["inpFecha", "selFuncionario", "inpPlaca", "inpCiudadano", "inpTramite"];
-  camposReq.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el.value.trim()) { el.classList.add("invalid"); valid = false; }
-    else { el.classList.remove("invalid"); }
-  });
+  function renumerarFilas() {
+    const filas = document.querySelectorAll("#tbodyDetalles tr");
+    filas.forEach((tr, idx) => {
+      const celdaNro = tr.querySelector(".num-item");
+      if (celdaNro) celdaNro.textContent = idx + 1;
+    });
+  }
 
-  if (!valid) { mostrarEstado("error", "❌ Complete los campos obligatorios."); return; }
-  if (detallesFormulario.length === 0) { mostrarEstado("error", "❌ Agregue al menos un motivo."); return; }
+  /* =====================================================
+     GUARDAR DEVOLUCIÓN (Submit)
+  ===================================================== */
+  function guardarDevolucion(event) {
+    event.preventDefault();
 
-  const datos = {
-    fecha: document.getElementById("inpFecha").value,
-    funcionario: document.getElementById("selFuncionario").value,
-    placa: document.getElementById("inpPlaca").value.trim().toUpperCase(),
-    documento: document.getElementById("inpDocumento").value.trim(),
-    ciudadano: document.getElementById("inpCiudadano").value.trim(),
-    tramite: document.getElementById("inpTramite").value.trim(),
-    detalles: detallesFormulario
+    const btn = document.getElementById("btnGuardar");
+    const msg = document.getElementById("msgGuardado");
+
+    // Recopilar detalles
+    const detalles = [];
+    const filas = document.querySelectorAll("#tbodyDetalles tr");
+    filas.forEach(tr => {
+      const mot = tr.querySelector(".sel-motivo").value;
+      const obs = tr.querySelector(".inp-observacion").value;
+      if (mot) {
+        detalles.push({ motivo: mot, observacion: obs });
+      }
+    });
+
+    if (detalles.length === 0) {
+      msg.className = "estado-msg text-danger";
+      msg.innerHTML = "❌ Debe seleccionar al menos un motivo válido.";
+      return;
+    }
+
+    const payload = {
+      action: "guardarDevolucion",
+      datos: {
+        fecha: document.getElementById("fecha").value,
+        funcionario: document.getElementById("funcionario").value,
+        placa: document.getElementById("placa").value.trim().toUpperCase(),
+        documento: document.getElementById("documento").value.trim(),
+        ciudadano: document.getElementById("ciudadano").value.trim(),
+        tramite: document.getElementById("tramite").value,
+        detalles: detalles
+      }
+    };
+
+    btn.disabled = true;
+    msg.className = "estado-msg text-info";
+    msg.innerHTML = '<span class="spinner"></span> Registrando devolución y generando PDF...';
+
+    ejecutarPeticion(payload)
+      .then(res => {
+        btn.disabled = false;
+        if (res && res.ok) {
+          msg.className = "estado-msg text-success";
+          msg.innerHTML = `✅ ¡Registrado con éxito! Consecutivo N° <b>${res.consecutivo}</b>`;
+          
+          if (res.pdfDownloadUrl) {
+            window.open(res.pdfDownloadUrl, "_blank");
+          }
+          reiniciarFormulario();
+        } else {
+          msg.className = "estado-msg text-danger";
+          msg.innerHTML = "❌ Error: " + (res.error || "Ocurrió un fallo en el registro");
+        }
+      })
+      .catch(err => {
+        btn.disabled = false;
+        msg.className = "estado-msg text-danger";
+        msg.innerHTML = "❌ Error de conexión: " + err.message;
+      });
+  }
+
+  function reiniciarFormulario() {
+    document.getElementById("formDevolucion").reset();
+    document.getElementById("tbodyDetalles").innerHTML = "";
+    document.getElementById("fecha").valueAsDate = new Date();
+    agregarFilaDetalle();
+  }
+
+  /* =====================================================
+     BÚSQUEDA POR PLACA (Global)
+  ===================================================== */
+  window.buscarPorPlaca = function() {
+    const input = document.getElementById("inpBuscarPlaca");
+    if (!input) return;
+
+    const placa = input.value.trim().toUpperCase();
+    if (!placa) { 
+      mostrarEstadoBusqueda("text-danger", "❌ Ingrese una placa."); 
+      return; 
+    }
+
+    mostrarEstadoBusqueda("text-info", '<span class="spinner"></span> Buscando devoluciones para <b>' + escaparHTML(placa) + '</b>...');
+
+    ejecutarPeticion({ action: "buscarPorPlaca", placa: placa })
+      .then(res => {
+        if (res && res.ok) {
+          if (!res.resultados || res.resultados.length === 0) {
+            mostrarEstadoBusqueda("text-warning", "Sin resultados para la placa <b>" + escaparHTML(placa) + "</b>.");
+            document.getElementById("contResultados").style.display = "none";
+          } else {
+            mostrarEstadoBusqueda("text-success", "✅ Se encontraron " + res.resultados.length + " devolución(es).");
+            renderResultados(res.resultados);
+          }
+        } else {
+          mostrarEstadoBusqueda("text-danger", "❌ Error en la búsqueda: " + (res && res.error ? res.error : "Respuesta no válida"));
+        }
+      })
+      .catch(err => {
+        mostrarEstadoBusqueda("text-danger", "❌ Error de conexión con el servidor.<br>" + err.message);
+      });
   };
 
-  const botones = document.querySelectorAll(".acciones .btn");
-  botones.forEach(btn => btn.disabled = true);
-  mostrarEstado("info", '<span class="spinner"></span> Guardando datos y generando documento PDF...');
-
-  ejecutarPeticion({ action: "guardarDevolucion", datos: JSON.stringify(datos) })
-    .then(res => {
-      if (res && res.ok) {
-        const nombreArchivo = "Devolucion_" + res.consecutivo + "_" + datos.placa + ".pdf";
-
-        if (res.pdfError) {
-          mostrarEstado("error", "⚠️ Se guardó el registro (Consecutivo " + res.consecutivo + "), pero falló el PDF: <br><b>" + res.pdfError + "</b>");
-        } else if (res.pdfBase64) {
-          mostrarEstado("ok", "✅ Guardado con éxito. Descargando PDF...");
-          descargarPDFDesdeBase64(res.pdfBase64, nombreArchivo);
-          setTimeout(() => { limpiarFormulario(); cargarDatosIniciales(); }, 2000);
-        } else if (res.pdfDownloadUrl) {
-          mostrarEstado("ok", "✅ Guardado con éxito. Abriendo enlace del PDF...");
-          descargarPDFDesdeURL(res.pdfDownloadUrl, nombreArchivo);
-          setTimeout(() => { limpiarFormulario(); cargarDatosIniciales(); }, 2000);
-        } else {
-          mostrarEstado("error", "⚠️ Se guardó el registro, pero el servidor no devolvió el archivo PDF.");
-        }
-
-      } else {
-        mostrarEstado("error", "❌ Error al guardar: " + (res && res.error ? res.error : "Respuesta no válida"));
-      }
-    })
-    .catch(err => {
-      mostrarEstado("error", "❌ Error de conexión al guardar.<br>" + err.message);
-    })
-    .finally(() => {
-      botones.forEach(btn => btn.disabled = false);
-    });
-}
-
-function descargarPDFDesdeBase64(base64, filename) {
-  try {
-    const byteCharacters = atob(base64);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
+  window.limpiarBusqueda = function() {
+    const input = document.getElementById("inpBuscarPlaca");
+    if (input) input.value = "";
+    document.getElementById("tbodyResultados").innerHTML = "";
+    document.getElementById("contResultados").style.display = "none";
+    const msg = document.getElementById("msgBusqueda");
+    if (msg) {
+      msg.className = "estado-msg";
+      msg.innerHTML = "";
     }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: "application/pdf" });
-    
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.style.display = "none";
-    document.body.appendChild(a);
-    a.click();
-    
-    setTimeout(() => {
-      window.URL.revokeObjectURL(url);
-      if (document.body.contains(a)) document.body.removeChild(a);
-    }, 1500);
-  } catch (err) {
-    console.error("Error procesando Base64 a PDF:", err);
-    mostrarEstado("error", "❌ Ocurrió un error al procesar el archivo PDF descargado.");
-  }
-}
+  };
 
-function descargarPDFDesdeURL(url, filename) {
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.target = "_blank";
-  a.rel = "noopener noreferrer";
-  a.style.display = "none";
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => { if (document.body.contains(a)) document.body.removeChild(a); }, 1000);
-}
+  function renderResultados(lista) {
+    const tbody = document.getElementById("tbodyResultados");
+    tbody.innerHTML = "";
 
-/* =====================================================
-   BÚSQUEDA POR PLACA
-===================================================== */
-function buscarPorPlaca() {
-  const placa = document.getElementById("inpBuscarPlaca").value.trim().toUpperCase();
-  if (!placa) { mostrarEstadoBusqueda("error", "❌ Ingrese una placa."); return; }
-
-  mostrarEstadoBusqueda("info", '<span class="spinner"></span> Buscando devoluciones para <b>' + escaparHTML(placa) + '</b>...');
-
-  ejecutarPeticion({ action: "buscarPorPlaca", placa: placa })
-    .then(res => {
-      if (res && res.ok) {
-        if (!res.resultados || res.resultados.length === 0) {
-          mostrarEstadoBusqueda("error", "Sin resultados para la placa <b>" + escaparHTML(placa) + "</b>.");
-          document.getElementById("contResultados").style.display = "none";
-        } else {
-          mostrarEstadoBusqueda("ok", "✅ Se encontraron " + res.resultados.length + " devolución(es).");
-          renderResultados(res.resultados);
-        }
-      } else {
-        mostrarEstadoBusqueda("error", "❌ Error en la búsqueda: " + (res && res.error ? res.error : "Respuesta no válida"));
-      }
-    })
-    .catch(err => {
-      mostrarEstadoBusqueda("error", "❌ Error de conexión.<br>" + err.message);
+    lista.forEach(item => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><b>${escaparHTML(item.consecutivo || "-")}</b></td>
+        <td>${escaparHTML(item.fecha || "-")}</td>
+        <td><span class="badge bg-dark">${escaparHTML(item.placa || "-")}</span></td>
+        <td>${escaparHTML(item.ciudadano || "-")}</td>
+        <td>${escaparHTML(item.tramite || "-")}</td>
+        <td><small>${escaparHTML(item.motivos || "-")}</small></td>
+        <td>
+          <button type="button" class="btn btn-sm btn-outline-danger" onclick="descargarPDF('${item.consecutivo}')">
+            📄 PDF
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
     });
-}
 
-/* =====================================================
-   RENDERIZAR RESULTADOS
-===================================================== */
-function renderResultados(resultados) {
-  resultadosBusqueda = resultados || [];
-  const tbody = document.getElementById("tbodyResultados");
-  tbody.innerHTML = "";
-
-  resultadosBusqueda.forEach(r => {
-    const tr = document.createElement("tr");
-    
-    let motivosTexto = "";
-    const rawMotivos = r.motivos || r.MOTIVOS || "";
-    if (typeof rawMotivos === 'string') {
-      try {
-        const parsed = JSON.parse(rawMotivos);
-        if (Array.isArray(parsed)) {
-          motivosTexto = parsed.map(m => typeof m === 'string' ? m : (m.motivo || '')).join(", ");
-        } else { motivosTexto = rawMotivos; }
-      } catch (err) { motivosTexto = rawMotivos; }
-    } else if (Array.isArray(rawMotivos)) {
-      motivosTexto = rawMotivos.map(m => typeof m === 'string' ? m : (m.motivo || '')).join(", ");
-    } else { motivosTexto = String(rawMotivos); }
-
-    const pdfUrl = r.pdfDownloadUrl || r.pdfUrl || r.PDF || "";
-    let pdfHtml = pdfUrl ? '<a href="' + escaparAtributo(pdfUrl) + '" target="_blank" rel="noopener noreferrer" class="btn btn-success btn-sm">📄 Ver</a>' : "—";
-
-    tr.innerHTML =
-      "<td>" + escaparHTML(r.consecutivo || r.id || "") + "</td>" +
-      "<td>" + escaparHTML(r.fecha || r.FECHA || "") + "</td>" +
-      "<td>" + escaparHTML(r.placa || r.PLACA || "") + "</td>" +
-      "<td>" + escaparHTML(r.ciudadano || r.CIUDADANO || "") + "</td>" +
-      "<td>" + escaparHTML(r.funcionario || r.FUNCIONARIO || "") + "</td>" +
-      "<td>" + escaparHTML(r.tramite || r.TRAMITE || "") + "</td>" +
-      "<td>" + escaparHTML(motivosTexto) + "</td>" +
-      "<td>" + pdfHtml + "</td>";
-
-    tbody.appendChild(tr);
-  });
-
-  document.getElementById("contResultados").style.display = "block";
-}
-
-/* =====================================================
-   LIMPIEZA Y UTILIDADES
-===================================================== */
-function limpiarFormulario() {
-  document.getElementById("selFuncionario").value = "";
-  document.getElementById("inpPlaca").value = "";
-  document.getElementById("inpDocumento").value = "";
-  document.getElementById("inpCiudadano").value = "";
-  document.getElementById("inpTramite").value = "";
-  document.getElementById("inpMotivo").value = "";
-  document.getElementById("inpObservacionMotivo").value = "";
-  detallesFormulario = [];
-  renderDetalles();
-  document.querySelectorAll(".invalid").forEach(el => el.classList.remove("invalid"));
-  
-  const hoy = new Date();
-  const yyyy = hoy.getFullYear();
-  const mm = String(hoy.getMonth() + 1).padStart(2, "0");
-  const dd = String(hoy.getDate()).padStart(2, "0");
-  document.getElementById("inpFecha").value = yyyy + "-" + mm + "-" + dd;
-  mostrarEstado("info", "Formulario limpiado.");
-}
-
-function limpiarBusqueda() {
-  document.getElementById("inpBuscarPlaca").value = "";
-  document.getElementById("tbodyResultados").innerHTML = "";
-  document.getElementById("contResultados").style.display = "none";
-  document.getElementById("msgBusqueda").className = "estado-msg";
-  document.getElementById("msgBusqueda").innerHTML = "";
-}
-
-function escaparHTML(valor) {
-  return String(valor ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-}
-
-function escaparAtributo(valor) {
-  return String(valor ?? "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-/* =====================================================
-   INICIO DEL SISTEMA
-===================================================== */
-document.addEventListener("DOMContentLoaded", function() {
-  const hoy = new Date();
-  const yyyy = hoy.getFullYear();
-  const mm = String(hoy.getMonth() + 1).padStart(2, "0");
-  const dd = String(hoy.getDate()).padStart(2, "0");
-  document.getElementById("inpFecha").value = yyyy + "-" + mm + "-" + dd;
-
-  const inpTramite = document.getElementById("inpTramite");
-  if (inpTramite) {
-    inpTramite.addEventListener("focus", mostrarSugerenciasTramites);
-    inpTramite.addEventListener("input", mostrarSugerenciasTramites);
-    inpTramite.addEventListener("keydown", manejarTecladoTramites);
-    inpTramite.addEventListener("blur", ocultarSugerenciasTramites);
+    document.getElementById("contResultados").style.display = "block";
   }
 
-  ["inpPlaca", "inpBuscarPlaca"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener("input", function() { this.value = this.value.toUpperCase(); });
-  });
+  function descargarPDF(id) {
+    mostrarEstadoBusqueda("text-info", '<span class="spinner"></span> Generando PDF del consecutivo <b>' + id + '</b>...');
+    
+    ejecutarPeticion({ action: "generarPDF", id: id })
+      .then(res => {
+        if (res && res.ok && res.pdfDownloadUrl) {
+          mostrarEstadoBusqueda("text-success", "✅ Documento PDF listo.");
+          window.open(res.pdfDownloadUrl, "_blank");
+        } else {
+          mostrarEstadoBusqueda("text-danger", "❌ Error al generar PDF: " + (res.error || "Sin enlace de descarga"));
+        }
+      })
+      .catch(err => {
+        mostrarEstadoBusqueda("text-danger", "❌ Error al procesar PDF: " + err.message);
+      });
+  }
 
-  cargarDatosIniciales();
-});
+  /* =====================================================
+     UTILIDADES GENERALES
+  ===================================================== */
+  function mostrarEstadoBusqueda(claseCss, htmlMensaje) {
+    const msg = document.getElementById("msgBusqueda");
+    if (msg) {
+      msg.className = "estado-msg " + claseCss;
+      msg.innerHTML = htmlMensaje;
+    }
+  }
+
+  function escaparHTML(cadena) {
+    return String(cadena || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  // Inicialización de la App
+  window.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("fecha").valueAsDate = new Date();
+    
+    const badge = document.getElementById("estadoConexion");
+    ejecutarPeticion({ action: "ping" })
+      .then(res => {
+        if (res && res.ok) {
+          badge.className = "badge bg-success";
+          badge.innerText = "Conectado (v" + res.version + ")";
+          cargarCatalogosIniciales();
+        } else {
+          badge.className = "badge bg-danger";
+          badge.innerText = "Sin respuesta del backend";
+        }
+      })
+      .catch(() => {
+        badge.className = "badge bg-danger";
+        badge.innerText = "Error de conexión";
+      });
+  });
 </script>
+
 </body>
 </html>
