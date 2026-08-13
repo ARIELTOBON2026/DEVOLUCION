@@ -1,493 +1,644 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Devolución de Trámites - Secretaría de Movilidad</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body { background-color: #f4f6f9; padding-bottom: 50px; }
-    .header-banner { background-color: #1b365d; color: white; padding: 20px 0; margin-bottom: 25px; }
-    .card { box-shadow: 0 4px 8px rgba(0,0,0,0.05); border: none; margin-bottom: 25px; }
-    .card-header { background-color: #0d6efd; color: white; font-weight: bold; }
-    .estado-msg { font-weight: bold; margin-top: 10px; }
-    .spinner {
-      display: inline-block; width: 1rem; height: 1rem;
-      border: 0.15em solid currentColor; border-right-color: transparent;
-      border-radius: 50%; animation: spinner-border .75s linear infinite;
+/* ================================================================
+ * SISTEMA MAESTRO - DETALLE DE DEVOLUCIONES
+ * SECRETARÍA DE MOVILIDAD - LA CEJA DEL TAMBO
+ * BACKEND GOOGLE APPS SCRIPT - VERSIÓN 11.9 (FIX PDF GENERATION)
+ * ================================================================
+ */
+
+const SPREADSHEET_ID = "1e6sCQi0g3jlhIkU1OVCjqoQ7CorT854X48t_nst_U84";
+const TEMPLATE_DOC_ID = "1Knnv5Uas66UC5Wsx4ir2JAFjbhROVZoKH9mw0N10RyM";
+
+const SHEET_FUNCIONARIOS = "FUNCIONARIOS";
+const SHEET_MOTIVOS = "MOTIVOS";
+const SHEET_TRAMITES = "TRAMITES";
+const SHEET_DEVOLUCIONES = "DEVOLUCIONES";
+const SHEET_DETALLES = "DEVOLUCIONES_DETALLES";
+
+const TIMEZONE = "America/Bogota";
+
+/* ================================================================
+ * DO GET Y DO POST
+ * ================================================================ */
+
+function doGet(e) {
+  try {
+    e = e || {};
+    const params = e.parameter || {};
+    const action = String(params.action || "ping").trim();
+
+    let resultado;
+    switch (action) {
+      case "ping": resultado = ping(); break;
+      case "diagnostico": resultado = diagnostico(); break;
+      case "getInitialData": resultado = getInitialData(); break;
+      case "buscarPorPlaca": resultado = buscarPorPlaca(params.placa); break;
+      case "getDetalleDevolucion": resultado = getDetalleDevolucion(params.id || params.consecutivo); break;
+      case "generarPDF": resultado = generarPDF(params.id || params.consecutivo); break;
+      default: resultado = { ok: false, error: "Acción no reconocida: " + action };
     }
-    .btn-eliminar-fila { padding: 0.25rem 0.5rem; font-size: 0.875rem; }
-  </style>
-</head>
-<body>
+    return responderJSON(resultado);
+  } catch (error) {
+    return responderJSON({ ok: false, error: errorToString(error) });
+  }
+}
 
-<!-- ENCABEZADO -->
-<div class="header-banner text-center">
-  <div class="container">
-    <h2>SECRETARÍA DE MOVILIDAD</h2>
-    <h4>La Ceja del Tambo</h4>
-    <p class="mb-0">Sistema Maestro de Registro y Devolución de Trámites V 1.1</p>
-    <div id="estadoConexion" class="badge bg-warning text-dark mt-2">Comprobando conexión...</div>
-  </div>
-</div>
+function doPost(e) {
+  try {
+    let datos = {};
+    if (e && e.postData && e.postData.contents) {
+      try { datos = JSON.parse(e.postData.contents); } catch (err) { datos = e.parameter || {}; }
+    } else {
+      datos = e && e.parameter ? e.parameter : {};
+    }
 
-<div class="container">
+    const action = String(datos.action || "guardarDevolucion").trim();
+    let resultado;
 
-  <!-- 1. FORMULARIO DE REGISTRO DE DEVOLUCIONES -->
-  <div class="card">
-    <div class="card-header">
-      📝 Registro de Nueva Devolución
-    </div>
-    <div class="card-body">
-      <form id="formDevolucion" onsubmit="guardarDevolucion(event)">
-        
-        <div class="row g-3">
-          <div class="col-md-3">
-            <label for="fecha" class="form-label">Fecha de Devolución</label>
-            <input type="date" id="fecha" class="form-control" required>
-          </div>
+    if (action === "guardarDevolucion") {
+      let payload = datos.datos || datos;
+      if (typeof payload === "string") payload = JSON.parse(payload);
+      resultado = procesarGuardado(payload);
+    } else if (action === "ping") resultado = ping();
+    else if (action === "getInitialData") resultado = getInitialData();
+    else if (action === "buscarPorPlaca") resultado = buscarPorPlaca(datos.placa);
+    else if (action === "generarPDF") resultado = generarPDF(datos.id || datos.consecutivo);
+    else resultado = { ok: false, error: "Acción POST no reconocida: " + action };
 
-          <div class="col-md-4">
-            <label for="funcionario" class="form-label">Funcionario Responsable</label>
-            <select id="funcionario" class="form-select" required>
-              <option value="">Cargando catálogo...</option>
-            </select>
-          </div>
+    return responderJSON(resultado);
+  } catch (error) {
+    return responderJSON({ ok: false, error: errorToString(error) });
+  }
+}
 
-          <div class="col-md-2">
-            <label for="placa" class="form-label">Placa Vehículo</label>
-            <input type="text" id="placa" class="form-control text-uppercase" placeholder="AAA123" maxlength="6" required>
-          </div>
+function responderJSON(objeto) {
+  return ContentService.createTextOutput(JSON.stringify(objeto))
+    .setMimeType(ContentService.MimeType.JSON);
+}
 
-          <div class="col-md-3">
-            <label for="documento" class="form-label">Documento / Cédula</label>
-            <input type="text" id="documento" class="form-control" placeholder="Número de documento" required>
-          </div>
+function ping() {
+  return { ok: true, mensaje: "OK", version: "11.9" };
+}
 
-          <div class="col-md-6">
-            <label for="ciudadano" class="form-label">Nombre del Ciudadano / Solicitante</label>
-            <input type="text" id="ciudadano" class="form-control" placeholder="Nombre completo" required>
-          </div>
-
-          <div class="col-md-6">
-            <label for="tramite" class="form-label">Tipo de Trámite</label>
-            <select id="tramite" class="form-select" required>
-              <option value="">Cargando catálogo...</option>
-            </select>
-          </div>
-        </div>
-
-        <hr class="my-4">
-
-        <!-- DETALLES Y MOTIVOS (MULTIFILA) -->
-        <h5>Motivos de Devolución</h5>
-        <p class="text-muted small">Agregue uno o más motivos para justificar la devolución del trámite.</p>
-
-        <div class="table-responsive">
-          <table class="table table-bordered align-middle" id="tablaDetalles">
-            <thead class="table-light">
-              <tr>
-                <th style="width: 5%;">N°</th>
-                <th style="width: 45%;">Motivo de Devolución</th>
-                <th style="width: 42%;">Observación Adicional</th>
-                <th style="width: 8%;" class="text-center">Acción</th>
-              </tr>
-            </thead>
-            <tbody id="tbodyDetalles">
-              <!-- Filas dinámicas -->
-            </tbody>
-          </table>
-        </div>
-
-        <button type="button" class="btn btn-outline-primary mb-3" onclick="agregarFilaDetalle()">
-          ➕ Agregar Otro Motivo
-        </button>
-
-        <hr>
-
-        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-          <button type="reset" class="btn btn-secondary me-md-2" onclick="reiniciarFormulario()">Limpiar Formulario</button>
-          <button type="submit" id="btnGuardar" class="btn btn-primary">💾 Registrar y Generar PDF</button>
-        </div>
-
-        <div id="msgGuardado" class="estado-msg text-end mt-2"></div>
-      </form>
-    </div>
-  </div>
-
-  <!-- 2. SECCIÓN BÚSQUEDA POR PLACA (AHORA EN LA PARTE INFERIOR) -->
-  <div class="card">
-    <div class="card-header bg-dark text-white">
-      🔍 Consultar Devoluciones por Placa
-    </div>
-    <div class="card-body">
-      <div class="row g-2 align-items-center">
-        <div class="col-sm-4 col-md-3">
-          <input type="text" id="inpBuscarPlaca" class="form-control text-uppercase" placeholder="Ej: AAA123" maxlength="6">
-        </div>
-        <div class="col-auto">
-          <button type="button" class="btn btn-success" onclick="buscarPorPlaca()">🔍 Buscar</button>
-          <button type="button" class="btn btn-secondary" onclick="limpiarBusqueda()">🧹 Limpiar</button>
-        </div>
-      </div>
-      <div id="msgBusqueda" class="estado-msg"></div>
-
-      <!-- TABLA DE RESULTADOS DE BÚSQUEDA -->
-      <div id="contResultados" class="table-responsive mt-3" style="display: none;">
-        <table class="table table-striped table-hover align-middle">
-          <thead class="table-dark">
-            <tr>
-              <th>ID</th>
-              <th>Fecha</th>
-              <th>Placa</th>
-              <th>Ciudadano</th>
-              <th>Trámite</th>
-              <th>Motivo(s)</th>
-              <th>Acción</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyResultados"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<script>
-  // ⚠️ REEMPLAZA CON TU URL DE WEB APP DE GOOGLE APPS SCRIPT
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw1D5Lb7q3GEeksJgXho_avO8lJ3NWgZWuTJPhJ1VWz6-U2Kfd8msUcc1w-VQpgL5fVlA/exec";
-
-  let listaMotivosGlobal = [];
-
-  /* =====================================================
-     PETICIONES HTTP (Fetch POST)
-  ===================================================== */
-  async function ejecutarPeticion(payload) {
-    const res = await fetch(SCRIPT_URL, {
-      method: "POST",
-      mode: "cors",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload)
+function diagnostico() {
+  try {
+    const ss = obtenerSpreadsheet();
+    const hojas = [SHEET_FUNCIONARIOS, SHEET_MOTIVOS, SHEET_TRAMITES, SHEET_DEVOLUCIONES, SHEET_DETALLES];
+    const estado = {};
+    
+    hojas.forEach(nombre => {
+      try {
+        const hoja = ss.getSheetByName(nombre);
+        estado[nombre] = hoja ? { existe: true, filas: hoja.getLastRow(), columnas: hoja.getLastColumn() } : { existe: false };
+      } catch (e) {
+        estado[nombre] = { existe: false, error: e.message };
+      }
     });
-    return await res.json();
+    
+    let plantillaOk = false;
+    try {
+      DriveApp.getFileById(TEMPLATE_DOC_ID);
+      plantillaOk = true;
+    } catch (e) {}
+    
+    return {
+      ok: true,
+      spreadsheetId: SPREADSHEET_ID,
+      templateDocId: TEMPLATE_DOC_ID,
+      hojas: estado,
+      plantillaAccesible: plantillaOk,
+      timezone: TIMEZONE
+    };
+  } catch (error) {
+    return { ok: false, error: errorToString(error) };
+  }
+}
+
+/* ================================================================
+ * LECTURA Y UTILIDADES HOJAS
+ * ================================================================ */
+
+function obtenerSpreadsheet() {
+  return SpreadsheetApp.openById(SPREADSHEET_ID);
+}
+
+function obtenerHoja(nombre) {
+  const ss = obtenerSpreadsheet();
+  const hoja = ss.getSheetByName(nombre);
+  if (!hoja) throw new Error("No existe la hoja: " + nombre);
+  return hoja;
+}
+
+function obtenerDatosHoja(nombreHoja) {
+  const hoja = obtenerHoja(nombreHoja);
+  const lastRow = hoja.getLastRow();
+  const lastColumn = hoja.getLastColumn();
+
+  if (lastRow < 2 || lastColumn < 1) return { headers: [], rows: [] };
+
+  const valores = hoja.getRange(1, 1, lastRow, lastColumn).getDisplayValues();
+  const headers = valores[0].map(function(h) { return String(h).trim(); });
+  const rows = valores.slice(1).filter(function(fila) {
+    return fila.some(function(celda) { return String(celda).trim() !== ""; });
+  });
+
+  return { headers: headers, rows: rows };
+}
+
+function normalizarTexto(valor) {
+  return String(valor === null || valor === undefined ? "" : valor)
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+}
+
+function indiceColumna(headers, posibles) {
+  const normalizados = headers.map(function(h) { return normalizarTexto(h); });
+
+  for (let i = 0; i < posibles.length; i++) {
+    const buscado = normalizarTexto(posibles[i]);
+    const idx = normalizados.indexOf(buscado);
+    if (idx >= 0) return idx;
   }
 
-  /* =====================================================
-     CARGA DE CATÁLOGOS INICIALES
-  ===================================================== */
-  function cargarCatalogosIniciales() {
-    ejecutarPeticion({ action: "getInitialData" })
-      .then(res => {
-        if (res && res.ok) {
-          poblarSelect("funcionario", res.funcionarios, "nombre");
-          poblarSelect("tramite", res.tramites, "tramite");
-          listaMotivosGlobal = res.motivos || [];
-          
-          if (document.getElementById("tbodyDetalles").children.length === 0) {
-            agregarFilaDetalle();
-          }
-        } else {
-          alert("Error cargando catálogos: " + (res.error || "Desconocido"));
-        }
-      })
-      .catch(err => alert("Error de conexión al cargar catálogos: " + err.message));
-  }
-
-  function poblarSelect(idElem, lista, claveTexto) {
-    const select = document.getElementById(idElem);
-    select.innerHTML = '<option value="">-- Seleccione una opción --</option>';
-    if (Array.isArray(lista)) {
-      lista.forEach(item => {
-        const val = item[claveTexto] || "";
-        if (val) {
-          const opt = document.createElement("option");
-          opt.value = val;
-          opt.textContent = val;
-          select.appendChild(opt);
-        }
-      });
+  for (let i = 0; i < posibles.length; i++) {
+    const buscado = normalizarTexto(posibles[i]);
+    if (!buscado) continue;
+    for (let j = 0; j < normalizados.length; j++) {
+      if (normalizados[j].includes(buscado)) return j;
     }
   }
+  return -1;
+}
 
-  /* =====================================================
-     TABLA DINÁMICA DE DETALLES
-  ===================================================== */
-  function agregarFilaDetalle() {
-    const tbody = document.getElementById("tbodyDetalles");
-    const numFila = tbody.children.length + 1;
+/* ================================================================
+ * CARGA DE CATÁLOGOS INICIALES
+ * ================================================================ */
 
-    const tr = document.createElement("tr");
+function getInitialData() {
+  return {
+    ok: true,
+    funcionarios: cargarFuncionarios(),
+    motivos: cargarMotivos(),
+    tramites: cargarTramites()
+  };
+}
 
-    let opcionesMotivo = '<option value="">-- Seleccione Motivo --</option>';
-    listaMotivosGlobal.forEach(m => {
-      if (m.motivo) opcionesMotivo += `<option value="${escaparHTML(m.motivo)}">${escaparHTML(m.motivo)}</option>`;
-    });
+function cargarFuncionarios() {
+  const datos = obtenerDatosHoja(SHEET_FUNCIONARIOS);
+  if (datos.headers.length === 0) return [];
+  const indice = indiceColumna(datos.headers, ["NOMBRES", "FUNCIONARIO", "NOMBRE"]);
+  const col = indice >= 0 ? indice : 0;
+  return datos.rows.map(f => ({ nombre: String(f[col] || "").trim() })).filter(f => f.nombre);
+}
 
-    tr.innerHTML = `
-      <td class="text-center num-item">${numFila}</td>
-      <td>
-        <select class="form-select sel-motivo" required>
-          ${opcionesMotivo}
-        </select>
-      </td>
-      <td>
-        <input type="text" class="form-control inp-observacion" placeholder="Detalles u observaciones opcionales...">
-      </td>
-      <td class="text-center">
-        <button type="button" class="btn btn-danger btn-eliminar-fila" onclick="eliminarFilaDetalle(this)">🗑️</button>
-      </td>
-    `;
+function cargarMotivos() {
+  const datos = obtenerDatosHoja(SHEET_MOTIVOS);
+  if (datos.headers.length === 0) return [];
+  const indice = indiceColumna(datos.headers, ["MOTIVO DEVOLUCIÓN", "MOTIVO", "DESCRIPCION"]);
+  const col = indice >= 0 ? indice : 0;
+  return datos.rows.map(m => ({ motivo: String(m[col] || "").trim() })).filter(m => m.motivo);
+}
 
-    tbody.appendChild(tr);
-    renumerarFilas();
+function cargarTramites() {
+  const datos = obtenerDatosHoja(SHEET_TRAMITES);
+  if (datos.headers.length === 0) return [];
+  const indice = indiceColumna(datos.headers, ["VALOR", "TRAMITE", "TRÁMITE", "NOMBRE"]);
+  const col = indice >= 0 ? indice : 0;
+  return datos.rows.map(t => ({ tramite: String(t[col] || "").trim() })).filter(t => t.tramite);
+}
+
+/* ================================================================
+ * BÚSQUEDA POR PLACA (Backend)
+ * ================================================================ */
+
+function buscarPorPlaca(placa) {
+  placa = String(placa || "").trim().toUpperCase();
+  if (!placa) return { ok: false, error: "Debe ingresar una placa para buscar." };
+
+  const datos = obtenerDatosHoja(SHEET_DEVOLUCIONES);
+  const idxPlaca = indiceColumna(datos.headers, ["PLACA", "PLACA VEHICULO"]);
+  
+  if (idxPlaca < 0) return { ok: false, error: "No se encontró la columna PLACA en la hoja DEVOLUCIONES." };
+
+  const coincidenciaRows = datos.rows.filter(fila => String(fila[idxPlaca] || "").trim().toUpperCase() === placa);
+  
+  const resultados = coincidenciaRows.map(fila => {
+    const obj = {};
+    datos.headers.forEach((h, i) => { obj[h] = fila[i]; });
+    
+    const consecutivo = obtenerValorObjeto(obj, ["ID", "CONSECUTIVO", "NUMERO"]);
+    obj.consecutivo = consecutivo;
+    obj.fecha = obtenerValorObjeto(obj, ["FECHA", "FECHA DEVOLUCION"]);
+    obj.placa = obtenerValorObjeto(obj, ["PLACA"]);
+    obj.ciudadano = obtenerValorObjeto(obj, ["CIUDADANO"]);
+    obj.funcionario = obtenerValorObjeto(obj, ["FUNCIONARIO"]);
+    obj.tramite = obtenerValorObjeto(obj, ["TRAMITE", "TRÁMITE"]);
+    
+    const listaDetalles = obtenerDetalles(consecutivo);
+    obj.motivos = listaDetalles.map(d => d.motivo).join(", ");
+    obj.pdfDownloadUrl = "https://drive.google.com/uc?export=download&id=";
+    
+    return obj;
+  });
+
+  return { ok: true, resultados: resultados };
+}
+
+/* ================================================================
+ * PROCESAR GUARDADO DE DEVOLUCIÓN
+ * ================================================================ */
+
+function procesarGuardado(payload) {
+  if (!payload || typeof payload !== "object") throw new Error("Datos no válidos.");
+
+  const fecha = String(payload.fecha || "").trim();
+  const funcionario = String(payload.funcionario || "").trim();
+  const placa = String(payload.placa || "").trim().toUpperCase();
+  const documento = String(payload.documento || "").trim();
+  const ciudadano = String(payload.ciudadano || "").trim();
+  const tramite = String(payload.tramite || "").trim();
+
+  let detalles = payload.detalles;
+  if (typeof detalles === "string") {
+    try { detalles = JSON.parse(detalles); } catch (e) { detalles = []; }
   }
+  if (!Array.isArray(detalles)) detalles = [];
 
-  function eliminarFilaDetalle(btn) {
-    const tbody = document.getElementById("tbodyDetalles");
-    if (tbody.children.length <= 1) {
-      alert("Debe mantener al menos un motivo de devolución.");
-      return;
+  const detallesValidos = detalles.filter(d => d && String(d.motivo || "").trim() !== "");
+  if (detallesValidos.length === 0) throw new Error("Debe agregar al menos un motivo de devolución.");
+
+  const consecutivo = obtenerNuevoConsecutivo();
+  const fechaRegistro = formatearFecha(fecha);
+
+  // 1. Guardar en DEVOLUCIONES
+  const hojaMaestra = obtenerHoja(SHEET_DEVOLUCIONES);
+  const headersMaestro = obtenerHeaders(hojaMaestra);
+
+  hojaMaestra.appendRow(construirFilaPorHeaders(headersMaestro, {
+    id: consecutivo,
+    consecutivo: consecutivo,
+    fecha: fechaRegistro,
+    funcionario: funcionario,
+    placa: placa,
+    documento: documento,
+    ciudadano: ciudadano,
+    tramite: tramite
+  }));
+
+  // 2. Guardar en DEVOLUCIONES_DETALLES
+  const hojaDetalles = obtenerHoja(SHEET_DETALLES);
+  const headersDetalle = obtenerHeaders(hojaDetalles);
+
+  detallesValidos.forEach(function(detalle, idx) {
+    hojaDetalles.appendRow(construirFilaPorHeaders(headersDetalle, {
+      nro: idx + 1,
+      id_devolucion: consecutivo,
+      id: consecutivo,
+      consecutivo: consecutivo,
+      motivo: String(detalle.motivo || "").trim(),
+      observacion: String(detalle.observacion || "").trim()
+    }));
+  });
+
+  SpreadsheetApp.flush();
+  Utilities.sleep(1000);
+
+  // 3. Generar PDF
+  const pdfResultado = generarPDF(consecutivo);
+
+  return {
+    ok: true,
+    mensaje: "Devolución registrada exitosamente.",
+    consecutivo: consecutivo,
+    pdfDownloadUrl: pdfResultado.pdfDownloadUrl,
+    pdfFileId: pdfResultado.fileId,
+    pdfBase64: pdfResultado.pdfBase64
+  };
+}
+
+function obtenerHeaders(hoja) {
+  if (hoja.getLastColumn() < 1) return [];
+  return hoja.getRange(1, 1, 1, hoja.getLastColumn()).getDisplayValues()[0].map(h => String(h).trim());
+}
+
+function construirFilaPorHeaders(headers, valores) {
+  return headers.map(function(header) {
+    const h = normalizarTexto(header);
+
+    if (h === "id" || h === "consecutivo" || h === "id_devolucion") return valores.id_devolucion || valores.id || valores.consecutivo || "";
+    if (h === "fecha" || h === "fecha devolucion") return valores.fecha || "";
+    if (h === "funcionario" || h === "nombre funcionario") return valores.funcionario || "";
+    if (h === "placa" || h === "placa vehiculo") return valores.placa || "";
+    if (h === "documento" || h === "cedula" || h === "cc") return valores.documento || "";
+    if (h === "ciudadano" || h === "nombre ciudadano") return valores.ciudadano || "";
+    if (h === "tramite" || h === "trámite" || h === "tipo tramite") return valores.tramite || "";
+    if (h === "nro" || h === "item" || h === "numero") return valores.nro || "";
+    if (h === "motivo" || h === "motivo devolucion") return valores.motivo || "";
+    if (h === "observacion" || h === "observaciones") return valores.observacion || "";
+    return "";
+  });
+}
+
+function obtenerNuevoConsecutivo() {
+  const hoja = obtenerHoja(SHEET_DEVOLUCIONES);
+  const lastRow = hoja.getLastRow();
+  if (lastRow < 2) return 1;
+
+  const headers = obtenerHeaders(hoja);
+  const idx = indiceColumna(headers, ["ID", "CONSECUTIVO", "NUMERO"]);
+  if (idx < 0) return lastRow;
+
+  const valores = hoja.getRange(2, idx + 1, lastRow - 1, 1).getValues();
+  let mayor = 0;
+  valores.forEach(fila => {
+    const n = Number(fila[0]);
+    if (!isNaN(n) && n > mayor) mayor = n;
+  });
+  return mayor + 1;
+}
+
+/* ================================================================
+ * DETALLE DEVOLUCIÓN & PDF
+ * ================================================================ */
+
+function getDetalleDevolucion(id) {
+  const datos = obtenerDatosHoja(SHEET_DEVOLUCIONES);
+  const idxId = indiceColumna(datos.headers, ["ID", "CONSECUTIVO", "NUMERO"]);
+  if (idxId < 0) throw new Error("No existe la columna ID en DEVOLUCIONES.");
+
+  let maestroFila = null;
+  datos.rows.some(fila => {
+    if (String(fila[idxId] || "").trim() === String(id).trim()) {
+      maestroFila = fila;
+      return true;
     }
-    btn.closest("tr").remove();
-    renumerarFilas();
-  }
+    return false;
+  });
 
-  function renumerarFilas() {
-    const filas = document.querySelectorAll("#tbodyDetalles tr");
-    filas.forEach((tr, idx) => {
-      const celdaNro = tr.querySelector(".num-item");
-      if (celdaNro) celdaNro.textContent = idx + 1;
-    });
-  }
+  if (!maestroFila) return { ok: false, error: "No se encontró el registro " + id };
 
-/* =====================================================
-     GUARDAR DEVOLUCIÓN (Opción A: Visor interactivo)
-  ===================================================== */
-  function guardarDevolucion(event) {
-    event.preventDefault();
+  const maestro = {};
+  datos.headers.forEach((h, i) => { maestro[h] = maestroFila[i]; });
 
-    const btn = document.getElementById("btnGuardar");
-    const msg = document.getElementById("msgGuardado");
+  return { ok: true, maestro: maestro, detalles: obtenerDetalles(id) };
+}
 
-    const detalles = [];
-    const filas = document.querySelectorAll("#tbodyDetalles tr");
-    filas.forEach(tr => {
-      const mot = tr.querySelector(".sel-motivo").value;
-      const obs = tr.querySelector(".inp-observacion").value;
+function obtenerDetalles(id) {
+  const datos = obtenerDatosHoja(SHEET_DETALLES);
+  const idxId = indiceColumna(datos.headers, ["ID_DEVOLUCION", "ID", "CONSECUTIVO", "NRO"]);
+  const idxMotivo = indiceColumna(datos.headers, ["MOTIVO", "DESCRIPCION"]);
+  const idxObs = indiceColumna(datos.headers, ["OBSERVACION", "OBSERVACIONES"]);
+
+  if (idxId < 0) return [];
+
+  const idBuscado = String(id || "").trim();
+  const resultado = [];
+
+  datos.rows.forEach(fila => {
+    const idFila = String(fila[idxId] || "").trim();
+    if (idFila === idBuscado || (Number(idFila) === Number(idBuscado) && idBuscado !== "")) {
+      const mot = idxMotivo >= 0 ? String(fila[idxMotivo] || "").trim() : "";
+      const obs = idxObs >= 0 ? String(fila[idxObs] || "").trim() : "";
       if (mot) {
-        detalles.push({ motivo: mot, observacion: obs });
+        resultado.push({ motivo: mot, observacion: obs });
       }
-    });
-
-    if (detalles.length === 0) {
-      msg.className = "estado-msg text-danger";
-      msg.innerHTML = "❌ Debe seleccionar al menos un motivo válido.";
-      return;
     }
+  });
 
-    // 1. Abrir la pestaña auxiliar
-    const ventanaPDF = window.open("about:blank", "_blank");
-    if (ventanaPDF) {
-      ventanaPDF.document.write(`
-        <html>
-          <head><title>Generando PDF...</title></head>
-          <body style="font-family: Arial, sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f4f6f9;">
-            <div style="text-align: center; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-              <h2 style="color: #1b365d; margin-bottom: 10px;">Secretaría de Movilidad</h2>
-              <p style="color: #555; font-size: 16px;">Generando documento PDF, por favor espere...</p>
-            </div>
-          </body>
-        </html>
-      `);
-    }
+  return resultado;
+}
 
-    const payload = {
-      action: "guardarDevolucion",
-      datos: {
-        fecha: document.getElementById("fecha").value,
-        funcionario: document.getElementById("funcionario").value,
-        placa: document.getElementById("placa").value.trim().toUpperCase(),
-        documento: document.getElementById("documento").value.trim(),
-        ciudadano: document.getElementById("ciudadano").value.trim(),
-        tramite: document.getElementById("tramite").value,
-        detalles: detalles
-      }
+function generarPDF(id) {
+  id = String(id).trim();
+  let copia = null;
+  
+  try {
+    const plantilla = DriveApp.getFileById(TEMPLATE_DOC_ID);
+    const detalle = getDetalleDevolucion(id);
+
+    if (!detalle.ok) throw new Error(detalle.error);
+
+    const maestro = detalle.maestro || {};
+    const detalles = detalle.detalles || [];
+
+    // Crear copia del documento
+    copia = plantilla.makeCopy("Devolucion_" + id);
+    const doc = DocumentApp.openById(copia.getId());
+    const body = doc.getBody();
+
+    const valores = {
+      consecutivo: obtenerValorObjeto(maestro, ["ID", "CONSECUTIVO", "NUMERO"]) || id,
+      fecha: obtenerValorObjeto(maestro, ["FECHA", "FECHA DEVOLUCION"]) || "",
+      funcionario: obtenerValorObjeto(maestro, ["FUNCIONARIO"]) || "",
+      placa: obtenerValorObjeto(maestro, ["PLACA"]) || "",
+      documento: obtenerValorObjeto(maestro, ["DOCUMENTO", "CEDULA"]) || "",
+      ciudadano: obtenerValorObjeto(maestro, ["CIUDADANO"]) || "",
+      tramite: obtenerValorObjeto(maestro, ["TRAMITE", "TRÁMITE", "TIPO TRAMITE"]) || ""
     };
 
-    btn.disabled = true;
-    msg.className = "estado-msg text-info";
-    msg.innerHTML = '<span class="spinner"></span> Registrando devolución y generando PDF...';
+    Logger.log("Generando PDF para ID: " + id);
+    Logger.log("Valores a reemplazar: " + JSON.stringify(valores));
 
-    ejecutarPeticion(payload)
-      .then(res => {
-        btn.disabled = false;
-        if (res && res.ok) {
-          msg.className = "estado-msg text-success";
-          msg.innerHTML = `✅ ¡Registrado con éxito! Consecutivo N° <b>${res.consecutivo}</b>`;
+    // Reemplazar todos los marcadores
+    reemplazarTolerante(body, "CONSECUTIVO", valores.consecutivo);
+    reemplazarTolerante(body, "FECHA", valores.fecha);
+    reemplazarTolerante(body, "FUNCIONARIO", valores.funcionario);
+    reemplazarTolerante(body, "PLACA", valores.placa);
+    reemplazarTolerante(body, "DOCUMENTO", valores.documento);
+    reemplazarTolerante(body, "CIUDADANO", valores.ciudadano);
+    reemplazarTolerante(body, "TRAMITE", valores.tramite);
 
-          if (res.pdfDownloadUrl && ventanaPDF) {
-            // Reemplazar la página de espera por el resultado con enlace directo
-            ventanaPDF.document.body.innerHTML = `
-              <div style="text-align: center; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px;">
-                <h2 style="color: #1b365d; margin-bottom: 15px;">Documento Listo</h2>
-                <p style="color: #28a745; font-weight: bold; font-size: 18px;">✅ Consecutivo N° ${res.consecutivo}</p>
-                <p style="color: #666; margin-bottom: 25px;">Su documento PDF ha sido generado exitosamente.</p>
-                <a href="${res.pdfDownloadUrl}" target="_self" style="background-color: #0d6efd; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
-                  📥 Descargar PDF
-                </a>
-              </div>
-            `;
-            // Disparar descarga automática en la pestaña
-            ventanaPDF.location.href = res.pdfDownloadUrl;
-          } else if (ventanaPDF) {
-            ventanaPDF.close();
-          }
+    // Insertar tabla de detalles
+    insertarTablaDetalles(doc, detalles);
 
-          reiniciarFormulario();
-        } else {
-          if (ventanaPDF) ventanaPDF.close();
-          msg.className = "estado-msg text-danger";
-          msg.innerHTML = "❌ Error: " + (res.error || "Ocurrió un fallo en el registro");
-        }
-      })
-      .catch(err => {
-        btn.disabled = false;
-        if (ventanaPDF) ventanaPDF.close();
-        msg.className = "estado-msg text-danger";
-        msg.innerHTML = "❌ Error de conexión: " + err.message;
-      });
+    // Guardar el documento antes de convertir a PDF
+    doc.saveAndClose();
+
+    // Convertir a PDF
+    const pdfBlob = DriveApp.getFileById(copia.getId()).getAs(MimeType.PDF);
+    pdfBlob.setName("Devolucion_" + id + ".pdf");
+    
+    // Crear archivo PDF en Drive
+    const archivoPDF = DriveApp.createFile(pdfBlob);
+    
+    try {
+      archivoPDF.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    } catch (e) {
+      Logger.log("Warning: No se pudo establecer permisos de compartir: " + e.message);
+    }
+
+    // Eliminar la copia del documento
+    DriveApp.getFileById(copia.getId()).setTrashed(true);
+
+    return {
+      ok: true,
+      fileId: archivoPDF.getId(),
+      pdfDownloadUrl: "https://drive.google.com/uc?export=download&id=" + archivoPDF.getId(),
+      pdfBase64: Utilities.base64Encode(pdfBlob.getBytes())
+    };
+    
+  } catch (error) {
+    Logger.log("Error en generarPDF: " + error.toString());
+    Logger.log("Stack: " + error.stack);
+    
+    // Limpiar copia temporal si existe
+    try {
+      if (copia) DriveApp.getFileById(copia.getId()).setTrashed(true);
+    } catch (e) {
+      Logger.log("Error al limpiar copia temporal: " + e.message);
+    }
+    
+    throw new Error("Error al generar PDF: " + error.message);
   }
-  /* =====================================================
-     BÚSQUEDA POR PLACA (Global)
-  ===================================================== */
-  window.buscarPorPlaca = function() {
-    const input = document.getElementById("inpBuscarPlaca");
-    if (!input) return;
+}
 
-    const placa = input.value.trim().toUpperCase();
-    if (!placa) { 
-      mostrarEstadoBusqueda("text-danger", "❌ Ingrese una placa."); 
-      return; 
-    }
+function insertarTablaDetalles(doc, detalles) {
+  const body = doc.getBody();
+  const matriz = [["N°", "MOTIVO", "OBSERVACIÓN"]];
 
-    mostrarEstadoBusqueda("text-info", '<span class="spinner"></span> Buscando devoluciones para <b>' + escaparHTML(placa) + '</b>...');
-
-    ejecutarPeticion({ action: "buscarPorPlaca", placa: placa })
-      .then(res => {
-        if (res && res.ok) {
-          if (!res.resultados || res.resultados.length === 0) {
-            mostrarEstadoBusqueda("text-warning", "Sin resultados para la placa <b>" + escaparHTML(placa) + "</b>.");
-            document.getElementById("contResultados").style.display = "none";
-          } else {
-            mostrarEstadoBusqueda("text-success", "✅ Se encontraron " + res.resultados.length + " devolución(es).");
-            renderResultados(res.resultados);
-          }
-        } else {
-          mostrarEstadoBusqueda("text-danger", "❌ Error en la búsqueda: " + (res && res.error ? res.error : "Respuesta no válida"));
-        }
-      })
-      .catch(err => {
-        mostrarEstadoBusqueda("text-danger", "❌ Error de conexión con el servidor.<br>" + err.message);
-      });
-  };
-
-  window.limpiarBusqueda = function() {
-    const input = document.getElementById("inpBuscarPlaca");
-    if (input) input.value = "";
-    document.getElementById("tbodyResultados").innerHTML = "";
-    document.getElementById("contResultados").style.display = "none";
-    const msg = document.getElementById("msgBusqueda");
-    if (msg) {
-      msg.className = "estado-msg";
-      msg.innerHTML = "";
-    }
-  };
-
-  function renderResultados(lista) {
-    const tbody = document.getElementById("tbodyResultados");
-    tbody.innerHTML = "";
-
-    lista.forEach(item => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td><b>${escaparHTML(item.consecutivo || "-")}</b></td>
-        <td>${escaparHTML(item.fecha || "-")}</td>
-        <td><span class="badge bg-dark">${escaparHTML(item.placa || "-")}</span></td>
-        <td>${escaparHTML(item.ciudadano || "-")}</td>
-        <td>${escaparHTML(item.tramite || "-")}</td>
-        <td><small>${escaparHTML(item.motivos || "-")}</small></td>
-        <td>
-          <button type="button" class="btn btn-sm btn-outline-danger" onclick="descargarPDF('${item.consecutivo}')">
-            📄 PDF
-          </button>
-        </td>
-      `;
-      tbody.appendChild(tr);
+  if (Array.isArray(detalles) && detalles.length > 0) {
+    detalles.forEach((d, i) => {
+      matriz.push([String(i + 1), textoSeguro(d.motivo), textoSeguro(d.observacion)]);
     });
-
-    document.getElementById("contResultados").style.display = "block";
+  } else {
+    matriz.push(["1", "Sin motivos especificados", " "]);
   }
 
-  function descargarPDF(id) {
-    mostrarEstadoBusqueda("text-info", '<span class="spinner"></span> Generando PDF del consecutivo <b>' + id + '</b>...');
-    
-    ejecutarPeticion({ action: "generarPDF", id: id })
-      .then(res => {
-        if (res && res.ok && res.pdfDownloadUrl) {
-          mostrarEstadoBusqueda("text-success", "✅ Documento PDF listo.");
-          window.open(res.pdfDownloadUrl, "_blank");
-        } else {
-          mostrarEstadoBusqueda("text-danger", "❌ Error al generar PDF: " + (res.error || "Sin enlace de descarga"));
+  // Buscar el marcador de tabla con múltiples variantes
+  let encontrado = body.findText("\\{\\{\\s*TABLA\\s*\\}\\}");
+  
+  if (!encontrado) {
+    // Intentar variantes comunes
+    encontrado = body.findText("\\{\\{\\s*tabla\\s*\\}\\}");
+  }
+  
+  if (!encontrado) {
+    encontrado = body.findText("TABLA");
+  }
+  
+  if (encontrado) {
+    try {
+      const el = encontrado.getElement();
+      let parrafo = el;
+      
+      while (parrafo && parrafo.getType() !== DocumentApp.ElementType.PARAGRAPH) {
+        parrafo = parrafo.getParent();
+      }
+      
+      if (parrafo) {
+        const padre = parrafo.getParent();
+
+        if (padre.getType() === DocumentApp.ElementType.BODY_SECTION) {
+          const idx = padre.getChildIndex(parrafo);
+          const tablaInsertada = padre.insertTable(idx, matriz);
+          parrafo.removeFromParent();
+          
+          // Aplicar formato a la tabla
+          formatearTabla(tablaInsertada);
+        } else if (padre.getType() === DocumentApp.ElementType.TABLE_CELL) {
+          const celda = padre.asTableCell();
+          celda.setText("");
+          const tablaInsertada = celda.appendTable(matriz);
+          formatearTabla(tablaInsertada);
         }
-      })
-      .catch(err => {
-        mostrarEstadoBusqueda("text-danger", "❌ Error al procesar PDF: " + err.message);
-      });
+      }
+    } catch (e) {
+      Logger.log("Error al insertar tabla: " + e.message);
+      // Si falla la inserción, continuar sin tabla
+    }
+  } else {
+    Logger.log("Advertencia: No se encontró el marcador {{TABLA}} en el documento");
   }
+}
 
-  /* =====================================================
-     UTILIDADES GENERALES
-  ===================================================== */
-  function mostrarEstadoBusqueda(claseCss, htmlMensaje) {
-    const msg = document.getElementById("msgBusqueda");
-    if (msg) {
-      msg.className = "estado-msg " + claseCss;
-      msg.innerHTML = htmlMensaje;
+function formatearTabla(tabla) {
+  try {
+    tabla.setColumnWidth(0, 35);
+    tabla.setColumnWidth(1, 230);
+    tabla.setColumnWidth(2, 200);
+    
+    // Formatear encabezados
+    const headerRow = tabla.getRow(0);
+    for (let i = 0; i < headerRow.getNumCells(); i++) {
+      const cell = headerRow.getCell(i);
+      cell.setBackgroundColor('#4472C4');
+      cell.editAsText().setForegroundColor('#FFFFFF').setBold(true);
+    }
+  } catch (e) {
+    Logger.log("Error al formatear tabla: " + e.message);
+  }
+}
+
+function reemplazarTolerante(body, nombre, valor) {
+  try {
+    const textoLimpio = textoSeguro(valor);
+    
+    // Intentar múltiples variantes del marcador
+    const variantes = [
+      "\\{\\{\\s*" + nombre + "\\s*\\}\\}",
+      "\\{\\{\\s*" + nombre.toLowerCase() + "\\s*\\}\\}",
+      "\\{\\{\\s*" + nombre.toUpperCase() + "\\s*\\}\\}",
+      "\\{\\{" + nombre + "\\}\\}",
+      "\\{\\{" + nombre.toLowerCase() + "\\}\\}",
+      "\\{\\{" + nombre.toUpperCase() + "\\}\\}"
+    ];
+    
+    variantes.forEach(variante => {
+      try {
+        body.replaceText(variante, textoLimpio);
+      } catch (e) {
+        // Ignorar errores individuales
+      }
+    });
+  } catch (e) {
+    Logger.log("Error al reemplazar " + nombre + ": " + e.message);
+  }
+}
+
+function textoSeguro(valor) {
+  let t = String(valor === null || valor === undefined ? "" : valor).trim();
+  if (t === "") return " ";
+  
+  // Escapar caracteres especiales para regex
+  return t.replace(/\\/g, "\\\\")
+          .replace(/\$/g, "$$$$")
+          .replace(/\{/g, "\\{")
+          .replace(/\}/g, "\\}")
+          .replace(/\[/g, "\\[")
+          .replace(/\]/g, "\\]");
+}
+
+function obtenerValorObjeto(objeto, posibles) {
+  if (!objeto) return "";
+  const claves = Object.keys(objeto);
+  for (let i = 0; i < posibles.length; i++) {
+    const buscado = normalizarTexto(posibles[i]);
+    for (let j = 0; j < claves.length; j++) {
+      if (normalizarTexto(claves[j]) === buscado) return String(objeto[claves[j]] || "").trim();
     }
   }
+  return "";
+}
 
-  function escaparHTML(cadena) {
-    return String(cadena || "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+function convertirFecha(fecha) {
+  if (fecha instanceof Date) return fecha;
+  const t = String(fecha || "").trim();
+  if (!t) return new Date();
+  
+  // Si viene en formato YYYY-MM-DD (ej: enviado por el input date de HTML)
+  const p = t.split("-");
+  if (p.length === 3) {
+    return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]), 12, 0, 0);
   }
+  
+  const d = new Date(t);
+  return isNaN(d.getTime()) ? new Date() : d;
+}
 
-  // Inicialización de la App
-  window.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("fecha").valueAsDate = new Date();
-    
-    const badge = document.getElementById("estadoConexion");
-    ejecutarPeticion({ action: "ping" })
-      .then(res => {
-        if (res && res.ok) {
-          badge.className = "badge bg-success";
-          badge.innerText = "Conectado (v" + res.version + ")";
-          cargarCatalogosIniciales();
-        } else {
-          badge.className = "badge bg-danger";
-          badge.innerText = "Sin respuesta del backend";
-        }
-      })
-      .catch(() => {
-        badge.className = "badge bg-danger";
-        badge.innerText = "Error de conexión";
-      });
-  });
-</script>
+function formatearFecha(valor) {
+  if (!valor) return "";
+  const f = convertirFecha(valor);
+  return (f instanceof Date && !isNaN(f.getTime())) ? Utilities.formatDate(f, TIMEZONE, "dd/MM/yyyy") : String(valor);
+}
 
-</body>
-</html>
+function errorToString(e) {
+  return e instanceof Error ? e.message : String(e);
+}
