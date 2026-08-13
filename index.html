@@ -24,7 +24,7 @@
 <!-- ENCABEZADO -->
 <div class="header-banner text-center">
   <div class="container">
-    <h2>SECRETARÍA DE MOVILIDAD v1.2</h2>
+    <h2>SECRETARÍA DE MOVILIDAD v1.1</h2>
     <h4>La Ceja del Tambo</h4>
     <p class="mb-0">Sistema Maestro de Registro y Devolución de Trámites</p>
     <div id="estadoConexion" class="badge bg-warning text-dark mt-2">Comprobando conexión...</div>
@@ -174,6 +174,21 @@
   }
 
   /* =====================================================
+     DESCARGA SILENCIOSA EN SEGUNDO PLANO (OPCIÓN 2)
+  ===================================================== */
+  function descargarEnSegundoPlano(url) {
+    const iframe = document.createElement("iframe");
+    iframe.style.display = "none";
+    iframe.src = url;
+    document.body.appendChild(iframe);
+    
+    // Se elimina el iframe del DOM tras 10 segundos
+    setTimeout(() => {
+      if (iframe) iframe.remove();
+    }, 10000);
+  }
+
+  /* =====================================================
      CARGA DE CATÁLOGOS INICIALES
   ===================================================== */
   function cargarCatalogosIniciales() {
@@ -314,14 +329,8 @@
           msg.innerHTML = `✅ ¡Registrado con éxito! Consecutivo N° <b>${res.consecutivo}</b>`;
           
           if (res.pdfDownloadUrl) {
-            // CORRECCIÓN: Inserción de enlace dinámico para evitar ventana en blanco por bloqueo del navegador
-            const a = document.createElement("a");
-            a.href = res.pdfDownloadUrl;
-            a.target = "_blank";
-            a.rel = "noopener noreferrer";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
+            // OPCIÓN 2: Descarga limpia en segundo plano sin abrir pestañas
+            descargarEnSegundoPlano(res.pdfDownloadUrl);
           }
           reiniciarFormulario();
         } else {
@@ -420,16 +429,10 @@
     ejecutarPeticion({ action: "generarPDF", id: id })
       .then(res => {
         if (res && res.ok && res.pdfDownloadUrl) {
-          mostrarEstadoBusqueda("text-success", "✅ Documento PDF listo.");
+          mostrarEstadoBusqueda("text-success", "✅ Descargando documento PDF...");
           
-          // CORRECCIÓN: Inserción de enlace dinámico para abrir el PDF correctamente
-          const a = document.createElement("a");
-          a.href = res.pdfDownloadUrl;
-          a.target = "_blank";
-          a.rel = "noopener noreferrer";
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
+          // OPCIÓN 2: Descarga limpia en segundo plano sin abrir pestañas
+          descargarEnSegundoPlano(res.pdfDownloadUrl);
         } else {
           mostrarEstadoBusqueda("text-danger", "❌ Error al generar PDF: " + (res.error || "Sin enlace de descarga"));
         }
