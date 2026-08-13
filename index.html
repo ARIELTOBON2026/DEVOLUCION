@@ -334,7 +334,7 @@ th{
 <div class="container">
 
 <header>
-  <h1>DEVOLUCIÓN DE TRÁMITES V1</h1>
+  <h1>DEVOLUCIÓN DE TRÁMITES</h1>
   <p>Secretaría de Movilidad - La Ceja del Tambo</p>
   <div id="estadoConexion" class="estado-conexion">
     <span class="badge badge-info">Conectando...</span>
@@ -450,7 +450,7 @@ th{
 /* =====================================================
    CONFIGURACIÓN
 ===================================================== */
-const URL_BACKEND = "https://script.google.com/macros/s/AKfycbz7SiCodemB5yE0CqsSfF3uPrhfwNuXcXOpPAxxbRhGj2qkViSvIMi1ypx0MZ5jkzkLfw/exec";
+const URL_BACKEND = "https://script.google.com/macros/s/AKfycbwpbsTMERbMtskSbsfWKhcc0xmZ8F5WoPnHUJwrDzhl0sI1tntSn_6-CZkhsjBg7uMpaA/exec";
 
 let listaFuncionarios = [];
 let listaMotivos = [];
@@ -486,7 +486,7 @@ function actualizarEstadoConexion(tipo, texto) {
 }
 
 /* =====================================================
-   PETICIONES CON FETCH (REEMPLAZO ROBUSTO ANTI-CORS)
+   PETICIONES CON FETCH
 ===================================================== */
 async function ejecutarPeticion(params) {
   const action = params.action || "ping";
@@ -724,7 +724,7 @@ function quitarMotivo(i) {
 }
 
 /* =====================================================
-   GUARDAR DEVOLUCIÓN Y GENERAR PDF
+   GUARDAR DEVOLUCIÓN Y GENERAR PDF (CORREGIDO Y VALIDADO)
 ===================================================== */
 function guardarDevolucion() {
   let valid = true;
@@ -750,21 +750,28 @@ function guardarDevolucion() {
 
   const botones = document.querySelectorAll(".acciones .btn");
   botones.forEach(btn => btn.disabled = true);
-  mostrarEstado("info", '<span class="spinner"></span> Guardando y generando PDF...');
+  mostrarEstado("info", '<span class="spinner"></span> Guardando datos y generando documento PDF...');
 
   ejecutarPeticion({ action: "guardarDevolucion", datos: JSON.stringify(datos) })
     .then(res => {
       if (res && res.ok) {
-        mostrarEstado("ok", "✅ Guardado exitosamente. Consecutivo: " + res.consecutivo);
         const nombreArchivo = "Devolucion_" + res.consecutivo + "_" + datos.placa + ".pdf";
-        
-        if (res.pdfBase64) {
+
+        // Detección de fallos en el PDF
+        if (res.pdfError) {
+          mostrarEstado("error", "⚠️ Se guardó el registro (Consecutivo " + res.consecutivo + "), pero falló el PDF: <br><b>" + res.pdfError + "</b>");
+        } else if (res.pdfBase64) {
+          mostrarEstado("ok", "✅ Guardado con éxito. Descargando PDF...");
           descargarPDFDesdeBase64(res.pdfBase64, nombreArchivo);
+          setTimeout(() => { limpiarFormulario(); cargarDatosIniciales(); }, 2000);
         } else if (res.pdfDownloadUrl) {
+          mostrarEstado("ok", "✅ Guardado con éxito. Abriendo enlace del PDF...");
           descargarPDFDesdeURL(res.pdfDownloadUrl, nombreArchivo);
+          setTimeout(() => { limpiarFormulario(); cargarDatosIniciales(); }, 2000);
+        } else {
+          mostrarEstado("error", "⚠️ Se guardó el registro, pero el servidor no devolvió el archivo PDF.");
         }
 
-        setTimeout(() => { limpiarFormulario(); cargarDatosIniciales(); }, 1000);
       } else {
         mostrarEstado("error", "❌ Error al guardar: " + (res && res.error ? res.error : "Respuesta no válida"));
       }
@@ -781,9 +788,12 @@ function descargarPDFDesdeBase64(base64, filename) {
   try {
     const byteCharacters = atob(base64);
     const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) byteNumbers[i] = byteCharacters.charCodeAt(i);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
     const byteArray = new Uint8Array(byteNumbers);
     const blob = new Blob([byteArray], { type: "application/pdf" });
+    
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -791,11 +801,15 @@ function descargarPDFDesdeBase64(base64, filename) {
     a.style.display = "none";
     document.body.appendChild(a);
     a.click();
+    
     setTimeout(() => {
       window.URL.revokeObjectURL(url);
       if (document.body.contains(a)) document.body.removeChild(a);
-    }, 1000);
-  } catch (err) { console.error("Error al procesar descarga de PDF:", err); }
+    }, 1500);
+  } catch (err) {
+    console.error("Error procesando Base64 a PDF:", err);
+    mostrarEstado("error", "❌ Ocurrió un error al procesar el archivo PDF descargado.");
+  }
 }
 
 function descargarPDFDesdeURL(url, filename) {
